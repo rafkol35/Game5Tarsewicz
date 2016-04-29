@@ -1,0 +1,3415 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset=utf-8>
+    <title>StefanGames Game1</title>
+    <style>
+        body {
+            background: #fff;
+            padding: 0;
+            margin: 0;
+            overflow: hidden;
+            font-family: georgia;
+            text-align: center;
+        }
+
+        h1 {
+        }
+
+        a {
+            color: skyblue;
+        }
+
+        #stats {
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+            #stats #fps {
+                background: transparent !important;
+            }
+
+                #stats #fps #fpsText {
+                    color: #abc !important;
+                }
+
+                #stats #fps #fpsGraph {
+                    display: none;
+                }
+
+        canvas {
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+
+</head>
+<body>
+    <script src="js/three.min.js"></script>
+    <script src="js/stats.min.js"></script>
+
+    <script>
+
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        function onDocumentMouseMove(event) {
+            event.preventDefault();
+            mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+            mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+            if (mousePressed && !draggedCubic) {
+                var diffangley = (((mouse.x - mouseLast.x) * 90) * Math.PI / 180);
+                var diffanglex = (((mouseLast.y - mouse.y) * 90) * Math.PI / 180);
+                rotateAroundWorldAxis(pivot, new THREE.Vector3(0, 1, 0), diffangley);
+                rotateAroundWorldAxis(pivot, new THREE.Vector3(1, 0, 0), diffanglex);
+                //pivot.updateMatrix();
+                //pivot.updateMatrixWorld();
+            }
+            else if (mousePressed && draggedCubic) {
+                raycasterTouch.setFromCamera(mouse, camera);
+                var intersects = raycasterTouch.intersectObjects(cubics);
+
+                if (intersects.length > 0) {
+                    //console.log(intersects.length);
+                    //intersects[0].face.normal
+                    var newTouchedCubic2 = intersects[0].object;
+
+                    if (newTouchedCubic != newTouchedCubic2) {
+                        newTouchedCubic = newTouchedCubic2;
+                        if (newTouchedCubic != draggedCubic) {
+                            newTouchedCubicFaceNormal = intersects[0].face.normal.clone();
+
+                            //newTouchedCubic.quaternion.Eu
+                            newTouchedCubicFaceNormal.applyQuaternion(newTouchedCubic.quaternion);
+                            newTouchedCubicFaceNormal.round();
+                            //console.log(newTouchedCubicFaceNormal);
+
+                            draggedCubicFaceNormal.applyQuaternion(draggedCubic.quaternion);
+                            draggedCubicFaceNormal.round();
+                            //console.log(draggedCubicFaceNormal);
+
+                            var cubRotInfo = getCubicsBy(draggedCubic, newTouchedCubic);
+                            //console.log(rotatingCubes.length);
+                            if (rotatingCubes.length == 9) {
+                                //setCubesEmissive(rotatingCubes, 0x888888);
+                                //blockOnRotate = true;
+                                mousePressed = false;
+
+                                rotateCubes(cubRotInfo);
+                            }
+                        }
+                    }
+                }
+            }
+            mouseLast.set(mouse.x, mouse.y);
+        }
+
+        var mousePressedPos = new THREE.Vector2(0, 0);
+
+        function onDocumentMouseDown(event) {
+            event.preventDefault();
+            if (RCBlock) return;
+
+            mousePressed = true;
+            mouseClickPos.x = (event.clientX / window.innerWidth) * 2 - 1;
+            mouseClickPos.y = -(event.clientY / window.innerHeight) * 2 + 1;
+            mouseLast = mouseClickPos;
+
+            mousePressedPos.x = mouseClickPos.x;
+            mousePressedPos.y = mouseClickPos.y;
+
+            if (blockOnRotate) {
+
+            } else {
+                raycasterTouch.setFromCamera(mouse, camera);
+                var intersects = raycasterTouch.intersectObjects(cubics);
+
+                if (intersects.length > 0) {
+                    draggedCubic = intersects[0].object;
+                    draggedCubicFaceNormal = intersects[0].face.normal.clone();
+                    newTouchedCubic = null;
+                    //var _tbn = draggedCubicFaceNormal.clone();
+                    //_tbn.applyQuaternion(draggedCubic.quaternion);
+                    //_tbn.round();
+                    //console.log(_tbn);
+                }
+            }
+        }
+        function onDocumentMouseUp(event) {
+            event.preventDefault();
+            mousePressed = false;
+            draggedCubic = null;
+            newTouchedCubic = null;
+            var mouseClickPos2 = new THREE.Vector2(0,0);
+            mouseClickPos2.x = (event.clientX / window.innerWidth) * 2 - 1;
+            mouseClickPos2.y = -(event.clientY / window.innerHeight) * 2 + 1;
+            //var dist = mouseClickPos2.sub(mouseClickPos);
+            //console.log(" " + mousePressedPos.x + "  " + mousePressedPos.y);// + " " + dist.length());
+            //console.log(" " + mouseClickPos2.x + "  " + mouseClickPos2.y);// + " " + dist.length());
+            var dist = mousePressedPos.distanceTo(mouseClickPos2);
+            //console.log(dist);
+            //if (blockOnRotate) {
+            if (dist < 0.01){
+                //setCubesEmissive(cubics, 0x000000);
+                //rotatingCubes.cle
+                blockOnRotate = false;
+            }
+            //}
+        }
+
+        
+
+        var mousePressed = false;
+        var mouse = new THREE.Vector2(), INTERSECTED;
+        var mouseClickPos = new THREE.Vector2();
+        var mouseLast = new THREE.Vector2();
+        var raycaster = new THREE.Raycaster();
+        var raycasterTouch = new THREE.Raycaster();
+
+        var clock = new THREE.Clock();
+
+        var scene;
+        var camera;
+        //var camera = new THREE.OrthographicCamera(-1.2,1.2, 1,-1, 0.1, 1000);
+        //var camera = new THREE.OrthographicCamera(window.innerWidth / -200, window.innerWidth / 200, window.innerHeight / 200, window.innerHeight / -2000, -500, 1000);
+
+        var light;
+        
+        var renderer;
+        
+        // STATS
+        var container, stats;
+        var stats;
+        var pivot;
+        
+        var blockOnRotate = false;
+        var rotatingCubes;
+
+        var draggedCubic = null;
+        var draggedCubicFaceNormal = null;
+        var newTouchedCubic = null;
+        var newTouchedCubicFaceNormal = null;
+        var cubics = [];
+
+        var testRotatedCube = null;
+        var th = 0.0;
+        var r = 1.0;
+        var x0 = 0.0;
+        var y0 = 0.0;
+        //var texture_placeholder;
+        //var textures;
+        //var numLoadedTextures = 0;
+
+        THREE.ImageUtils.crossOrigin = '';
+
+        init();
+
+        function init() {
+            //texture_placeholder = document.createElement('canvas');
+            //texture_placeholder.width = 128;
+            //texture_placeholder.height = 128;
+
+            //var context = texture_placeholder.getContext('2d');
+            //context.fillStyle = 'rgb( 200, 200, 200 )';
+            //context.fillRect(0, 0, texture_placeholder.width, texture_placeholder.height);
+
+            //textures = [
+            //    //loadTexture('textures/cube/skybox/px.jpg'), // right
+            //    //loadTexture('textures/cube/skybox/nx.jpg'), // left
+            //    //loadTexture('textures/cube/skybox/py.jpg'), // top
+            //    //loadTexture('textures/cube/skybox/ny.jpg'), // bottom
+            //    //loadTexture('textures/cube/skybox/pz.jpg'), // back
+            //    //loadTexture('textures/cube/skybox/nz.jpg')  // front
+            //];
+
+            //for (var i = 0 ; i < 27 ; ++i) {
+            //    textures.push( loadTexture("http://localhost/stefan_games/game1/rbn_" + i + ".png") );
+            //}
+
+            createCubics();            
+        }
+
+        function createCubics() {
+            //numLoadedTextures += 1;
+            //console.log("createCubics() : " + numLoadedTextures);
+            //console.log(textures[0]);
+            //if (numLoadedTextures != 27) return;
+
+            //console.log("+++++++++++++++++++++++++++++++++++++++++++");
+            //console.log(pivot);
+            //console.log(textures.length);
+
+            scene = new THREE.Scene();
+            camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+            //var ar = window.innerWidth / window.innerHeight;
+            //camera = new THREE.OrthographicCamera(-4 * ar, 4 * ar, 4 * ar, -4 * ar, 0.1, 1000);
+            //camera = new THREE.OrthographicCamera(-4 * ar, 4 * ar, 4 * ar, -4 * ar, 0.1, 1000);
+            //camera.aspect = ar;
+            //var camera = new THREE.OrthographicCamera(window.innerWidth / -200, window.innerWidth / 200, window.innerHeight / 200, window.innerHeight / -2000, -500, 1000);
+            //camera.setLens(10);
+
+            light = new THREE.DirectionalLight(0xffffff, 1);
+            light.position.set(0, 0, 5).normalize();
+            scene.add(light);
+
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setClearColor(0xf0f0f0);
+            document.body.appendChild(renderer.domElement);
+
+            // STATS
+            container = document.createElement('div');
+            document.body.appendChild(container);
+            stats = new Stats();
+            container.appendChild(stats.domElement);
+
+            pivot = new THREE.Object3D();
+            scene.add(pivot);
+
+            camera.position.set(0, 0, 5);
+            camera.lookAt(new THREE.Vector3(0, 0, 0));
+
+            document.addEventListener('mousemove', onDocumentMouseMove, false);
+            document.addEventListener('mousedown', onDocumentMouseDown, false);
+            document.addEventListener('mouseup', onDocumentMouseUp, false);
+            window.addEventListener('resize', onWindowResize, false);
+
+
+            //var i = 0;
+            //for (var x = -1 ; x <= 1 ; ++x) {
+            //    for (var y = -1 ; y <= 1 ; ++y) {
+            //        for (var z = -1 ; z <= 1 ; ++z) {
+            //            //if (x != 0 || y != 0 || z != 0) continue;
+            //            var texName = "01";
+            //            var cube = createCubic(new THREE.Vector3(x, y, z), texName);
+            //            cube.name = "" + x + "_" + y + "_" + z;
+            //            pivot.add(cube);
+            //            cubics[i] = cube;
+            //            i++;
+            //        }
+            //    }
+            //}
+
+            var i = 0;
+            var x = 0;
+            var y = 0;
+            var z = 0;
+
+            var tn_01 = "01";
+            var tn_02 = "02";
+            var tn_03 = "03";
+            var tn_04 = "04";
+            var tn_05 = "05";
+            var tn_06 = "06";
+            var tn_07 = "07";
+            var tn_08 = "08";
+            var tn_09 = "09";
+
+            var cube = createCubic(new THREE.Vector3(-1, 1, 1), tn_01, 0);
+            var cube = createCubic(new THREE.Vector3(0, 1, 1), tn_02, 1);
+            var cube = createCubic(new THREE.Vector3(1, 1, 1), tn_03, 2);
+
+            var cube = createCubic(new THREE.Vector3(-1, 0, 1), tn_04, 3);
+            var cube = createCubic(new THREE.Vector3(0, 0, 1), tn_05, 4);
+            var cube = createCubic(new THREE.Vector3(1, 0, 1), tn_06, 5);
+
+            var cube = createCubic(new THREE.Vector3(-1, -1, 1), tn_07, 6);
+            var cube = createCubic(new THREE.Vector3(0, -1, 1), tn_08, 7);
+            var cube = createCubic(new THREE.Vector3(1, -1, 1), tn_09, 8);
+
+
+            var cube = createCubic(new THREE.Vector3(-1, 1, 0), tn_01, 9);
+            var cube = createCubic(new THREE.Vector3(0, 1, 0), tn_02, 10);
+            var cube = createCubic(new THREE.Vector3(1, 1, 0), tn_03, 11);
+
+            var cube = createCubic(new THREE.Vector3(-1, 0, 0), tn_04, 12);
+            var cube = createCubic(new THREE.Vector3(0, 0, 0), tn_05, 13);
+            var cube = createCubic(new THREE.Vector3(1, 0, 0), tn_06, 14);
+
+            var cube = createCubic(new THREE.Vector3(-1, -1, 0), tn_07, 15);
+            var cube = createCubic(new THREE.Vector3(0, -1, 0), tn_08, 16);
+            var cube = createCubic(new THREE.Vector3(1, -1, 0), tn_09, 17);
+
+
+            var cube = createCubic(new THREE.Vector3(-1, 1, -1), tn_01, 18);
+            var cube = createCubic(new THREE.Vector3(0, 1, -1), tn_02, 19);
+            var cube = createCubic(new THREE.Vector3(1, 1, -1), tn_03, 20);
+
+            var cube = createCubic(new THREE.Vector3(-1, 0, -1), tn_04, 21);
+            var cube = createCubic(new THREE.Vector3(0, 0, -1), tn_05, 22);
+            var cube = createCubic(new THREE.Vector3(1, 0, -1), tn_06, 23);
+
+            var cube = createCubic(new THREE.Vector3(-1, -1, -1), tn_07, 24);
+            var cube = createCubic(new THREE.Vector3(0, -1, -1), tn_08, 25);
+            var cube = createCubic(new THREE.Vector3(1, -1, -1), tn_09, 26);
+
+
+            //var cube = createCubic(new THREE.Vector3(-1, 0, 1), tn_04, 3);
+            //var cube = createCubic(new THREE.Vector3(0, 0, 1), tn_05, 4);
+            //var cube = createCubic(new THREE.Vector3(1, 0, 1), tn_06, 5);
+
+            //var cube = createCubic(new THREE.Vector3(-1, -1, 1), tn_07, 6);
+            //var cube = createCubic(new THREE.Vector3(0, -1, 1), tn_08, 7);
+            //var cube = createCubic(new THREE.Vector3(1, -1, 1), tn_09, 8);
+
+            //pivot.add(cube);
+            //cubics[i] = cube;
+
+            //var cube = createCubic(new THREE.Vector3(1, 1, 1), tn_03);
+
+            //for (var x = -1 ; x <= 1 ; ++x) {
+            //    for (var y = -1 ; y <= 1 ; ++y) {
+            //        for (var z = -1 ; z <= 1 ; ++z) {
+            //            //if (x != 0 || y != 0 || z != 0) continue;
+            //            var texName = "01";
+            //            var cube = createCubic(new THREE.Vector3(x, y, z), texName);
+            //            cube.name = "" + x + "_" + y + "_" + z;
+            //            pivot.add(cube);
+            //            cubics[i] = cube;
+            //            i++;
+            //        }
+            //    }
+            //}
+
+            render();
+        }
+        //function loadTexture(path) {
+        //    //console.log("loadTexture : "  + path);
+
+        //    var texture = new THREE.Texture(texture_placeholder);
+        //    //var material = new THREE.MeshBasicMaterial({ map: texture, overdraw: 0.5 });
+        //    //var material = new THREE.MeshLambertMaterial({ map: texture, color: 0xffffff, vertexColors: THREE.VertexColors });
+
+        //    var image = new Image();
+        //    image.onload = function () {
+
+        //        texture.image = this;
+        //        texture.needsUpdate = true;
+        //        createCubics();
+
+        //    };
+        //    image.src = path;
+
+        //    return texture;
+        //}
+
+        function render() {
+            
+            //console.log("render()");
+
+            var dt = clock.getDelta()
+
+            if (RCBlock) {
+                rotateCubesStep(dt);
+            }
+
+            if (blockOnRotate) {
+
+            }
+            else {
+                if (!mousePressed) {
+                    raycaster.setFromCamera(mouse, camera);
+                    var intersects = raycaster.intersectObjects(cubics);
+
+                    if (intersects.length > 0) {
+                        if (INTERSECTED != intersects[0].object) {
+                            if (INTERSECTED) INTERSECTED.material.emissive.setHex(INTERSECTED.currentHex);
+                            INTERSECTED = intersects[0].object;
+                            INTERSECTED.currentHex = INTERSECTED.material.emissive.getHex();
+                            INTERSECTED.material.emissive.setHex(0x888888);
+                        }
+                    } else {
+                        if (INTERSECTED) {
+                            INTERSECTED.material.emissive.setHex(INTERSECTED.currentHex);
+                            INTERSECTED = null;
+                        }
+                    }
+                }
+            }
+
+            requestAnimationFrame(render);
+            renderer.render(scene, camera);
+            stats.update();
+        };
+
+        function setCubesEmissive(_cubics, emissiveVal) {
+            //console.log(_cubics.length);
+            for (var i = 0 ; i < _cubics.length ; ++i) {
+                _cubics[i].material.emissive.setHex(emissiveVal);
+            }
+        }
+
+        function createCubic(p, num, ind) {
+            //console.log("createCubic : " + num);
+            //var map1 = textures[num]; //THREE.ImageUtils.loadTexture('rbn_'+num+'.png');
+            //var map1 = THREE.ImageUtils.loadTexture("rbn_" + num + '.png');
+            //var map1 = THREE.ImageUtils.loadTexture('tex_mal/mal_' + num + '.png');
+            var map1 = THREE.ImageUtils.loadTexture('tex_mal/all2.png');
+            //var map1 = THREE.ImageUtils.loadTexture("rbn_" + num + '.png');
+            //console.log(map1);
+            //var map1 = THREE.ImageUtils.loadTexture('rbn_'+num+'.png');
+            var geometry = new THREE.BoxGeometry(1, 1, 1);
+
+            var cls = [];
+            cls.push(new THREE.Color(0xffffff));
+            cls.push(new THREE.Color(0xff0000));
+            cls.push(new THREE.Color(0x00ff00));
+            cls.push(new THREE.Color(0x0000ff));
+            cls.push(new THREE.Color(0xffff00));
+            cls.push(new THREE.Color(0xdd8800));
+
+            //for (var i = 0 ; i < 6 ; ++i) {
+            //    if (i != 1114) continue;
+            //    geometry.faces[i * 2].vertexColors[0] = cls[i];
+            //    geometry.faces[i * 2].vertexColors[1] = cls[i];
+            //    geometry.faces[i * 2].vertexColors[2] = cls[i];
+
+            //    geometry.faces[i * 2 + 1].vertexColors[0] = cls[i];
+            //    geometry.faces[i * 2 + 1].vertexColors[1] = cls[i];
+            //    geometry.faces[i * 2 + 1].vertexColors[2] = cls[i];
+            //}
+            geometry.normalsNeedUpdate = true;
+
+            var material = new THREE.MeshLambertMaterial({ map: map1, color: 0xffffff, vertexColors: THREE.VertexColors });
+            var cube = new THREE.Mesh(geometry, material);
+            cube.position.set(p.x, p.y, p.z);// = position;
+            //console.log(geometry);
+
+            pivot.add(cube);
+            cubics[ind] = cube;
+
+            //console.log(cubics.length);
+            //for (var i = 0 ; i < 12 ; ++i) {
+            //    geometry.faceVertexUvs[0][i][0].x *= 2;
+            //    geometry.faceVertexUvs[0][i][0].y *= 2;
+
+            //    geometry.faceVertexUvs[0][i][1].x *= 2;
+            //    geometry.faceVertexUvs[0][i][1].y *= 2;
+
+            //    geometry.faceVertexUvs[0][i][2].x *= 2;
+            //    geometry.faceVertexUvs[0][i][2].y *= 2;
+            //}
+
+            //for (var i = 0 ; i < 12 ; ++i) {
+
+            //    geometry.faceVertexUvs[0][i][0].x = 0;
+            //    geometry.faceVertexUvs[0][i][0].y = 1;
+
+            //    geometry.faceVertexUvs[0][i][1].x = 0;
+            //    geometry.faceVertexUvs[0][i][1].y = 0.666;
+
+            //    geometry.faceVertexUvs[0][i][2].x = 0.333;
+            //    geometry.faceVertexUvs[0][i][2].y = 0.666;
+            //}
+
+            //switch(num)
+            //{
+            //    case "01":
+            //        break;
+            //}
+            //console.log(p);
+
+
+            if (p.equals(new THREE.Vector3(-1, 1, 1))) {
+                //console.log("jest ");
+
+                // sciana prawa
+                geometry.faceVertexUvs[0][0][0].x = 0;
+                geometry.faceVertexUvs[0][0][0].y = 1;
+                geometry.faceVertexUvs[0][0][1].x = 0;
+                geometry.faceVertexUvs[0][0][1].y = 0.666;
+                geometry.faceVertexUvs[0][0][2].x = 0.333;
+                geometry.faceVertexUvs[0][0][2].y = 1;
+
+                geometry.faceVertexUvs[0][1][0].x = 0;
+                geometry.faceVertexUvs[0][1][0].y = 0.666;
+                geometry.faceVertexUvs[0][1][1].x = 0.333;
+                geometry.faceVertexUvs[0][1][1].y = 0.666;
+                geometry.faceVertexUvs[0][1][2].x = 0.333;
+                geometry.faceVertexUvs[0][1][2].y = 1;
+
+                // sciana lewa
+                //console.log(geometry.faces[2]);
+                geometry.faceVertexUvs[0][2][0].x = 0.666;
+                geometry.faceVertexUvs[0][2][0].y = 1;
+                geometry.faceVertexUvs[0][2][1].x = 0.666;
+                geometry.faceVertexUvs[0][2][1].y = 0.666;
+                geometry.faceVertexUvs[0][2][2].x = 1;
+                geometry.faceVertexUvs[0][2][2].y = 1;
+
+                geometry.faceVertexUvs[0][3][0].x = 0.666;
+                geometry.faceVertexUvs[0][3][0].y = 0.666;
+                geometry.faceVertexUvs[0][3][1].x = 1;
+                geometry.faceVertexUvs[0][3][1].y = 0.666;
+                geometry.faceVertexUvs[0][3][2].x = 1;
+                geometry.faceVertexUvs[0][3][2].y = 1;
+
+                // sciana gora
+                geometry.faceVertexUvs[0][4][0].x = 0;
+                geometry.faceVertexUvs[0][4][0].y = 0.333;
+                geometry.faceVertexUvs[0][4][1].x = 0;
+                geometry.faceVertexUvs[0][4][1].y = 0;
+                geometry.faceVertexUvs[0][4][2].x = 0.333;
+                geometry.faceVertexUvs[0][4][2].y = 0.333;
+
+                geometry.faceVertexUvs[0][5][0].x = 0;
+                geometry.faceVertexUvs[0][5][0].y = 0;
+                geometry.faceVertexUvs[0][5][1].x = 0.333;
+                geometry.faceVertexUvs[0][5][1].y = 0;
+                geometry.faceVertexUvs[0][5][2].x = 0.333;
+                geometry.faceVertexUvs[0][5][2].y = 0.333;
+
+                // sciana dolna
+                geometry.faceVertexUvs[0][6][0].x = 0;
+                geometry.faceVertexUvs[0][6][0].y = 1;
+                geometry.faceVertexUvs[0][6][1].x = 0;
+                geometry.faceVertexUvs[0][6][1].y = 0.666;
+                geometry.faceVertexUvs[0][6][2].x = 0.333;
+                geometry.faceVertexUvs[0][6][2].y = 1;
+
+                geometry.faceVertexUvs[0][7][0].x = 0;
+                geometry.faceVertexUvs[0][7][0].y = 0.666;
+                geometry.faceVertexUvs[0][7][1].x = 0.333;
+                geometry.faceVertexUvs[0][7][1].y = 0.666;
+                geometry.faceVertexUvs[0][7][2].x = 0.333;
+                geometry.faceVertexUvs[0][7][2].y = 1;
+
+                // sciana frontowa:
+                geometry.faceVertexUvs[0][8][0].x = 0;
+                geometry.faceVertexUvs[0][8][0].y = 1;
+                geometry.faceVertexUvs[0][8][1].x = 0;
+                geometry.faceVertexUvs[0][8][1].y = 0.666;
+                geometry.faceVertexUvs[0][8][2].x = 0.333;
+                geometry.faceVertexUvs[0][8][2].y = 1;
+
+                geometry.faceVertexUvs[0][9][0].x = 0;
+                geometry.faceVertexUvs[0][9][0].y = 0.666;
+                geometry.faceVertexUvs[0][9][1].x = 0.333;
+                geometry.faceVertexUvs[0][9][1].y = 0.666;
+                geometry.faceVertexUvs[0][9][2].x = 0.333;
+                geometry.faceVertexUvs[0][9][2].y = 1;
+
+                // sciana tylna
+                geometry.faceVertexUvs[0][10][0].x = 0;
+                geometry.faceVertexUvs[0][10][0].y = 1;
+                geometry.faceVertexUvs[0][10][1].x = 0;
+                geometry.faceVertexUvs[0][10][1].y = 0.666;
+                geometry.faceVertexUvs[0][10][2].x = 0.333;
+                geometry.faceVertexUvs[0][10][2].y = 1;
+
+                geometry.faceVertexUvs[0][11][0].x = 0;
+                geometry.faceVertexUvs[0][11][0].y = 0.666;
+                geometry.faceVertexUvs[0][11][1].x = 0.333;
+                geometry.faceVertexUvs[0][11][1].y = 0.666;
+                geometry.faceVertexUvs[0][11][2].x = 0.333;
+                geometry.faceVertexUvs[0][11][2].y = 1;
+            }
+
+            if (p.equals(new THREE.Vector3(0, 1, 1))) {
+                //console.log("jest ");
+
+                // sciana prawa
+                geometry.faceVertexUvs[0][0][0].x = 0;
+                geometry.faceVertexUvs[0][0][0].y = 1;
+                geometry.faceVertexUvs[0][0][1].x = 0;
+                geometry.faceVertexUvs[0][0][1].y = 0.666;
+                geometry.faceVertexUvs[0][0][2].x = 0.333;
+                geometry.faceVertexUvs[0][0][2].y = 1;
+
+                geometry.faceVertexUvs[0][1][0].x = 0;
+                geometry.faceVertexUvs[0][1][0].y = 0.666;
+                geometry.faceVertexUvs[0][1][1].x = 0.333;
+                geometry.faceVertexUvs[0][1][1].y = 0.666;
+                geometry.faceVertexUvs[0][1][2].x = 0.333;
+                geometry.faceVertexUvs[0][1][2].y = 1;
+
+                // sciana lewa
+                geometry.faceVertexUvs[0][2][0].x = 0.666;
+                geometry.faceVertexUvs[0][2][0].y = 1;
+                geometry.faceVertexUvs[0][2][1].x = 0.666;
+                geometry.faceVertexUvs[0][2][1].y = 0.666;
+                geometry.faceVertexUvs[0][2][2].x = 1;
+                geometry.faceVertexUvs[0][2][2].y = 1;
+
+                geometry.faceVertexUvs[0][3][0].x = 0.666;
+                geometry.faceVertexUvs[0][3][0].y = 0.666;
+                geometry.faceVertexUvs[0][3][1].x = 1;
+                geometry.faceVertexUvs[0][3][1].y = 0.666;
+                geometry.faceVertexUvs[0][3][2].x = 1;
+                geometry.faceVertexUvs[0][3][2].y = 1;
+
+                // sciana gora
+                geometry.faceVertexUvs[0][4][0].x = 0.333;
+                geometry.faceVertexUvs[0][4][0].y = 0.333;
+                geometry.faceVertexUvs[0][4][1].x = 0.333;
+                geometry.faceVertexUvs[0][4][1].y = 0;
+                geometry.faceVertexUvs[0][4][2].x = 0.666;
+                geometry.faceVertexUvs[0][4][2].y = 0.333;
+
+                geometry.faceVertexUvs[0][5][0].x = 0.333;
+                geometry.faceVertexUvs[0][5][0].y = 0;
+                geometry.faceVertexUvs[0][5][1].x = 0.666;
+                geometry.faceVertexUvs[0][5][1].y = 0.0;
+                geometry.faceVertexUvs[0][5][2].x = 0.666;
+                geometry.faceVertexUvs[0][5][2].y = 0.333;
+
+                // sciana dolna
+                geometry.faceVertexUvs[0][6][0].x = 0;
+                geometry.faceVertexUvs[0][6][0].y = 1;
+                geometry.faceVertexUvs[0][6][1].x = 0;
+                geometry.faceVertexUvs[0][6][1].y = 0.666;
+                geometry.faceVertexUvs[0][6][2].x = 0.333;
+                geometry.faceVertexUvs[0][6][2].y = 1;
+
+                geometry.faceVertexUvs[0][7][0].x = 0;
+                geometry.faceVertexUvs[0][7][0].y = 0.666;
+                geometry.faceVertexUvs[0][7][1].x = 0.333;
+                geometry.faceVertexUvs[0][7][1].y = 0.666;
+                geometry.faceVertexUvs[0][7][2].x = 0.333;
+                geometry.faceVertexUvs[0][7][2].y = 1;
+
+                // sciana frontowa:
+                geometry.faceVertexUvs[0][8][0].x = 0.333;
+                geometry.faceVertexUvs[0][8][0].y = 1;
+                geometry.faceVertexUvs[0][8][1].x = 0.333;
+                geometry.faceVertexUvs[0][8][1].y = 0.666;
+                geometry.faceVertexUvs[0][8][2].x = 0.666;
+                geometry.faceVertexUvs[0][8][2].y = 1;
+
+                geometry.faceVertexUvs[0][9][0].x = 0.333;
+                geometry.faceVertexUvs[0][9][0].y = 0.666;
+                geometry.faceVertexUvs[0][9][1].x = 0.666;
+                geometry.faceVertexUvs[0][9][1].y = 0.666;
+                geometry.faceVertexUvs[0][9][2].x = 0.666;
+                geometry.faceVertexUvs[0][9][2].y = 1;
+
+                // sciana tylna
+                geometry.faceVertexUvs[0][10][0].x = 0;
+                geometry.faceVertexUvs[0][10][0].y = 1;
+                geometry.faceVertexUvs[0][10][1].x = 0;
+                geometry.faceVertexUvs[0][10][1].y = 0.666;
+                geometry.faceVertexUvs[0][10][2].x = 0.333;
+                geometry.faceVertexUvs[0][10][2].y = 1;
+
+                geometry.faceVertexUvs[0][11][0].x = 0;
+                geometry.faceVertexUvs[0][11][0].y = 0.666;
+                geometry.faceVertexUvs[0][11][1].x = 0.333;
+                geometry.faceVertexUvs[0][11][1].y = 0.666;
+                geometry.faceVertexUvs[0][11][2].x = 0.333;
+                geometry.faceVertexUvs[0][11][2].y = 1;
+            }
+
+            if (p.equals(new THREE.Vector3(1, 1, 1))) {
+                //console.log("jest ");
+
+                // sciana prawa
+                geometry.faceVertexUvs[0][0][0].x = 0;
+                geometry.faceVertexUvs[0][0][0].y = 1;
+                geometry.faceVertexUvs[0][0][1].x = 0;
+                geometry.faceVertexUvs[0][0][1].y = 0.666;
+                geometry.faceVertexUvs[0][0][2].x = 0.333;
+                geometry.faceVertexUvs[0][0][2].y = 1;
+
+                geometry.faceVertexUvs[0][1][0].x = 0;
+                geometry.faceVertexUvs[0][1][0].y = 0.666;
+                geometry.faceVertexUvs[0][1][1].x = 0.333;
+                geometry.faceVertexUvs[0][1][1].y = 0.666;
+                geometry.faceVertexUvs[0][1][2].x = 0.333;
+                geometry.faceVertexUvs[0][1][2].y = 1;
+
+                // sciana lewa
+                geometry.faceVertexUvs[0][2][0].x = 0.666;
+                geometry.faceVertexUvs[0][2][0].y = 1;
+                geometry.faceVertexUvs[0][2][1].x = 0.666;
+                geometry.faceVertexUvs[0][2][1].y = 0.666;
+                geometry.faceVertexUvs[0][2][2].x = 1;
+                geometry.faceVertexUvs[0][2][2].y = 1;
+
+                geometry.faceVertexUvs[0][3][0].x = 0.666;
+                geometry.faceVertexUvs[0][3][0].y = 0.666;
+                geometry.faceVertexUvs[0][3][1].x = 1;
+                geometry.faceVertexUvs[0][3][1].y = 0.666;
+                geometry.faceVertexUvs[0][3][2].x = 1;
+                geometry.faceVertexUvs[0][3][2].y = 1;
+
+                // sciana gora
+                geometry.faceVertexUvs[0][4][0].x = 0.666;
+                geometry.faceVertexUvs[0][4][0].y = 0.333;
+                geometry.faceVertexUvs[0][4][1].x = 0.666;
+                geometry.faceVertexUvs[0][4][1].y = 0;
+                geometry.faceVertexUvs[0][4][2].x = 1;
+                geometry.faceVertexUvs[0][4][2].y = 0.333;
+
+                geometry.faceVertexUvs[0][5][0].x = 0.666;
+                geometry.faceVertexUvs[0][5][0].y = 0;
+                geometry.faceVertexUvs[0][5][1].x = 1;
+                geometry.faceVertexUvs[0][5][1].y = 0.0;
+                geometry.faceVertexUvs[0][5][2].x = 1;
+                geometry.faceVertexUvs[0][5][2].y = 0.333;
+
+                // sciana dolna
+                geometry.faceVertexUvs[0][6][0].x = 0;
+                geometry.faceVertexUvs[0][6][0].y = 1;
+                geometry.faceVertexUvs[0][6][1].x = 0;
+                geometry.faceVertexUvs[0][6][1].y = 0.666;
+                geometry.faceVertexUvs[0][6][2].x = 0.333;
+                geometry.faceVertexUvs[0][6][2].y = 1;
+
+                geometry.faceVertexUvs[0][7][0].x = 0;
+                geometry.faceVertexUvs[0][7][0].y = 0.666;
+                geometry.faceVertexUvs[0][7][1].x = 0.333;
+                geometry.faceVertexUvs[0][7][1].y = 0.666;
+                geometry.faceVertexUvs[0][7][2].x = 0.333;
+                geometry.faceVertexUvs[0][7][2].y = 1;
+
+                // sciana frontowa:
+                geometry.faceVertexUvs[0][8][0].x = 0.666;
+                geometry.faceVertexUvs[0][8][0].y = 1;
+                geometry.faceVertexUvs[0][8][1].x = 0.666;
+                geometry.faceVertexUvs[0][8][1].y = 0.666;
+                geometry.faceVertexUvs[0][8][2].x = 1;
+                geometry.faceVertexUvs[0][8][2].y = 1;
+
+                geometry.faceVertexUvs[0][9][0].x = 0.666;
+                geometry.faceVertexUvs[0][9][0].y = 0.666;
+                geometry.faceVertexUvs[0][9][1].x = 1;
+                geometry.faceVertexUvs[0][9][1].y = 0.666;
+                geometry.faceVertexUvs[0][9][2].x = 1;
+                geometry.faceVertexUvs[0][9][2].y = 1;
+
+                // sciana tylna
+                geometry.faceVertexUvs[0][10][0].x = 0;
+                geometry.faceVertexUvs[0][10][0].y = 1;
+                geometry.faceVertexUvs[0][10][1].x = 0;
+                geometry.faceVertexUvs[0][10][1].y = 0.666;
+                geometry.faceVertexUvs[0][10][2].x = 0.333;
+                geometry.faceVertexUvs[0][10][2].y = 1;
+
+                geometry.faceVertexUvs[0][11][0].x = 0;
+                geometry.faceVertexUvs[0][11][0].y = 0.666;
+                geometry.faceVertexUvs[0][11][1].x = 0.333;
+                geometry.faceVertexUvs[0][11][1].y = 0.666;
+                geometry.faceVertexUvs[0][11][2].x = 0.333;
+                geometry.faceVertexUvs[0][11][2].y = 1;
+            }
+
+
+            if (p.equals(new THREE.Vector3(-1, 0, 1))) {
+                //console.log("jest ");
+
+                // sciana prawa
+                geometry.faceVertexUvs[0][0][0].x = 0;
+                geometry.faceVertexUvs[0][0][0].y = 1;
+                geometry.faceVertexUvs[0][0][1].x = 0;
+                geometry.faceVertexUvs[0][0][1].y = 0.666;
+                geometry.faceVertexUvs[0][0][2].x = 0.333;
+                geometry.faceVertexUvs[0][0][2].y = 1;
+
+                geometry.faceVertexUvs[0][1][0].x = 0;
+                geometry.faceVertexUvs[0][1][0].y = 0.666;
+                geometry.faceVertexUvs[0][1][1].x = 0.333;
+                geometry.faceVertexUvs[0][1][1].y = 0.666;
+                geometry.faceVertexUvs[0][1][2].x = 0.333;
+                geometry.faceVertexUvs[0][1][2].y = 1;
+
+                // sciana lewa
+                //console.log(geometry.faces[2]);
+                geometry.faceVertexUvs[0][2][0].x = 0.666;
+                geometry.faceVertexUvs[0][2][0].y = 0.666;
+                geometry.faceVertexUvs[0][2][1].x = 0.666;
+                geometry.faceVertexUvs[0][2][1].y = 0.333;
+                geometry.faceVertexUvs[0][2][2].x = 1;
+                geometry.faceVertexUvs[0][2][2].y = 0.666;
+
+                geometry.faceVertexUvs[0][3][0].x = 0.666;
+                geometry.faceVertexUvs[0][3][0].y = 0.333;
+                geometry.faceVertexUvs[0][3][1].x = 1;
+                geometry.faceVertexUvs[0][3][1].y = 0.333;
+                geometry.faceVertexUvs[0][3][2].x = 1;
+                geometry.faceVertexUvs[0][3][2].y = 0.666;
+
+                // sciana gora
+                geometry.faceVertexUvs[0][4][0].x = 0;
+                geometry.faceVertexUvs[0][4][0].y = 0.333;
+                geometry.faceVertexUvs[0][4][1].x = 0;
+                geometry.faceVertexUvs[0][4][1].y = 0;
+                geometry.faceVertexUvs[0][4][2].x = 0.333;
+                geometry.faceVertexUvs[0][4][2].y = 0.333;
+
+                geometry.faceVertexUvs[0][5][0].x = 0;
+                geometry.faceVertexUvs[0][5][0].y = 0;
+                geometry.faceVertexUvs[0][5][1].x = 0.333;
+                geometry.faceVertexUvs[0][5][1].y = 0;
+                geometry.faceVertexUvs[0][5][2].x = 0.333;
+                geometry.faceVertexUvs[0][5][2].y = 0.333;
+
+                // sciana dolna
+                geometry.faceVertexUvs[0][6][0].x = 0;
+                geometry.faceVertexUvs[0][6][0].y = 1;
+                geometry.faceVertexUvs[0][6][1].x = 0;
+                geometry.faceVertexUvs[0][6][1].y = 0.666;
+                geometry.faceVertexUvs[0][6][2].x = 0.333;
+                geometry.faceVertexUvs[0][6][2].y = 1;
+
+                geometry.faceVertexUvs[0][7][0].x = 0;
+                geometry.faceVertexUvs[0][7][0].y = 0.666;
+                geometry.faceVertexUvs[0][7][1].x = 0.333;
+                geometry.faceVertexUvs[0][7][1].y = 0.666;
+                geometry.faceVertexUvs[0][7][2].x = 0.333;
+                geometry.faceVertexUvs[0][7][2].y = 1;
+
+                // sciana frontowa:
+                geometry.faceVertexUvs[0][8][0].x = 0;
+                geometry.faceVertexUvs[0][8][0].y = 0.666;
+                geometry.faceVertexUvs[0][8][1].x = 0;
+                geometry.faceVertexUvs[0][8][1].y = 0.333;
+                geometry.faceVertexUvs[0][8][2].x = 0.333;
+                geometry.faceVertexUvs[0][8][2].y = 0.666;
+
+                geometry.faceVertexUvs[0][9][0].x = 0;
+                geometry.faceVertexUvs[0][9][0].y = 0.333;
+                geometry.faceVertexUvs[0][9][1].x = 0.333;
+                geometry.faceVertexUvs[0][9][1].y = 0.333;
+                geometry.faceVertexUvs[0][9][2].x = 0.333;
+                geometry.faceVertexUvs[0][9][2].y = 0.666;
+
+                // sciana tylna
+                geometry.faceVertexUvs[0][10][0].x = 0;
+                geometry.faceVertexUvs[0][10][0].y = 1;
+                geometry.faceVertexUvs[0][10][1].x = 0;
+                geometry.faceVertexUvs[0][10][1].y = 0.666;
+                geometry.faceVertexUvs[0][10][2].x = 0.333;
+                geometry.faceVertexUvs[0][10][2].y = 1;
+
+                geometry.faceVertexUvs[0][11][0].x = 0;
+                geometry.faceVertexUvs[0][11][0].y = 0.666;
+                geometry.faceVertexUvs[0][11][1].x = 0.333;
+                geometry.faceVertexUvs[0][11][1].y = 0.666;
+                geometry.faceVertexUvs[0][11][2].x = 0.333;
+                geometry.faceVertexUvs[0][11][2].y = 1;
+            }
+
+            if (p.equals(new THREE.Vector3(0, 0, 1))) {
+                //console.log("jest ");
+
+                // sciana prawa
+                geometry.faceVertexUvs[0][0][0].x = 0;
+                geometry.faceVertexUvs[0][0][0].y = 1;
+                geometry.faceVertexUvs[0][0][1].x = 0;
+                geometry.faceVertexUvs[0][0][1].y = 0.666;
+                geometry.faceVertexUvs[0][0][2].x = 0.333;
+                geometry.faceVertexUvs[0][0][2].y = 1;
+
+                geometry.faceVertexUvs[0][1][0].x = 0;
+                geometry.faceVertexUvs[0][1][0].y = 0.666;
+                geometry.faceVertexUvs[0][1][1].x = 0.333;
+                geometry.faceVertexUvs[0][1][1].y = 0.666;
+                geometry.faceVertexUvs[0][1][2].x = 0.333;
+                geometry.faceVertexUvs[0][1][2].y = 1;
+
+                // sciana lewa
+                geometry.faceVertexUvs[0][2][0].x = 0.666;
+                geometry.faceVertexUvs[0][2][0].y = 1;
+                geometry.faceVertexUvs[0][2][1].x = 0.666;
+                geometry.faceVertexUvs[0][2][1].y = 0.666;
+                geometry.faceVertexUvs[0][2][2].x = 1;
+                geometry.faceVertexUvs[0][2][2].y = 1;
+
+                geometry.faceVertexUvs[0][3][0].x = 0.666;
+                geometry.faceVertexUvs[0][3][0].y = 0.666;
+                geometry.faceVertexUvs[0][3][1].x = 1;
+                geometry.faceVertexUvs[0][3][1].y = 0.666;
+                geometry.faceVertexUvs[0][3][2].x = 1;
+                geometry.faceVertexUvs[0][3][2].y = 1;
+
+                // sciana gora
+                geometry.faceVertexUvs[0][4][0].x = 0.333;
+                geometry.faceVertexUvs[0][4][0].y = 0.333;
+                geometry.faceVertexUvs[0][4][1].x = 0.333;
+                geometry.faceVertexUvs[0][4][1].y = 0;
+                geometry.faceVertexUvs[0][4][2].x = 0.666;
+                geometry.faceVertexUvs[0][4][2].y = 0.333;
+
+                geometry.faceVertexUvs[0][5][0].x = 0.333;
+                geometry.faceVertexUvs[0][5][0].y = 0;
+                geometry.faceVertexUvs[0][5][1].x = 0.666;
+                geometry.faceVertexUvs[0][5][1].y = 0.0;
+                geometry.faceVertexUvs[0][5][2].x = 0.666;
+                geometry.faceVertexUvs[0][5][2].y = 0.333;
+
+                // sciana dolna
+                geometry.faceVertexUvs[0][6][0].x = 0;
+                geometry.faceVertexUvs[0][6][0].y = 1;
+                geometry.faceVertexUvs[0][6][1].x = 0;
+                geometry.faceVertexUvs[0][6][1].y = 0.666;
+                geometry.faceVertexUvs[0][6][2].x = 0.333;
+                geometry.faceVertexUvs[0][6][2].y = 1;
+
+                geometry.faceVertexUvs[0][7][0].x = 0;
+                geometry.faceVertexUvs[0][7][0].y = 0.666;
+                geometry.faceVertexUvs[0][7][1].x = 0.333;
+                geometry.faceVertexUvs[0][7][1].y = 0.666;
+                geometry.faceVertexUvs[0][7][2].x = 0.333;
+                geometry.faceVertexUvs[0][7][2].y = 1;
+
+                // sciana frontowa:
+                geometry.faceVertexUvs[0][8][0].x = 0.333;
+                geometry.faceVertexUvs[0][8][0].y = 0.666;
+                geometry.faceVertexUvs[0][8][1].x = 0.333;
+                geometry.faceVertexUvs[0][8][1].y = 0.333;
+                geometry.faceVertexUvs[0][8][2].x = 0.666;
+                geometry.faceVertexUvs[0][8][2].y = 0.666;
+
+                geometry.faceVertexUvs[0][9][0].x = 0.333;
+                geometry.faceVertexUvs[0][9][0].y = 0.333;
+                geometry.faceVertexUvs[0][9][1].x = 0.666;
+                geometry.faceVertexUvs[0][9][1].y = 0.333;
+                geometry.faceVertexUvs[0][9][2].x = 0.666;
+                geometry.faceVertexUvs[0][9][2].y = 0.666;
+
+                // sciana tylna
+                geometry.faceVertexUvs[0][10][0].x = 0;
+                geometry.faceVertexUvs[0][10][0].y = 1;
+                geometry.faceVertexUvs[0][10][1].x = 0;
+                geometry.faceVertexUvs[0][10][1].y = 0.666;
+                geometry.faceVertexUvs[0][10][2].x = 0.333;
+                geometry.faceVertexUvs[0][10][2].y = 1;
+
+                geometry.faceVertexUvs[0][11][0].x = 0;
+                geometry.faceVertexUvs[0][11][0].y = 0.666;
+                geometry.faceVertexUvs[0][11][1].x = 0.333;
+                geometry.faceVertexUvs[0][11][1].y = 0.666;
+                geometry.faceVertexUvs[0][11][2].x = 0.333;
+                geometry.faceVertexUvs[0][11][2].y = 1;
+            }
+
+            if (p.equals(new THREE.Vector3(1, 0, 1))) {
+                //console.log("jest ");
+
+                // sciana prawa
+                geometry.faceVertexUvs[0][0][0].x = 0;
+                geometry.faceVertexUvs[0][0][0].y = 0.666;
+                geometry.faceVertexUvs[0][0][1].x = 0;
+                geometry.faceVertexUvs[0][0][1].y = 0.333;
+                geometry.faceVertexUvs[0][0][2].x = 0.333;
+                geometry.faceVertexUvs[0][0][2].y = 0.666;
+
+                geometry.faceVertexUvs[0][1][0].x = 0;
+                geometry.faceVertexUvs[0][1][0].y = 0.333;
+                geometry.faceVertexUvs[0][1][1].x = 0.333;
+                geometry.faceVertexUvs[0][1][1].y = 0.333;
+                geometry.faceVertexUvs[0][1][2].x = 0.333;
+                geometry.faceVertexUvs[0][1][2].y = 0.666;
+
+                // sciana lewa
+                geometry.faceVertexUvs[0][2][0].x = 0.666;
+                geometry.faceVertexUvs[0][2][0].y = 1;
+                geometry.faceVertexUvs[0][2][1].x = 0.666;
+                geometry.faceVertexUvs[0][2][1].y = 0.666;
+                geometry.faceVertexUvs[0][2][2].x = 1;
+                geometry.faceVertexUvs[0][2][2].y = 1;
+
+                geometry.faceVertexUvs[0][3][0].x = 0.666;
+                geometry.faceVertexUvs[0][3][0].y = 0.666;
+                geometry.faceVertexUvs[0][3][1].x = 1;
+                geometry.faceVertexUvs[0][3][1].y = 0.666;
+                geometry.faceVertexUvs[0][3][2].x = 1;
+                geometry.faceVertexUvs[0][3][2].y = 1;
+
+                // sciana gora
+                geometry.faceVertexUvs[0][4][0].x = 0.666;
+                geometry.faceVertexUvs[0][4][0].y = 0.333;
+                geometry.faceVertexUvs[0][4][1].x = 0.666;
+                geometry.faceVertexUvs[0][4][1].y = 0;
+                geometry.faceVertexUvs[0][4][2].x = 1;
+                geometry.faceVertexUvs[0][4][2].y = 0.333;
+
+                geometry.faceVertexUvs[0][5][0].x = 0.666;
+                geometry.faceVertexUvs[0][5][0].y = 0;
+                geometry.faceVertexUvs[0][5][1].x = 1;
+                geometry.faceVertexUvs[0][5][1].y = 0.0;
+                geometry.faceVertexUvs[0][5][2].x = 1;
+                geometry.faceVertexUvs[0][5][2].y = 0.333;
+
+                // sciana dolna
+                geometry.faceVertexUvs[0][6][0].x = 0;
+                geometry.faceVertexUvs[0][6][0].y = 1;
+                geometry.faceVertexUvs[0][6][1].x = 0;
+                geometry.faceVertexUvs[0][6][1].y = 0.666;
+                geometry.faceVertexUvs[0][6][2].x = 0.333;
+                geometry.faceVertexUvs[0][6][2].y = 1;
+
+                geometry.faceVertexUvs[0][7][0].x = 0;
+                geometry.faceVertexUvs[0][7][0].y = 0.666;
+                geometry.faceVertexUvs[0][7][1].x = 0.333;
+                geometry.faceVertexUvs[0][7][1].y = 0.666;
+                geometry.faceVertexUvs[0][7][2].x = 0.333;
+                geometry.faceVertexUvs[0][7][2].y = 1;
+
+                // sciana frontowa:
+                geometry.faceVertexUvs[0][8][0].x = 0.666;
+                geometry.faceVertexUvs[0][8][0].y = 0.666;
+                geometry.faceVertexUvs[0][8][1].x = 0.666;
+                geometry.faceVertexUvs[0][8][1].y = 0.333;
+                geometry.faceVertexUvs[0][8][2].x = 1;
+                geometry.faceVertexUvs[0][8][2].y = 0.666;
+
+                geometry.faceVertexUvs[0][9][0].x = 0.666;
+                geometry.faceVertexUvs[0][9][0].y = 0.333;
+                geometry.faceVertexUvs[0][9][1].x = 1;
+                geometry.faceVertexUvs[0][9][1].y = 0.333;
+                geometry.faceVertexUvs[0][9][2].x = 1;
+                geometry.faceVertexUvs[0][9][2].y = 0.666;
+
+                // sciana tylna
+                geometry.faceVertexUvs[0][10][0].x = 0;
+                geometry.faceVertexUvs[0][10][0].y = 1;
+                geometry.faceVertexUvs[0][10][1].x = 0;
+                geometry.faceVertexUvs[0][10][1].y = 0.666;
+                geometry.faceVertexUvs[0][10][2].x = 0.333;
+                geometry.faceVertexUvs[0][10][2].y = 1;
+
+                geometry.faceVertexUvs[0][11][0].x = 0;
+                geometry.faceVertexUvs[0][11][0].y = 0.666;
+                geometry.faceVertexUvs[0][11][1].x = 0.333;
+                geometry.faceVertexUvs[0][11][1].y = 0.666;
+                geometry.faceVertexUvs[0][11][2].x = 0.333;
+                geometry.faceVertexUvs[0][11][2].y = 1;
+            }
+
+
+            if (p.equals(new THREE.Vector3(-1, -1, 1))) {
+                //console.log("jest ");
+
+                // sciana prawa
+                geometry.faceVertexUvs[0][0][0].x = 0;
+                geometry.faceVertexUvs[0][0][0].y = 1;
+                geometry.faceVertexUvs[0][0][1].x = 0;
+                geometry.faceVertexUvs[0][0][1].y = 0.666;
+                geometry.faceVertexUvs[0][0][2].x = 0.333;
+                geometry.faceVertexUvs[0][0][2].y = 1;
+
+                geometry.faceVertexUvs[0][1][0].x = 0;
+                geometry.faceVertexUvs[0][1][0].y = 0.666;
+                geometry.faceVertexUvs[0][1][1].x = 0.333;
+                geometry.faceVertexUvs[0][1][1].y = 0.666;
+                geometry.faceVertexUvs[0][1][2].x = 0.333;
+                geometry.faceVertexUvs[0][1][2].y = 1;
+
+                // sciana lewa
+                //console.log(geometry.faces[2]);
+                geometry.faceVertexUvs[0][2][0].x = 0.666;
+                geometry.faceVertexUvs[0][2][0].y = 0.333;
+                geometry.faceVertexUvs[0][2][1].x = 0.666;
+                geometry.faceVertexUvs[0][2][1].y = 0;
+                geometry.faceVertexUvs[0][2][2].x = 1;
+                geometry.faceVertexUvs[0][2][2].y = 0.333;
+
+                geometry.faceVertexUvs[0][3][0].x = 0.666;
+                geometry.faceVertexUvs[0][3][0].y = 0;
+                geometry.faceVertexUvs[0][3][1].x = 1;
+                geometry.faceVertexUvs[0][3][1].y = 0;
+                geometry.faceVertexUvs[0][3][2].x = 1;
+                geometry.faceVertexUvs[0][3][2].y = 0.333;
+
+                // sciana gora
+                geometry.faceVertexUvs[0][4][0].x = 0;
+                geometry.faceVertexUvs[0][4][0].y = 0.333;
+                geometry.faceVertexUvs[0][4][1].x = 0;
+                geometry.faceVertexUvs[0][4][1].y = 0;
+                geometry.faceVertexUvs[0][4][2].x = 0.333;
+                geometry.faceVertexUvs[0][4][2].y = 0.333;
+
+                geometry.faceVertexUvs[0][5][0].x = 0;
+                geometry.faceVertexUvs[0][5][0].y = 0;
+                geometry.faceVertexUvs[0][5][1].x = 0.333;
+                geometry.faceVertexUvs[0][5][1].y = 0;
+                geometry.faceVertexUvs[0][5][2].x = 0.333;
+                geometry.faceVertexUvs[0][5][2].y = 0.333;
+
+                // sciana dolna
+                geometry.faceVertexUvs[0][6][0].x = 0;
+                geometry.faceVertexUvs[0][6][0].y = 1;
+                geometry.faceVertexUvs[0][6][1].x = 0;
+                geometry.faceVertexUvs[0][6][1].y = 0.666;
+                geometry.faceVertexUvs[0][6][2].x = 0.333;
+                geometry.faceVertexUvs[0][6][2].y = 1;
+
+                geometry.faceVertexUvs[0][7][0].x = 0;
+                geometry.faceVertexUvs[0][7][0].y = 0.666;
+                geometry.faceVertexUvs[0][7][1].x = 0.333;
+                geometry.faceVertexUvs[0][7][1].y = 0.666;
+                geometry.faceVertexUvs[0][7][2].x = 0.333;
+                geometry.faceVertexUvs[0][7][2].y = 1;
+
+                // sciana frontowa:
+                geometry.faceVertexUvs[0][8][0].x = 0;
+                geometry.faceVertexUvs[0][8][0].y = 0.333;
+                geometry.faceVertexUvs[0][8][1].x = 0;
+                geometry.faceVertexUvs[0][8][1].y = 0;
+                geometry.faceVertexUvs[0][8][2].x = 0.333;
+                geometry.faceVertexUvs[0][8][2].y = 0.333;
+
+                geometry.faceVertexUvs[0][9][0].x = 0;
+                geometry.faceVertexUvs[0][9][0].y = 0;
+                geometry.faceVertexUvs[0][9][1].x = 0.333;
+                geometry.faceVertexUvs[0][9][1].y = 0;
+                geometry.faceVertexUvs[0][9][2].x = 0.333;
+                geometry.faceVertexUvs[0][9][2].y = 0.333;
+
+                // sciana tylna
+                geometry.faceVertexUvs[0][10][0].x = 0;
+                geometry.faceVertexUvs[0][10][0].y = 1;
+                geometry.faceVertexUvs[0][10][1].x = 0;
+                geometry.faceVertexUvs[0][10][1].y = 0.666;
+                geometry.faceVertexUvs[0][10][2].x = 0.333;
+                geometry.faceVertexUvs[0][10][2].y = 1;
+
+                geometry.faceVertexUvs[0][11][0].x = 0;
+                geometry.faceVertexUvs[0][11][0].y = 0.666;
+                geometry.faceVertexUvs[0][11][1].x = 0.333;
+                geometry.faceVertexUvs[0][11][1].y = 0.666;
+                geometry.faceVertexUvs[0][11][2].x = 0.333;
+                geometry.faceVertexUvs[0][11][2].y = 1;
+            }
+
+            if (p.equals(new THREE.Vector3(0, -1, 1))) {
+                //console.log("jest ");
+
+                // sciana prawa
+                geometry.faceVertexUvs[0][0][0].x = 0;
+                geometry.faceVertexUvs[0][0][0].y = 1;
+                geometry.faceVertexUvs[0][0][1].x = 0;
+                geometry.faceVertexUvs[0][0][1].y = 0.666;
+                geometry.faceVertexUvs[0][0][2].x = 0.333;
+                geometry.faceVertexUvs[0][0][2].y = 1;
+
+                geometry.faceVertexUvs[0][1][0].x = 0;
+                geometry.faceVertexUvs[0][1][0].y = 0.666;
+                geometry.faceVertexUvs[0][1][1].x = 0.333;
+                geometry.faceVertexUvs[0][1][1].y = 0.666;
+                geometry.faceVertexUvs[0][1][2].x = 0.333;
+                geometry.faceVertexUvs[0][1][2].y = 1;
+
+                // sciana lewa
+                geometry.faceVertexUvs[0][2][0].x = 0.666;
+                geometry.faceVertexUvs[0][2][0].y = 1;
+                geometry.faceVertexUvs[0][2][1].x = 0.666;
+                geometry.faceVertexUvs[0][2][1].y = 0.666;
+                geometry.faceVertexUvs[0][2][2].x = 1;
+                geometry.faceVertexUvs[0][2][2].y = 1;
+
+                geometry.faceVertexUvs[0][3][0].x = 0.666;
+                geometry.faceVertexUvs[0][3][0].y = 0.666;
+                geometry.faceVertexUvs[0][3][1].x = 1;
+                geometry.faceVertexUvs[0][3][1].y = 0.666;
+                geometry.faceVertexUvs[0][3][2].x = 1;
+                geometry.faceVertexUvs[0][3][2].y = 1;
+
+                // sciana gora
+                geometry.faceVertexUvs[0][4][0].x = 0.333;
+                geometry.faceVertexUvs[0][4][0].y = 0.333;
+                geometry.faceVertexUvs[0][4][1].x = 0.333;
+                geometry.faceVertexUvs[0][4][1].y = 0;
+                geometry.faceVertexUvs[0][4][2].x = 0.666;
+                geometry.faceVertexUvs[0][4][2].y = 0.333;
+
+                geometry.faceVertexUvs[0][5][0].x = 0.333;
+                geometry.faceVertexUvs[0][5][0].y = 0;
+                geometry.faceVertexUvs[0][5][1].x = 0.666;
+                geometry.faceVertexUvs[0][5][1].y = 0.0;
+                geometry.faceVertexUvs[0][5][2].x = 0.666;
+                geometry.faceVertexUvs[0][5][2].y = 0.333;
+
+                // sciana dolna
+                geometry.faceVertexUvs[0][6][0].x = 0.333;
+                geometry.faceVertexUvs[0][6][0].y = 1;
+                geometry.faceVertexUvs[0][6][1].x = 0.333;
+                geometry.faceVertexUvs[0][6][1].y = 0.666;
+                geometry.faceVertexUvs[0][6][2].x = 0.666;
+                geometry.faceVertexUvs[0][6][2].y = 1;
+
+                geometry.faceVertexUvs[0][7][0].x = 0.333;
+                geometry.faceVertexUvs[0][7][0].y = 0.666;
+                geometry.faceVertexUvs[0][7][1].x = 0.666;
+                geometry.faceVertexUvs[0][7][1].y = 0.666;
+                geometry.faceVertexUvs[0][7][2].x = 0.666;
+                geometry.faceVertexUvs[0][7][2].y = 1;
+
+                // sciana frontowa:
+                geometry.faceVertexUvs[0][8][0].x = 0.333;
+                geometry.faceVertexUvs[0][8][0].y = 0.333;
+                geometry.faceVertexUvs[0][8][1].x = 0.333;
+                geometry.faceVertexUvs[0][8][1].y = 0;
+                geometry.faceVertexUvs[0][8][2].x = 0.666;
+                geometry.faceVertexUvs[0][8][2].y = 0.333;
+
+                geometry.faceVertexUvs[0][9][0].x = 0.333;
+                geometry.faceVertexUvs[0][9][0].y = 0;
+                geometry.faceVertexUvs[0][9][1].x = 0.666;
+                geometry.faceVertexUvs[0][9][1].y = 0;
+                geometry.faceVertexUvs[0][9][2].x = 0.666;
+                geometry.faceVertexUvs[0][9][2].y = 0.333;
+
+                // sciana tylna
+                geometry.faceVertexUvs[0][10][0].x = 0;
+                geometry.faceVertexUvs[0][10][0].y = 1;
+                geometry.faceVertexUvs[0][10][1].x = 0;
+                geometry.faceVertexUvs[0][10][1].y = 0.666;
+                geometry.faceVertexUvs[0][10][2].x = 0.333;
+                geometry.faceVertexUvs[0][10][2].y = 1;
+
+                geometry.faceVertexUvs[0][11][0].x = 0;
+                geometry.faceVertexUvs[0][11][0].y = 0.666;
+                geometry.faceVertexUvs[0][11][1].x = 0.333;
+                geometry.faceVertexUvs[0][11][1].y = 0.666;
+                geometry.faceVertexUvs[0][11][2].x = 0.333;
+                geometry.faceVertexUvs[0][11][2].y = 1;
+            }
+
+            if (p.equals(new THREE.Vector3(1, -1, 1))) {
+                //console.log("jest ");
+
+                // sciana prawa
+                geometry.faceVertexUvs[0][0][0].x = 0;
+                geometry.faceVertexUvs[0][0][0].y = 0.333;
+                geometry.faceVertexUvs[0][0][1].x = 0;
+                geometry.faceVertexUvs[0][0][1].y = 0;
+                geometry.faceVertexUvs[0][0][2].x = 0.333;
+                geometry.faceVertexUvs[0][0][2].y = 0.333;
+
+                geometry.faceVertexUvs[0][1][0].x = 0;
+                geometry.faceVertexUvs[0][1][0].y = 0;
+                geometry.faceVertexUvs[0][1][1].x = 0.333;
+                geometry.faceVertexUvs[0][1][1].y = 0;
+                geometry.faceVertexUvs[0][1][2].x = 0.333;
+                geometry.faceVertexUvs[0][1][2].y = 0.333;
+
+                // sciana lewa
+                geometry.faceVertexUvs[0][2][0].x = 0.666;
+                geometry.faceVertexUvs[0][2][0].y = 1;
+                geometry.faceVertexUvs[0][2][1].x = 0.666;
+                geometry.faceVertexUvs[0][2][1].y = 0.666;
+                geometry.faceVertexUvs[0][2][2].x = 1;
+                geometry.faceVertexUvs[0][2][2].y = 1;
+
+                geometry.faceVertexUvs[0][3][0].x = 0.666;
+                geometry.faceVertexUvs[0][3][0].y = 0.666;
+                geometry.faceVertexUvs[0][3][1].x = 1;
+                geometry.faceVertexUvs[0][3][1].y = 0.666;
+                geometry.faceVertexUvs[0][3][2].x = 1;
+                geometry.faceVertexUvs[0][3][2].y = 1;
+
+                // sciana gora
+                geometry.faceVertexUvs[0][4][0].x = 0.666;
+                geometry.faceVertexUvs[0][4][0].y = 0.333;
+                geometry.faceVertexUvs[0][4][1].x = 0.666;
+                geometry.faceVertexUvs[0][4][1].y = 0;
+                geometry.faceVertexUvs[0][4][2].x = 1;
+                geometry.faceVertexUvs[0][4][2].y = 0.333;
+
+                geometry.faceVertexUvs[0][5][0].x = 0.666;
+                geometry.faceVertexUvs[0][5][0].y = 0;
+                geometry.faceVertexUvs[0][5][1].x = 1;
+                geometry.faceVertexUvs[0][5][1].y = 0.0;
+                geometry.faceVertexUvs[0][5][2].x = 1;
+                geometry.faceVertexUvs[0][5][2].y = 0.333;
+
+                // sciana dolna
+                geometry.faceVertexUvs[0][6][0].x = 0.666;
+                geometry.faceVertexUvs[0][6][0].y = 1;
+                geometry.faceVertexUvs[0][6][1].x = 0.666;
+                geometry.faceVertexUvs[0][6][1].y = 0.666;
+                geometry.faceVertexUvs[0][6][2].x = 1;
+                geometry.faceVertexUvs[0][6][2].y = 1;
+
+                geometry.faceVertexUvs[0][7][0].x = 0.666;
+                geometry.faceVertexUvs[0][7][0].y = 0.666;
+                geometry.faceVertexUvs[0][7][1].x = 1;
+                geometry.faceVertexUvs[0][7][1].y = 0.666;
+                geometry.faceVertexUvs[0][7][2].x = 1;
+                geometry.faceVertexUvs[0][7][2].y = 1;
+
+                // sciana frontowa:
+                geometry.faceVertexUvs[0][8][0].x = 0.666;
+                geometry.faceVertexUvs[0][8][0].y = 0.333;
+                geometry.faceVertexUvs[0][8][1].x = 0.666;
+                geometry.faceVertexUvs[0][8][1].y = 0;
+                geometry.faceVertexUvs[0][8][2].x = 1;
+                geometry.faceVertexUvs[0][8][2].y = 0.333;
+
+                geometry.faceVertexUvs[0][9][0].x = 0.666;
+                geometry.faceVertexUvs[0][9][0].y = 0;
+                geometry.faceVertexUvs[0][9][1].x = 1;
+                geometry.faceVertexUvs[0][9][1].y = 0;
+                geometry.faceVertexUvs[0][9][2].x = 1;
+                geometry.faceVertexUvs[0][9][2].y = 0.333;
+
+                // sciana tylna
+                geometry.faceVertexUvs[0][10][0].x = 0;
+                geometry.faceVertexUvs[0][10][0].y = 1;
+                geometry.faceVertexUvs[0][10][1].x = 0;
+                geometry.faceVertexUvs[0][10][1].y = 0.666;
+                geometry.faceVertexUvs[0][10][2].x = 0.333;
+                geometry.faceVertexUvs[0][10][2].y = 1;
+
+                geometry.faceVertexUvs[0][11][0].x = 0;
+                geometry.faceVertexUvs[0][11][0].y = 0.666;
+                geometry.faceVertexUvs[0][11][1].x = 0.333;
+                geometry.faceVertexUvs[0][11][1].y = 0.666;
+                geometry.faceVertexUvs[0][11][2].x = 0.333;
+                geometry.faceVertexUvs[0][11][2].y = 1;
+            }
+
+
+
+
+
+
+            if (p.equals(new THREE.Vector3(-1, 1, 0))) {
+                //console.log("jest ");
+
+                // sciana prawa
+                geometry.faceVertexUvs[0][0][0].x = 0;
+                geometry.faceVertexUvs[0][0][0].y = 1;
+                geometry.faceVertexUvs[0][0][1].x = 0;
+                geometry.faceVertexUvs[0][0][1].y = 0.666;
+                geometry.faceVertexUvs[0][0][2].x = 0.333;
+                geometry.faceVertexUvs[0][0][2].y = 1;
+
+                geometry.faceVertexUvs[0][1][0].x = 0;
+                geometry.faceVertexUvs[0][1][0].y = 0.666;
+                geometry.faceVertexUvs[0][1][1].x = 0.333;
+                geometry.faceVertexUvs[0][1][1].y = 0.666;
+                geometry.faceVertexUvs[0][1][2].x = 0.333;
+                geometry.faceVertexUvs[0][1][2].y = 1;
+
+                // sciana lewa
+                //console.log(geometry.faces[2]);
+                geometry.faceVertexUvs[0][2][0].x = 0.333;
+                geometry.faceVertexUvs[0][2][0].y = 1;
+                geometry.faceVertexUvs[0][2][1].x = 0.333;
+                geometry.faceVertexUvs[0][2][1].y = 0.666;
+                geometry.faceVertexUvs[0][2][2].x = 0.666;
+                geometry.faceVertexUvs[0][2][2].y = 1;
+
+                geometry.faceVertexUvs[0][3][0].x = 0.333;
+                geometry.faceVertexUvs[0][3][0].y = 0.666;
+                geometry.faceVertexUvs[0][3][1].x = 0.666;
+                geometry.faceVertexUvs[0][3][1].y = 0.666;
+                geometry.faceVertexUvs[0][3][2].x = 0.666;
+                geometry.faceVertexUvs[0][3][2].y = 1;
+
+                // sciana gora
+                geometry.faceVertexUvs[0][4][0].x = 0;
+                geometry.faceVertexUvs[0][4][0].y = 0.666;
+                geometry.faceVertexUvs[0][4][1].x = 0;
+                geometry.faceVertexUvs[0][4][1].y = 0.333;
+                geometry.faceVertexUvs[0][4][2].x = 0.333;
+                geometry.faceVertexUvs[0][4][2].y = 0.666;
+
+                geometry.faceVertexUvs[0][5][0].x = 0;
+                geometry.faceVertexUvs[0][5][0].y = 0.333;
+                geometry.faceVertexUvs[0][5][1].x = 0.333;
+                geometry.faceVertexUvs[0][5][1].y = 0.333;
+                geometry.faceVertexUvs[0][5][2].x = 0.333;
+                geometry.faceVertexUvs[0][5][2].y = 0.666;
+
+                // sciana dolna
+                geometry.faceVertexUvs[0][6][0].x = 0;
+                geometry.faceVertexUvs[0][6][0].y = 1;
+                geometry.faceVertexUvs[0][6][1].x = 0;
+                geometry.faceVertexUvs[0][6][1].y = 0.666;
+                geometry.faceVertexUvs[0][6][2].x = 0.333;
+                geometry.faceVertexUvs[0][6][2].y = 1;
+
+                geometry.faceVertexUvs[0][7][0].x = 0;
+                geometry.faceVertexUvs[0][7][0].y = 0.666;
+                geometry.faceVertexUvs[0][7][1].x = 0.333;
+                geometry.faceVertexUvs[0][7][1].y = 0.666;
+                geometry.faceVertexUvs[0][7][2].x = 0.333;
+                geometry.faceVertexUvs[0][7][2].y = 1;
+
+                // sciana frontowa:
+                geometry.faceVertexUvs[0][8][0].x = 0;
+                geometry.faceVertexUvs[0][8][0].y = 1;
+                geometry.faceVertexUvs[0][8][1].x = 0;
+                geometry.faceVertexUvs[0][8][1].y = 0.666;
+                geometry.faceVertexUvs[0][8][2].x = 0.333;
+                geometry.faceVertexUvs[0][8][2].y = 1;
+
+                geometry.faceVertexUvs[0][9][0].x = 0;
+                geometry.faceVertexUvs[0][9][0].y = 0.666;
+                geometry.faceVertexUvs[0][9][1].x = 0.333;
+                geometry.faceVertexUvs[0][9][1].y = 0.666;
+                geometry.faceVertexUvs[0][9][2].x = 0.333;
+                geometry.faceVertexUvs[0][9][2].y = 1;
+
+                // sciana tylna
+                geometry.faceVertexUvs[0][10][0].x = 0;
+                geometry.faceVertexUvs[0][10][0].y = 1;
+                geometry.faceVertexUvs[0][10][1].x = 0;
+                geometry.faceVertexUvs[0][10][1].y = 0.666;
+                geometry.faceVertexUvs[0][10][2].x = 0.333;
+                geometry.faceVertexUvs[0][10][2].y = 1;
+
+                geometry.faceVertexUvs[0][11][0].x = 0;
+                geometry.faceVertexUvs[0][11][0].y = 0.666;
+                geometry.faceVertexUvs[0][11][1].x = 0.333;
+                geometry.faceVertexUvs[0][11][1].y = 0.666;
+                geometry.faceVertexUvs[0][11][2].x = 0.333;
+                geometry.faceVertexUvs[0][11][2].y = 1;
+            }
+
+            if (p.equals(new THREE.Vector3(0, 1, 0))) {
+                //console.log("jest ");
+
+                // sciana prawa
+                geometry.faceVertexUvs[0][0][0].x = 0;
+                geometry.faceVertexUvs[0][0][0].y = 1;
+                geometry.faceVertexUvs[0][0][1].x = 0;
+                geometry.faceVertexUvs[0][0][1].y = 0.666;
+                geometry.faceVertexUvs[0][0][2].x = 0.333;
+                geometry.faceVertexUvs[0][0][2].y = 1;
+
+                geometry.faceVertexUvs[0][1][0].x = 0;
+                geometry.faceVertexUvs[0][1][0].y = 0.666;
+                geometry.faceVertexUvs[0][1][1].x = 0.333;
+                geometry.faceVertexUvs[0][1][1].y = 0.666;
+                geometry.faceVertexUvs[0][1][2].x = 0.333;
+                geometry.faceVertexUvs[0][1][2].y = 1;
+
+                // sciana lewa
+                geometry.faceVertexUvs[0][2][0].x = 0.666;
+                geometry.faceVertexUvs[0][2][0].y = 1;
+                geometry.faceVertexUvs[0][2][1].x = 0.666;
+                geometry.faceVertexUvs[0][2][1].y = 0.666;
+                geometry.faceVertexUvs[0][2][2].x = 1;
+                geometry.faceVertexUvs[0][2][2].y = 1;
+
+                geometry.faceVertexUvs[0][3][0].x = 0.666;
+                geometry.faceVertexUvs[0][3][0].y = 0.666;
+                geometry.faceVertexUvs[0][3][1].x = 1;
+                geometry.faceVertexUvs[0][3][1].y = 0.666;
+                geometry.faceVertexUvs[0][3][2].x = 1;
+                geometry.faceVertexUvs[0][3][2].y = 1;
+
+                // sciana gora
+                geometry.faceVertexUvs[0][4][0].x = 0.333;
+                geometry.faceVertexUvs[0][4][0].y = 0.666;
+                geometry.faceVertexUvs[0][4][1].x = 0.333;
+                geometry.faceVertexUvs[0][4][1].y = 0.333;
+                geometry.faceVertexUvs[0][4][2].x = 0.666;
+                geometry.faceVertexUvs[0][4][2].y = 0.666;
+
+                geometry.faceVertexUvs[0][5][0].x = 0.333;
+                geometry.faceVertexUvs[0][5][0].y = 0.333;
+                geometry.faceVertexUvs[0][5][1].x = 0.666;
+                geometry.faceVertexUvs[0][5][1].y = 0.333;
+                geometry.faceVertexUvs[0][5][2].x = 0.666;
+                geometry.faceVertexUvs[0][5][2].y = 0.666;
+
+                // sciana dolna
+                geometry.faceVertexUvs[0][6][0].x = 0;
+                geometry.faceVertexUvs[0][6][0].y = 1;
+                geometry.faceVertexUvs[0][6][1].x = 0;
+                geometry.faceVertexUvs[0][6][1].y = 0.666;
+                geometry.faceVertexUvs[0][6][2].x = 0.333;
+                geometry.faceVertexUvs[0][6][2].y = 1;
+
+                geometry.faceVertexUvs[0][7][0].x = 0;
+                geometry.faceVertexUvs[0][7][0].y = 0.666;
+                geometry.faceVertexUvs[0][7][1].x = 0.333;
+                geometry.faceVertexUvs[0][7][1].y = 0.666;
+                geometry.faceVertexUvs[0][7][2].x = 0.333;
+                geometry.faceVertexUvs[0][7][2].y = 1;
+
+                // sciana frontowa:
+                geometry.faceVertexUvs[0][8][0].x = 0.333;
+                geometry.faceVertexUvs[0][8][0].y = 1;
+                geometry.faceVertexUvs[0][8][1].x = 0.333;
+                geometry.faceVertexUvs[0][8][1].y = 0.666;
+                geometry.faceVertexUvs[0][8][2].x = 0.666;
+                geometry.faceVertexUvs[0][8][2].y = 1;
+
+                geometry.faceVertexUvs[0][9][0].x = 0.333;
+                geometry.faceVertexUvs[0][9][0].y = 0.666;
+                geometry.faceVertexUvs[0][9][1].x = 0.666;
+                geometry.faceVertexUvs[0][9][1].y = 0.666;
+                geometry.faceVertexUvs[0][9][2].x = 0.666;
+                geometry.faceVertexUvs[0][9][2].y = 1;
+
+                // sciana tylna
+                geometry.faceVertexUvs[0][10][0].x = 0;
+                geometry.faceVertexUvs[0][10][0].y = 1;
+                geometry.faceVertexUvs[0][10][1].x = 0;
+                geometry.faceVertexUvs[0][10][1].y = 0.666;
+                geometry.faceVertexUvs[0][10][2].x = 0.333;
+                geometry.faceVertexUvs[0][10][2].y = 1;
+
+                geometry.faceVertexUvs[0][11][0].x = 0;
+                geometry.faceVertexUvs[0][11][0].y = 0.666;
+                geometry.faceVertexUvs[0][11][1].x = 0.333;
+                geometry.faceVertexUvs[0][11][1].y = 0.666;
+                geometry.faceVertexUvs[0][11][2].x = 0.333;
+                geometry.faceVertexUvs[0][11][2].y = 1;
+            }
+
+            if (p.equals(new THREE.Vector3(1, 1, 0))) {
+                //console.log("jest ");
+
+                // sciana prawa
+                geometry.faceVertexUvs[0][0][0].x = 0.333;
+                geometry.faceVertexUvs[0][0][0].y = 1;
+                geometry.faceVertexUvs[0][0][1].x = 0.333;
+                geometry.faceVertexUvs[0][0][1].y = 0.666;
+                geometry.faceVertexUvs[0][0][2].x = 0.666;
+                geometry.faceVertexUvs[0][0][2].y = 1;
+
+                geometry.faceVertexUvs[0][1][0].x = 0.333;
+                geometry.faceVertexUvs[0][1][0].y = 0.666;
+                geometry.faceVertexUvs[0][1][1].x = 0.666;
+                geometry.faceVertexUvs[0][1][1].y = 0.666;
+                geometry.faceVertexUvs[0][1][2].x = 0.666;
+                geometry.faceVertexUvs[0][1][2].y = 1;
+
+                // sciana lewa
+                geometry.faceVertexUvs[0][2][0].x = 0.666;
+                geometry.faceVertexUvs[0][2][0].y = 1;
+                geometry.faceVertexUvs[0][2][1].x = 0.666;
+                geometry.faceVertexUvs[0][2][1].y = 0.666;
+                geometry.faceVertexUvs[0][2][2].x = 1;
+                geometry.faceVertexUvs[0][2][2].y = 1;
+
+                geometry.faceVertexUvs[0][3][0].x = 0.666;
+                geometry.faceVertexUvs[0][3][0].y = 0.666;
+                geometry.faceVertexUvs[0][3][1].x = 1;
+                geometry.faceVertexUvs[0][3][1].y = 0.666;
+                geometry.faceVertexUvs[0][3][2].x = 1;
+                geometry.faceVertexUvs[0][3][2].y = 1;
+
+                // sciana gora
+                geometry.faceVertexUvs[0][4][0].x = 0.666;
+                geometry.faceVertexUvs[0][4][0].y = 0.666;
+                geometry.faceVertexUvs[0][4][1].x = 0.666;
+                geometry.faceVertexUvs[0][4][1].y = 0.333;
+                geometry.faceVertexUvs[0][4][2].x = 1;
+                geometry.faceVertexUvs[0][4][2].y = 0.666;
+
+                geometry.faceVertexUvs[0][5][0].x = 0.666;
+                geometry.faceVertexUvs[0][5][0].y = 0.333;
+                geometry.faceVertexUvs[0][5][1].x = 1;
+                geometry.faceVertexUvs[0][5][1].y = 0.333;
+                geometry.faceVertexUvs[0][5][2].x = 1;
+                geometry.faceVertexUvs[0][5][2].y = 0.666;
+
+                // sciana dolna
+                geometry.faceVertexUvs[0][6][0].x = 0;
+                geometry.faceVertexUvs[0][6][0].y = 1;
+                geometry.faceVertexUvs[0][6][1].x = 0;
+                geometry.faceVertexUvs[0][6][1].y = 0.666;
+                geometry.faceVertexUvs[0][6][2].x = 0.333;
+                geometry.faceVertexUvs[0][6][2].y = 1;
+
+                geometry.faceVertexUvs[0][7][0].x = 0;
+                geometry.faceVertexUvs[0][7][0].y = 0.666;
+                geometry.faceVertexUvs[0][7][1].x = 0.333;
+                geometry.faceVertexUvs[0][7][1].y = 0.666;
+                geometry.faceVertexUvs[0][7][2].x = 0.333;
+                geometry.faceVertexUvs[0][7][2].y = 1;
+
+                // sciana frontowa:
+                geometry.faceVertexUvs[0][8][0].x = 0.666;
+                geometry.faceVertexUvs[0][8][0].y = 1;
+                geometry.faceVertexUvs[0][8][1].x = 0.666;
+                geometry.faceVertexUvs[0][8][1].y = 0.666;
+                geometry.faceVertexUvs[0][8][2].x = 1;
+                geometry.faceVertexUvs[0][8][2].y = 1;
+
+                geometry.faceVertexUvs[0][9][0].x = 0.666;
+                geometry.faceVertexUvs[0][9][0].y = 0.666;
+                geometry.faceVertexUvs[0][9][1].x = 1;
+                geometry.faceVertexUvs[0][9][1].y = 0.666;
+                geometry.faceVertexUvs[0][9][2].x = 1;
+                geometry.faceVertexUvs[0][9][2].y = 1;
+
+                // sciana tylna
+                geometry.faceVertexUvs[0][10][0].x = 0;
+                geometry.faceVertexUvs[0][10][0].y = 1;
+                geometry.faceVertexUvs[0][10][1].x = 0;
+                geometry.faceVertexUvs[0][10][1].y = 0.666;
+                geometry.faceVertexUvs[0][10][2].x = 0.333;
+                geometry.faceVertexUvs[0][10][2].y = 1;
+
+                geometry.faceVertexUvs[0][11][0].x = 0;
+                geometry.faceVertexUvs[0][11][0].y = 0.666;
+                geometry.faceVertexUvs[0][11][1].x = 0.333;
+                geometry.faceVertexUvs[0][11][1].y = 0.666;
+                geometry.faceVertexUvs[0][11][2].x = 0.333;
+                geometry.faceVertexUvs[0][11][2].y = 1;
+            }
+
+
+            if (p.equals(new THREE.Vector3(-1, 0, 0))) {
+                //console.log("jest ");
+
+                // sciana prawa
+                geometry.faceVertexUvs[0][0][0].x = 0;
+                geometry.faceVertexUvs[0][0][0].y = 1;
+                geometry.faceVertexUvs[0][0][1].x = 0;
+                geometry.faceVertexUvs[0][0][1].y = 0.666;
+                geometry.faceVertexUvs[0][0][2].x = 0.333;
+                geometry.faceVertexUvs[0][0][2].y = 1;
+
+                geometry.faceVertexUvs[0][1][0].x = 0;
+                geometry.faceVertexUvs[0][1][0].y = 0.666;
+                geometry.faceVertexUvs[0][1][1].x = 0.333;
+                geometry.faceVertexUvs[0][1][1].y = 0.666;
+                geometry.faceVertexUvs[0][1][2].x = 0.333;
+                geometry.faceVertexUvs[0][1][2].y = 1;
+
+                // sciana lewa
+                //console.log(geometry.faces[2]);
+                geometry.faceVertexUvs[0][2][0].x = 0.333;
+                geometry.faceVertexUvs[0][2][0].y = 0.666;
+                geometry.faceVertexUvs[0][2][1].x = 0.333;
+                geometry.faceVertexUvs[0][2][1].y = 0.333;
+                geometry.faceVertexUvs[0][2][2].x = 0.666;
+                geometry.faceVertexUvs[0][2][2].y = 0.666;
+
+                geometry.faceVertexUvs[0][3][0].x = 0.333;
+                geometry.faceVertexUvs[0][3][0].y = 0.333;
+                geometry.faceVertexUvs[0][3][1].x = 0.666;
+                geometry.faceVertexUvs[0][3][1].y = 0.333;
+                geometry.faceVertexUvs[0][3][2].x = 0.666;
+                geometry.faceVertexUvs[0][3][2].y = 0.666;
+
+                // sciana gora
+                geometry.faceVertexUvs[0][4][0].x = 0;
+                geometry.faceVertexUvs[0][4][0].y = 0.333;
+                geometry.faceVertexUvs[0][4][1].x = 0;
+                geometry.faceVertexUvs[0][4][1].y = 0;
+                geometry.faceVertexUvs[0][4][2].x = 0.333;
+                geometry.faceVertexUvs[0][4][2].y = 0.333;
+
+                geometry.faceVertexUvs[0][5][0].x = 0;
+                geometry.faceVertexUvs[0][5][0].y = 0;
+                geometry.faceVertexUvs[0][5][1].x = 0.333;
+                geometry.faceVertexUvs[0][5][1].y = 0;
+                geometry.faceVertexUvs[0][5][2].x = 0.333;
+                geometry.faceVertexUvs[0][5][2].y = 0.333;
+
+                // sciana dolna
+                geometry.faceVertexUvs[0][6][0].x = 0;
+                geometry.faceVertexUvs[0][6][0].y = 1;
+                geometry.faceVertexUvs[0][6][1].x = 0;
+                geometry.faceVertexUvs[0][6][1].y = 0.666;
+                geometry.faceVertexUvs[0][6][2].x = 0.333;
+                geometry.faceVertexUvs[0][6][2].y = 1;
+
+                geometry.faceVertexUvs[0][7][0].x = 0;
+                geometry.faceVertexUvs[0][7][0].y = 0.666;
+                geometry.faceVertexUvs[0][7][1].x = 0.333;
+                geometry.faceVertexUvs[0][7][1].y = 0.666;
+                geometry.faceVertexUvs[0][7][2].x = 0.333;
+                geometry.faceVertexUvs[0][7][2].y = 1;
+
+                // sciana frontowa:
+                geometry.faceVertexUvs[0][8][0].x = 0;
+                geometry.faceVertexUvs[0][8][0].y = 0.666;
+                geometry.faceVertexUvs[0][8][1].x = 0;
+                geometry.faceVertexUvs[0][8][1].y = 0.333;
+                geometry.faceVertexUvs[0][8][2].x = 0.333;
+                geometry.faceVertexUvs[0][8][2].y = 0.666;
+
+                geometry.faceVertexUvs[0][9][0].x = 0;
+                geometry.faceVertexUvs[0][9][0].y = 0.333;
+                geometry.faceVertexUvs[0][9][1].x = 0.333;
+                geometry.faceVertexUvs[0][9][1].y = 0.333;
+                geometry.faceVertexUvs[0][9][2].x = 0.333;
+                geometry.faceVertexUvs[0][9][2].y = 0.666;
+
+                // sciana tylna
+                geometry.faceVertexUvs[0][10][0].x = 0;
+                geometry.faceVertexUvs[0][10][0].y = 1;
+                geometry.faceVertexUvs[0][10][1].x = 0;
+                geometry.faceVertexUvs[0][10][1].y = 0.666;
+                geometry.faceVertexUvs[0][10][2].x = 0.333;
+                geometry.faceVertexUvs[0][10][2].y = 1;
+
+                geometry.faceVertexUvs[0][11][0].x = 0;
+                geometry.faceVertexUvs[0][11][0].y = 0.666;
+                geometry.faceVertexUvs[0][11][1].x = 0.333;
+                geometry.faceVertexUvs[0][11][1].y = 0.666;
+                geometry.faceVertexUvs[0][11][2].x = 0.333;
+                geometry.faceVertexUvs[0][11][2].y = 1;
+            }
+
+            if (p.equals(new THREE.Vector3(0, 0, 0))) {
+                //console.log("jest ");
+
+                // sciana prawa
+                geometry.faceVertexUvs[0][0][0].x = 0;
+                geometry.faceVertexUvs[0][0][0].y = 1;
+                geometry.faceVertexUvs[0][0][1].x = 0;
+                geometry.faceVertexUvs[0][0][1].y = 0.666;
+                geometry.faceVertexUvs[0][0][2].x = 0.333;
+                geometry.faceVertexUvs[0][0][2].y = 1;
+
+                geometry.faceVertexUvs[0][1][0].x = 0;
+                geometry.faceVertexUvs[0][1][0].y = 0.666;
+                geometry.faceVertexUvs[0][1][1].x = 0.333;
+                geometry.faceVertexUvs[0][1][1].y = 0.666;
+                geometry.faceVertexUvs[0][1][2].x = 0.333;
+                geometry.faceVertexUvs[0][1][2].y = 1;
+
+                // sciana lewa
+                geometry.faceVertexUvs[0][2][0].x = 0.666;
+                geometry.faceVertexUvs[0][2][0].y = 1;
+                geometry.faceVertexUvs[0][2][1].x = 0.666;
+                geometry.faceVertexUvs[0][2][1].y = 0.666;
+                geometry.faceVertexUvs[0][2][2].x = 1;
+                geometry.faceVertexUvs[0][2][2].y = 1;
+
+                geometry.faceVertexUvs[0][3][0].x = 0.666;
+                geometry.faceVertexUvs[0][3][0].y = 0.666;
+                geometry.faceVertexUvs[0][3][1].x = 1;
+                geometry.faceVertexUvs[0][3][1].y = 0.666;
+                geometry.faceVertexUvs[0][3][2].x = 1;
+                geometry.faceVertexUvs[0][3][2].y = 1;
+
+                // sciana gora
+                geometry.faceVertexUvs[0][4][0].x = 0.333;
+                geometry.faceVertexUvs[0][4][0].y = 0.333;
+                geometry.faceVertexUvs[0][4][1].x = 0.333;
+                geometry.faceVertexUvs[0][4][1].y = 0;
+                geometry.faceVertexUvs[0][4][2].x = 0.666;
+                geometry.faceVertexUvs[0][4][2].y = 0.333;
+
+                geometry.faceVertexUvs[0][5][0].x = 0.333;
+                geometry.faceVertexUvs[0][5][0].y = 0;
+                geometry.faceVertexUvs[0][5][1].x = 0.666;
+                geometry.faceVertexUvs[0][5][1].y = 0.0;
+                geometry.faceVertexUvs[0][5][2].x = 0.666;
+                geometry.faceVertexUvs[0][5][2].y = 0.333;
+
+                // sciana dolna
+                geometry.faceVertexUvs[0][6][0].x = 0;
+                geometry.faceVertexUvs[0][6][0].y = 1;
+                geometry.faceVertexUvs[0][6][1].x = 0;
+                geometry.faceVertexUvs[0][6][1].y = 0.666;
+                geometry.faceVertexUvs[0][6][2].x = 0.333;
+                geometry.faceVertexUvs[0][6][2].y = 1;
+
+                geometry.faceVertexUvs[0][7][0].x = 0;
+                geometry.faceVertexUvs[0][7][0].y = 0.666;
+                geometry.faceVertexUvs[0][7][1].x = 0.333;
+                geometry.faceVertexUvs[0][7][1].y = 0.666;
+                geometry.faceVertexUvs[0][7][2].x = 0.333;
+                geometry.faceVertexUvs[0][7][2].y = 1;
+
+                // sciana frontowa:
+                geometry.faceVertexUvs[0][8][0].x = 0.333;
+                geometry.faceVertexUvs[0][8][0].y = 0.666;
+                geometry.faceVertexUvs[0][8][1].x = 0.333;
+                geometry.faceVertexUvs[0][8][1].y = 0.333;
+                geometry.faceVertexUvs[0][8][2].x = 0.666;
+                geometry.faceVertexUvs[0][8][2].y = 0.666;
+
+                geometry.faceVertexUvs[0][9][0].x = 0.333;
+                geometry.faceVertexUvs[0][9][0].y = 0.333;
+                geometry.faceVertexUvs[0][9][1].x = 0.666;
+                geometry.faceVertexUvs[0][9][1].y = 0.333;
+                geometry.faceVertexUvs[0][9][2].x = 0.666;
+                geometry.faceVertexUvs[0][9][2].y = 0.666;
+
+                // sciana tylna
+                geometry.faceVertexUvs[0][10][0].x = 0;
+                geometry.faceVertexUvs[0][10][0].y = 1;
+                geometry.faceVertexUvs[0][10][1].x = 0;
+                geometry.faceVertexUvs[0][10][1].y = 0.666;
+                geometry.faceVertexUvs[0][10][2].x = 0.333;
+                geometry.faceVertexUvs[0][10][2].y = 1;
+
+                geometry.faceVertexUvs[0][11][0].x = 0;
+                geometry.faceVertexUvs[0][11][0].y = 0.666;
+                geometry.faceVertexUvs[0][11][1].x = 0.333;
+                geometry.faceVertexUvs[0][11][1].y = 0.666;
+                geometry.faceVertexUvs[0][11][2].x = 0.333;
+                geometry.faceVertexUvs[0][11][2].y = 1;
+            }
+
+            if (p.equals(new THREE.Vector3(1, 0, 0))) {
+                //console.log("jest ");
+
+                // sciana prawa
+                geometry.faceVertexUvs[0][0][0].x = 0.333;
+                geometry.faceVertexUvs[0][0][0].y = 0.666;
+                geometry.faceVertexUvs[0][0][1].x = 0.333;
+                geometry.faceVertexUvs[0][0][1].y = 0.333;
+                geometry.faceVertexUvs[0][0][2].x = 0.666;
+                geometry.faceVertexUvs[0][0][2].y = 0.666;
+
+                geometry.faceVertexUvs[0][1][0].x = 0.333;
+                geometry.faceVertexUvs[0][1][0].y = 0.333;
+                geometry.faceVertexUvs[0][1][1].x = 0.666;
+                geometry.faceVertexUvs[0][1][1].y = 0.333;
+                geometry.faceVertexUvs[0][1][2].x = 0.666;
+                geometry.faceVertexUvs[0][1][2].y = 0.666;
+
+                // sciana lewa
+                geometry.faceVertexUvs[0][2][0].x = 0.666;
+                geometry.faceVertexUvs[0][2][0].y = 1;
+                geometry.faceVertexUvs[0][2][1].x = 0.666;
+                geometry.faceVertexUvs[0][2][1].y = 0.666;
+                geometry.faceVertexUvs[0][2][2].x = 1;
+                geometry.faceVertexUvs[0][2][2].y = 1;
+
+                geometry.faceVertexUvs[0][3][0].x = 0.666;
+                geometry.faceVertexUvs[0][3][0].y = 0.666;
+                geometry.faceVertexUvs[0][3][1].x = 1;
+                geometry.faceVertexUvs[0][3][1].y = 0.666;
+                geometry.faceVertexUvs[0][3][2].x = 1;
+                geometry.faceVertexUvs[0][3][2].y = 1;
+
+                // sciana gora
+                geometry.faceVertexUvs[0][4][0].x = 0.666;
+                geometry.faceVertexUvs[0][4][0].y = 0.333;
+                geometry.faceVertexUvs[0][4][1].x = 0.666;
+                geometry.faceVertexUvs[0][4][1].y = 0;
+                geometry.faceVertexUvs[0][4][2].x = 1;
+                geometry.faceVertexUvs[0][4][2].y = 0.333;
+
+                geometry.faceVertexUvs[0][5][0].x = 0.666;
+                geometry.faceVertexUvs[0][5][0].y = 0;
+                geometry.faceVertexUvs[0][5][1].x = 1;
+                geometry.faceVertexUvs[0][5][1].y = 0.0;
+                geometry.faceVertexUvs[0][5][2].x = 1;
+                geometry.faceVertexUvs[0][5][2].y = 0.333;
+
+                // sciana dolna
+                geometry.faceVertexUvs[0][6][0].x = 0;
+                geometry.faceVertexUvs[0][6][0].y = 1;
+                geometry.faceVertexUvs[0][6][1].x = 0;
+                geometry.faceVertexUvs[0][6][1].y = 0.666;
+                geometry.faceVertexUvs[0][6][2].x = 0.333;
+                geometry.faceVertexUvs[0][6][2].y = 1;
+
+                geometry.faceVertexUvs[0][7][0].x = 0;
+                geometry.faceVertexUvs[0][7][0].y = 0.666;
+                geometry.faceVertexUvs[0][7][1].x = 0.333;
+                geometry.faceVertexUvs[0][7][1].y = 0.666;
+                geometry.faceVertexUvs[0][7][2].x = 0.333;
+                geometry.faceVertexUvs[0][7][2].y = 1;
+
+                // sciana frontowa:
+                geometry.faceVertexUvs[0][8][0].x = 0.666;
+                geometry.faceVertexUvs[0][8][0].y = 0.666;
+                geometry.faceVertexUvs[0][8][1].x = 0.666;
+                geometry.faceVertexUvs[0][8][1].y = 0.333;
+                geometry.faceVertexUvs[0][8][2].x = 1;
+                geometry.faceVertexUvs[0][8][2].y = 0.666;
+
+                geometry.faceVertexUvs[0][9][0].x = 0.666;
+                geometry.faceVertexUvs[0][9][0].y = 0.333;
+                geometry.faceVertexUvs[0][9][1].x = 1;
+                geometry.faceVertexUvs[0][9][1].y = 0.333;
+                geometry.faceVertexUvs[0][9][2].x = 1;
+                geometry.faceVertexUvs[0][9][2].y = 0.666;
+
+                // sciana tylna
+                geometry.faceVertexUvs[0][10][0].x = 0;
+                geometry.faceVertexUvs[0][10][0].y = 1;
+                geometry.faceVertexUvs[0][10][1].x = 0;
+                geometry.faceVertexUvs[0][10][1].y = 0.666;
+                geometry.faceVertexUvs[0][10][2].x = 0.333;
+                geometry.faceVertexUvs[0][10][2].y = 1;
+
+                geometry.faceVertexUvs[0][11][0].x = 0;
+                geometry.faceVertexUvs[0][11][0].y = 0.666;
+                geometry.faceVertexUvs[0][11][1].x = 0.333;
+                geometry.faceVertexUvs[0][11][1].y = 0.666;
+                geometry.faceVertexUvs[0][11][2].x = 0.333;
+                geometry.faceVertexUvs[0][11][2].y = 1;
+            }
+
+
+            if (p.equals(new THREE.Vector3(-1, -1, 0))) {
+                //console.log("jest ");
+
+                // sciana prawa
+                geometry.faceVertexUvs[0][0][0].x = 0;
+                geometry.faceVertexUvs[0][0][0].y = 1;
+                geometry.faceVertexUvs[0][0][1].x = 0;
+                geometry.faceVertexUvs[0][0][1].y = 0.666;
+                geometry.faceVertexUvs[0][0][2].x = 0.333;
+                geometry.faceVertexUvs[0][0][2].y = 1;
+
+                geometry.faceVertexUvs[0][1][0].x = 0;
+                geometry.faceVertexUvs[0][1][0].y = 0.666;
+                geometry.faceVertexUvs[0][1][1].x = 0.333;
+                geometry.faceVertexUvs[0][1][1].y = 0.666;
+                geometry.faceVertexUvs[0][1][2].x = 0.333;
+                geometry.faceVertexUvs[0][1][2].y = 1;
+
+                // sciana lewa
+                //console.log(geometry.faces[2]);
+                geometry.faceVertexUvs[0][2][0].x = 0.333;
+                geometry.faceVertexUvs[0][2][0].y = 0.333;
+                geometry.faceVertexUvs[0][2][1].x = 0.333;
+                geometry.faceVertexUvs[0][2][1].y = 0;
+                geometry.faceVertexUvs[0][2][2].x = 0.666;
+                geometry.faceVertexUvs[0][2][2].y = 0.333;
+
+                geometry.faceVertexUvs[0][3][0].x = 0.333;
+                geometry.faceVertexUvs[0][3][0].y = 0;
+                geometry.faceVertexUvs[0][3][1].x = 0.666;
+                geometry.faceVertexUvs[0][3][1].y = 0;
+                geometry.faceVertexUvs[0][3][2].x = 0.666;
+                geometry.faceVertexUvs[0][3][2].y = 0.333;
+
+                // sciana gora
+                geometry.faceVertexUvs[0][4][0].x = 0;
+                geometry.faceVertexUvs[0][4][0].y = 0.333;
+                geometry.faceVertexUvs[0][4][1].x = 0;
+                geometry.faceVertexUvs[0][4][1].y = 0;
+                geometry.faceVertexUvs[0][4][2].x = 0.333;
+                geometry.faceVertexUvs[0][4][2].y = 0.333;
+
+                geometry.faceVertexUvs[0][5][0].x = 0;
+                geometry.faceVertexUvs[0][5][0].y = 0;
+                geometry.faceVertexUvs[0][5][1].x = 0.333;
+                geometry.faceVertexUvs[0][5][1].y = 0;
+                geometry.faceVertexUvs[0][5][2].x = 0.333;
+                geometry.faceVertexUvs[0][5][2].y = 0.333;
+
+                // sciana dolna
+                geometry.faceVertexUvs[0][6][0].x = 0;
+                geometry.faceVertexUvs[0][6][0].y = 0.666;
+                geometry.faceVertexUvs[0][6][1].x = 0;
+                geometry.faceVertexUvs[0][6][1].y = 0.333;
+                geometry.faceVertexUvs[0][6][2].x = 0.333;
+                geometry.faceVertexUvs[0][6][2].y = 0.666;
+
+                geometry.faceVertexUvs[0][7][0].x = 0;
+                geometry.faceVertexUvs[0][7][0].y = 0.333;
+                geometry.faceVertexUvs[0][7][1].x = 0.333;
+                geometry.faceVertexUvs[0][7][1].y = 0.333;
+                geometry.faceVertexUvs[0][7][2].x = 0.333;
+                geometry.faceVertexUvs[0][7][2].y = 0.666;
+
+                // sciana frontowa:
+                geometry.faceVertexUvs[0][8][0].x = 0;
+                geometry.faceVertexUvs[0][8][0].y = 0.333;
+                geometry.faceVertexUvs[0][8][1].x = 0;
+                geometry.faceVertexUvs[0][8][1].y = 0;
+                geometry.faceVertexUvs[0][8][2].x = 0.333;
+                geometry.faceVertexUvs[0][8][2].y = 0.333;
+
+                geometry.faceVertexUvs[0][9][0].x = 0;
+                geometry.faceVertexUvs[0][9][0].y = 0;
+                geometry.faceVertexUvs[0][9][1].x = 0.333;
+                geometry.faceVertexUvs[0][9][1].y = 0;
+                geometry.faceVertexUvs[0][9][2].x = 0.333;
+                geometry.faceVertexUvs[0][9][2].y = 0.333;
+
+                // sciana tylna
+                geometry.faceVertexUvs[0][10][0].x = 0;
+                geometry.faceVertexUvs[0][10][0].y = 1;
+                geometry.faceVertexUvs[0][10][1].x = 0;
+                geometry.faceVertexUvs[0][10][1].y = 0.666;
+                geometry.faceVertexUvs[0][10][2].x = 0.333;
+                geometry.faceVertexUvs[0][10][2].y = 1;
+
+                geometry.faceVertexUvs[0][11][0].x = 0;
+                geometry.faceVertexUvs[0][11][0].y = 0.666;
+                geometry.faceVertexUvs[0][11][1].x = 0.333;
+                geometry.faceVertexUvs[0][11][1].y = 0.666;
+                geometry.faceVertexUvs[0][11][2].x = 0.333;
+                geometry.faceVertexUvs[0][11][2].y = 1;
+            }
+
+            if (p.equals(new THREE.Vector3(0, -1, 0))) {
+                //console.log("jest ");
+
+                // sciana prawa
+                geometry.faceVertexUvs[0][0][0].x = 0;
+                geometry.faceVertexUvs[0][0][0].y = 1;
+                geometry.faceVertexUvs[0][0][1].x = 0;
+                geometry.faceVertexUvs[0][0][1].y = 0.666;
+                geometry.faceVertexUvs[0][0][2].x = 0.333;
+                geometry.faceVertexUvs[0][0][2].y = 1;
+
+                geometry.faceVertexUvs[0][1][0].x = 0;
+                geometry.faceVertexUvs[0][1][0].y = 0.666;
+                geometry.faceVertexUvs[0][1][1].x = 0.333;
+                geometry.faceVertexUvs[0][1][1].y = 0.666;
+                geometry.faceVertexUvs[0][1][2].x = 0.333;
+                geometry.faceVertexUvs[0][1][2].y = 1;
+
+                // sciana lewa
+                geometry.faceVertexUvs[0][2][0].x = 0.666;
+                geometry.faceVertexUvs[0][2][0].y = 1;
+                geometry.faceVertexUvs[0][2][1].x = 0.666;
+                geometry.faceVertexUvs[0][2][1].y = 0.666;
+                geometry.faceVertexUvs[0][2][2].x = 1;
+                geometry.faceVertexUvs[0][2][2].y = 1;
+
+                geometry.faceVertexUvs[0][3][0].x = 0.666;
+                geometry.faceVertexUvs[0][3][0].y = 0.666;
+                geometry.faceVertexUvs[0][3][1].x = 1;
+                geometry.faceVertexUvs[0][3][1].y = 0.666;
+                geometry.faceVertexUvs[0][3][2].x = 1;
+                geometry.faceVertexUvs[0][3][2].y = 1;
+
+                // sciana gora
+                geometry.faceVertexUvs[0][4][0].x = 0.333;
+                geometry.faceVertexUvs[0][4][0].y = 0.333;
+                geometry.faceVertexUvs[0][4][1].x = 0.333;
+                geometry.faceVertexUvs[0][4][1].y = 0;
+                geometry.faceVertexUvs[0][4][2].x = 0.666;
+                geometry.faceVertexUvs[0][4][2].y = 0.333;
+
+                geometry.faceVertexUvs[0][5][0].x = 0.333;
+                geometry.faceVertexUvs[0][5][0].y = 0;
+                geometry.faceVertexUvs[0][5][1].x = 0.666;
+                geometry.faceVertexUvs[0][5][1].y = 0.0;
+                geometry.faceVertexUvs[0][5][2].x = 0.666;
+                geometry.faceVertexUvs[0][5][2].y = 0.333;
+
+                // sciana dolna
+                geometry.faceVertexUvs[0][6][0].x = 0.333;
+                geometry.faceVertexUvs[0][6][0].y = 0.666;
+                geometry.faceVertexUvs[0][6][1].x = 0.333;
+                geometry.faceVertexUvs[0][6][1].y = 0.333;
+                geometry.faceVertexUvs[0][6][2].x = 0.666;
+                geometry.faceVertexUvs[0][6][2].y = 0.666;
+
+                geometry.faceVertexUvs[0][7][0].x = 0.333;
+                geometry.faceVertexUvs[0][7][0].y = 0.333;
+                geometry.faceVertexUvs[0][7][1].x = 0.666;
+                geometry.faceVertexUvs[0][7][1].y = 0.333;
+                geometry.faceVertexUvs[0][7][2].x = 0.666;
+                geometry.faceVertexUvs[0][7][2].y = 0.666;
+
+                // sciana frontowa:
+                geometry.faceVertexUvs[0][8][0].x = 0.333;
+                geometry.faceVertexUvs[0][8][0].y = 0.333;
+                geometry.faceVertexUvs[0][8][1].x = 0.333;
+                geometry.faceVertexUvs[0][8][1].y = 0;
+                geometry.faceVertexUvs[0][8][2].x = 0.666;
+                geometry.faceVertexUvs[0][8][2].y = 0.333;
+
+                geometry.faceVertexUvs[0][9][0].x = 0.333;
+                geometry.faceVertexUvs[0][9][0].y = 0;
+                geometry.faceVertexUvs[0][9][1].x = 0.666;
+                geometry.faceVertexUvs[0][9][1].y = 0;
+                geometry.faceVertexUvs[0][9][2].x = 0.666;
+                geometry.faceVertexUvs[0][9][2].y = 0.333;
+
+                // sciana tylna
+                geometry.faceVertexUvs[0][10][0].x = 0;
+                geometry.faceVertexUvs[0][10][0].y = 1;
+                geometry.faceVertexUvs[0][10][1].x = 0;
+                geometry.faceVertexUvs[0][10][1].y = 0.666;
+                geometry.faceVertexUvs[0][10][2].x = 0.333;
+                geometry.faceVertexUvs[0][10][2].y = 1;
+
+                geometry.faceVertexUvs[0][11][0].x = 0;
+                geometry.faceVertexUvs[0][11][0].y = 0.666;
+                geometry.faceVertexUvs[0][11][1].x = 0.333;
+                geometry.faceVertexUvs[0][11][1].y = 0.666;
+                geometry.faceVertexUvs[0][11][2].x = 0.333;
+                geometry.faceVertexUvs[0][11][2].y = 1;
+            }
+
+            if (p.equals(new THREE.Vector3(1, -1, 0))) {
+                //console.log("jest ");
+
+                // sciana prawa
+                geometry.faceVertexUvs[0][0][0].x = 0.333;
+                geometry.faceVertexUvs[0][0][0].y = 0.333;
+                geometry.faceVertexUvs[0][0][1].x = 0.333;
+                geometry.faceVertexUvs[0][0][1].y = 0;
+                geometry.faceVertexUvs[0][0][2].x = 0.666;
+                geometry.faceVertexUvs[0][0][2].y = 0.333;
+
+                geometry.faceVertexUvs[0][1][0].x = 0.333;
+                geometry.faceVertexUvs[0][1][0].y = 0;
+                geometry.faceVertexUvs[0][1][1].x = 0.666;
+                geometry.faceVertexUvs[0][1][1].y = 0;
+                geometry.faceVertexUvs[0][1][2].x = 0.666;
+                geometry.faceVertexUvs[0][1][2].y = 0.333;
+
+                // sciana lewa
+                geometry.faceVertexUvs[0][2][0].x = 0.666;
+                geometry.faceVertexUvs[0][2][0].y = 1;
+                geometry.faceVertexUvs[0][2][1].x = 0.666;
+                geometry.faceVertexUvs[0][2][1].y = 0.666;
+                geometry.faceVertexUvs[0][2][2].x = 1;
+                geometry.faceVertexUvs[0][2][2].y = 1;
+
+                geometry.faceVertexUvs[0][3][0].x = 0.666;
+                geometry.faceVertexUvs[0][3][0].y = 0.666;
+                geometry.faceVertexUvs[0][3][1].x = 1;
+                geometry.faceVertexUvs[0][3][1].y = 0.666;
+                geometry.faceVertexUvs[0][3][2].x = 1;
+                geometry.faceVertexUvs[0][3][2].y = 1;
+
+                // sciana gora
+                geometry.faceVertexUvs[0][4][0].x = 0.666;
+                geometry.faceVertexUvs[0][4][0].y = 0.333;
+                geometry.faceVertexUvs[0][4][1].x = 0.666;
+                geometry.faceVertexUvs[0][4][1].y = 0;
+                geometry.faceVertexUvs[0][4][2].x = 1;
+                geometry.faceVertexUvs[0][4][2].y = 0.333;
+
+                geometry.faceVertexUvs[0][5][0].x = 0.666;
+                geometry.faceVertexUvs[0][5][0].y = 0;
+                geometry.faceVertexUvs[0][5][1].x = 1;
+                geometry.faceVertexUvs[0][5][1].y = 0.0;
+                geometry.faceVertexUvs[0][5][2].x = 1;
+                geometry.faceVertexUvs[0][5][2].y = 0.333;
+
+                // sciana dolna
+                geometry.faceVertexUvs[0][6][0].x = 0.666;
+                geometry.faceVertexUvs[0][6][0].y = 0.666;
+                geometry.faceVertexUvs[0][6][1].x = 0.666;
+                geometry.faceVertexUvs[0][6][1].y = 0.333;
+                geometry.faceVertexUvs[0][6][2].x = 1;
+                geometry.faceVertexUvs[0][6][2].y = 0.666;
+
+                geometry.faceVertexUvs[0][7][0].x = 0.666;
+                geometry.faceVertexUvs[0][7][0].y = 0.333;
+                geometry.faceVertexUvs[0][7][1].x = 1;
+                geometry.faceVertexUvs[0][7][1].y = 0.333;
+                geometry.faceVertexUvs[0][7][2].x = 1;
+                geometry.faceVertexUvs[0][7][2].y = 0.666;
+
+                // sciana frontowa:
+                geometry.faceVertexUvs[0][8][0].x = 0.666;
+                geometry.faceVertexUvs[0][8][0].y = 0.333;
+                geometry.faceVertexUvs[0][8][1].x = 0.666;
+                geometry.faceVertexUvs[0][8][1].y = 0;
+                geometry.faceVertexUvs[0][8][2].x = 1;
+                geometry.faceVertexUvs[0][8][2].y = 0.333;
+
+                geometry.faceVertexUvs[0][9][0].x = 0.666;
+                geometry.faceVertexUvs[0][9][0].y = 0;
+                geometry.faceVertexUvs[0][9][1].x = 1;
+                geometry.faceVertexUvs[0][9][1].y = 0;
+                geometry.faceVertexUvs[0][9][2].x = 1;
+                geometry.faceVertexUvs[0][9][2].y = 0.333;
+
+                // sciana tylna
+                geometry.faceVertexUvs[0][10][0].x = 0;
+                geometry.faceVertexUvs[0][10][0].y = 1;
+                geometry.faceVertexUvs[0][10][1].x = 0;
+                geometry.faceVertexUvs[0][10][1].y = 0.666;
+                geometry.faceVertexUvs[0][10][2].x = 0.333;
+                geometry.faceVertexUvs[0][10][2].y = 1;
+
+                geometry.faceVertexUvs[0][11][0].x = 0;
+                geometry.faceVertexUvs[0][11][0].y = 0.666;
+                geometry.faceVertexUvs[0][11][1].x = 0.333;
+                geometry.faceVertexUvs[0][11][1].y = 0.666;
+                geometry.faceVertexUvs[0][11][2].x = 0.333;
+                geometry.faceVertexUvs[0][11][2].y = 1;
+            }
+
+
+
+
+
+
+
+            if (p.equals(new THREE.Vector3(-1, 1, -1))) {
+                //console.log("jest ");
+
+                // sciana prawa
+                geometry.faceVertexUvs[0][0][0].x = 0;
+                geometry.faceVertexUvs[0][0][0].y = 1;
+                geometry.faceVertexUvs[0][0][1].x = 0;
+                geometry.faceVertexUvs[0][0][1].y = 0.666;
+                geometry.faceVertexUvs[0][0][2].x = 0.333;
+                geometry.faceVertexUvs[0][0][2].y = 1;
+
+                geometry.faceVertexUvs[0][1][0].x = 0;
+                geometry.faceVertexUvs[0][1][0].y = 0.666;
+                geometry.faceVertexUvs[0][1][1].x = 0.333;
+                geometry.faceVertexUvs[0][1][1].y = 0.666;
+                geometry.faceVertexUvs[0][1][2].x = 0.333;
+                geometry.faceVertexUvs[0][1][2].y = 1;
+
+                // sciana lewa
+                //console.log(geometry.faces[2]);
+                geometry.faceVertexUvs[0][2][0].x = 0;
+                geometry.faceVertexUvs[0][2][0].y = 1;
+                geometry.faceVertexUvs[0][2][1].x = 0;
+                geometry.faceVertexUvs[0][2][1].y = 0.666;
+                geometry.faceVertexUvs[0][2][2].x = 0.333;
+                geometry.faceVertexUvs[0][2][2].y = 1;
+
+                geometry.faceVertexUvs[0][3][0].x = 0;
+                geometry.faceVertexUvs[0][3][0].y = 0.666;
+                geometry.faceVertexUvs[0][3][1].x = 0.333;
+                geometry.faceVertexUvs[0][3][1].y = 0.666;
+                geometry.faceVertexUvs[0][3][2].x = 0.333;
+                geometry.faceVertexUvs[0][3][2].y = 1;
+
+                // sciana gora
+                geometry.faceVertexUvs[0][4][0].x = 0;
+                geometry.faceVertexUvs[0][4][0].y = 1;
+                geometry.faceVertexUvs[0][4][1].x = 0;
+                geometry.faceVertexUvs[0][4][1].y = 0.666;
+                geometry.faceVertexUvs[0][4][2].x = 0.333;
+                geometry.faceVertexUvs[0][4][2].y = 1;
+
+                geometry.faceVertexUvs[0][5][0].x = 0;
+                geometry.faceVertexUvs[0][5][0].y = 0.666;
+                geometry.faceVertexUvs[0][5][1].x = 0.333;
+                geometry.faceVertexUvs[0][5][1].y = 0.666;
+                geometry.faceVertexUvs[0][5][2].x = 0.333;
+                geometry.faceVertexUvs[0][5][2].y = 1;
+
+                // sciana dolna
+                geometry.faceVertexUvs[0][6][0].x = 0;
+                geometry.faceVertexUvs[0][6][0].y = 1;
+                geometry.faceVertexUvs[0][6][1].x = 0;
+                geometry.faceVertexUvs[0][6][1].y = 0.666;
+                geometry.faceVertexUvs[0][6][2].x = 0.333;
+                geometry.faceVertexUvs[0][6][2].y = 1;
+
+                geometry.faceVertexUvs[0][7][0].x = 0;
+                geometry.faceVertexUvs[0][7][0].y = 0.666;
+                geometry.faceVertexUvs[0][7][1].x = 0.333;
+                geometry.faceVertexUvs[0][7][1].y = 0.666;
+                geometry.faceVertexUvs[0][7][2].x = 0.333;
+                geometry.faceVertexUvs[0][7][2].y = 1;
+
+                // sciana frontowa:
+                geometry.faceVertexUvs[0][8][0].x = 0;
+                geometry.faceVertexUvs[0][8][0].y = 1;
+                geometry.faceVertexUvs[0][8][1].x = 0;
+                geometry.faceVertexUvs[0][8][1].y = 0.666;
+                geometry.faceVertexUvs[0][8][2].x = 0.333;
+                geometry.faceVertexUvs[0][8][2].y = 1;
+
+                geometry.faceVertexUvs[0][9][0].x = 0;
+                geometry.faceVertexUvs[0][9][0].y = 0.666;
+                geometry.faceVertexUvs[0][9][1].x = 0.333;
+                geometry.faceVertexUvs[0][9][1].y = 0.666;
+                geometry.faceVertexUvs[0][9][2].x = 0.333;
+                geometry.faceVertexUvs[0][9][2].y = 1;
+
+                // sciana tylna
+                geometry.faceVertexUvs[0][10][0].x = 0.666;
+                geometry.faceVertexUvs[0][10][0].y = 1;
+                geometry.faceVertexUvs[0][10][1].x = 0.666;
+                geometry.faceVertexUvs[0][10][1].y = 0.666;
+                geometry.faceVertexUvs[0][10][2].x = 1;
+                geometry.faceVertexUvs[0][10][2].y = 1;
+
+                geometry.faceVertexUvs[0][11][0].x = 0.666;
+                geometry.faceVertexUvs[0][11][0].y = 0.666;
+                geometry.faceVertexUvs[0][11][1].x = 1;
+                geometry.faceVertexUvs[0][11][1].y = 0.666;
+                geometry.faceVertexUvs[0][11][2].x = 1;
+                geometry.faceVertexUvs[0][11][2].y = 1;
+            }
+
+            if (p.equals(new THREE.Vector3(0, 1, -1))) {
+                //console.log("jest ");
+
+                // sciana prawa
+                geometry.faceVertexUvs[0][0][0].x = 0;
+                geometry.faceVertexUvs[0][0][0].y = 1;
+                geometry.faceVertexUvs[0][0][1].x = 0;
+                geometry.faceVertexUvs[0][0][1].y = 0.666;
+                geometry.faceVertexUvs[0][0][2].x = 0.333;
+                geometry.faceVertexUvs[0][0][2].y = 1;
+
+                geometry.faceVertexUvs[0][1][0].x = 0;
+                geometry.faceVertexUvs[0][1][0].y = 0.666;
+                geometry.faceVertexUvs[0][1][1].x = 0.333;
+                geometry.faceVertexUvs[0][1][1].y = 0.666;
+                geometry.faceVertexUvs[0][1][2].x = 0.333;
+                geometry.faceVertexUvs[0][1][2].y = 1;
+
+                // sciana lewa
+                geometry.faceVertexUvs[0][2][0].x = 0.666;
+                geometry.faceVertexUvs[0][2][0].y = 1;
+                geometry.faceVertexUvs[0][2][1].x = 0.666;
+                geometry.faceVertexUvs[0][2][1].y = 0.666;
+                geometry.faceVertexUvs[0][2][2].x = 1;
+                geometry.faceVertexUvs[0][2][2].y = 1;
+
+                geometry.faceVertexUvs[0][3][0].x = 0.666;
+                geometry.faceVertexUvs[0][3][0].y = 0.666;
+                geometry.faceVertexUvs[0][3][1].x = 1;
+                geometry.faceVertexUvs[0][3][1].y = 0.666;
+                geometry.faceVertexUvs[0][3][2].x = 1;
+                geometry.faceVertexUvs[0][3][2].y = 1;
+
+                // sciana gora
+                geometry.faceVertexUvs[0][4][0].x = 0.333;
+                geometry.faceVertexUvs[0][4][0].y = 1;
+                geometry.faceVertexUvs[0][4][1].x = 0.333;
+                geometry.faceVertexUvs[0][4][1].y = 0.666;
+                geometry.faceVertexUvs[0][4][2].x = 0.666;
+                geometry.faceVertexUvs[0][4][2].y = 1;
+
+                geometry.faceVertexUvs[0][5][0].x = 0.333;
+                geometry.faceVertexUvs[0][5][0].y = 0.666;
+                geometry.faceVertexUvs[0][5][1].x = 0.666;
+                geometry.faceVertexUvs[0][5][1].y = 0.666;
+                geometry.faceVertexUvs[0][5][2].x = 0.666;
+                geometry.faceVertexUvs[0][5][2].y = 1;
+
+                // sciana dolna
+                geometry.faceVertexUvs[0][6][0].x = 0;
+                geometry.faceVertexUvs[0][6][0].y = 1;
+                geometry.faceVertexUvs[0][6][1].x = 0;
+                geometry.faceVertexUvs[0][6][1].y = 0.666;
+                geometry.faceVertexUvs[0][6][2].x = 0.333;
+                geometry.faceVertexUvs[0][6][2].y = 1;
+
+                geometry.faceVertexUvs[0][7][0].x = 0;
+                geometry.faceVertexUvs[0][7][0].y = 0.666;
+                geometry.faceVertexUvs[0][7][1].x = 0.333;
+                geometry.faceVertexUvs[0][7][1].y = 0.666;
+                geometry.faceVertexUvs[0][7][2].x = 0.333;
+                geometry.faceVertexUvs[0][7][2].y = 1;
+
+                // sciana frontowa:
+                geometry.faceVertexUvs[0][8][0].x = 0.333;
+                geometry.faceVertexUvs[0][8][0].y = 1;
+                geometry.faceVertexUvs[0][8][1].x = 0.333;
+                geometry.faceVertexUvs[0][8][1].y = 0.666;
+                geometry.faceVertexUvs[0][8][2].x = 0.666;
+                geometry.faceVertexUvs[0][8][2].y = 1;
+
+                geometry.faceVertexUvs[0][9][0].x = 0.333;
+                geometry.faceVertexUvs[0][9][0].y = 0.666;
+                geometry.faceVertexUvs[0][9][1].x = 0.666;
+                geometry.faceVertexUvs[0][9][1].y = 0.666;
+                geometry.faceVertexUvs[0][9][2].x = 0.666;
+                geometry.faceVertexUvs[0][9][2].y = 1;
+
+                // sciana tylna
+                geometry.faceVertexUvs[0][10][0].x = 0.333;
+                geometry.faceVertexUvs[0][10][0].y = 1;
+                geometry.faceVertexUvs[0][10][1].x = 0.333;
+                geometry.faceVertexUvs[0][10][1].y = 0.666;
+                geometry.faceVertexUvs[0][10][2].x = 0.666;
+                geometry.faceVertexUvs[0][10][2].y = 1;
+
+                geometry.faceVertexUvs[0][11][0].x = 0.333;
+                geometry.faceVertexUvs[0][11][0].y = 0.666;
+                geometry.faceVertexUvs[0][11][1].x = 0.666;
+                geometry.faceVertexUvs[0][11][1].y = 0.666;
+                geometry.faceVertexUvs[0][11][2].x = 0.666;
+                geometry.faceVertexUvs[0][11][2].y = 1;
+            }
+
+            if (p.equals(new THREE.Vector3(1, 1, -1))) {
+                //console.log("jest ");
+
+                // sciana prawa
+                geometry.faceVertexUvs[0][0][0].x = 0.666;
+                geometry.faceVertexUvs[0][0][0].y = 1;
+                geometry.faceVertexUvs[0][0][1].x = 0.666;
+                geometry.faceVertexUvs[0][0][1].y = 0.666;
+                geometry.faceVertexUvs[0][0][2].x = 1;
+                geometry.faceVertexUvs[0][0][2].y = 1;
+
+                geometry.faceVertexUvs[0][1][0].x = 0.666;
+                geometry.faceVertexUvs[0][1][0].y = 0.666;
+                geometry.faceVertexUvs[0][1][1].x = 1;
+                geometry.faceVertexUvs[0][1][1].y = 0.666;
+                geometry.faceVertexUvs[0][1][2].x = 1;
+                geometry.faceVertexUvs[0][1][2].y = 1;
+
+                // sciana lewa
+                geometry.faceVertexUvs[0][2][0].x = 0.666;
+                geometry.faceVertexUvs[0][2][0].y = 1;
+                geometry.faceVertexUvs[0][2][1].x = 0.666;
+                geometry.faceVertexUvs[0][2][1].y = 0.666;
+                geometry.faceVertexUvs[0][2][2].x = 1;
+                geometry.faceVertexUvs[0][2][2].y = 1;
+
+                geometry.faceVertexUvs[0][3][0].x = 0.666;
+                geometry.faceVertexUvs[0][3][0].y = 0.666;
+                geometry.faceVertexUvs[0][3][1].x = 1;
+                geometry.faceVertexUvs[0][3][1].y = 0.666;
+                geometry.faceVertexUvs[0][3][2].x = 1;
+                geometry.faceVertexUvs[0][3][2].y = 1;
+
+                // sciana gora
+                geometry.faceVertexUvs[0][4][0].x = 0.666;
+                geometry.faceVertexUvs[0][4][0].y = 1;
+                geometry.faceVertexUvs[0][4][1].x = 0.666;
+                geometry.faceVertexUvs[0][4][1].y = 0.666;
+                geometry.faceVertexUvs[0][4][2].x = 1;
+                geometry.faceVertexUvs[0][4][2].y = 1;
+
+                geometry.faceVertexUvs[0][5][0].x = 0.666;
+                geometry.faceVertexUvs[0][5][0].y = 0.666;
+                geometry.faceVertexUvs[0][5][1].x = 1;
+                geometry.faceVertexUvs[0][5][1].y = 0.666;
+                geometry.faceVertexUvs[0][5][2].x = 1;
+                geometry.faceVertexUvs[0][5][2].y = 1;
+
+                // sciana dolna
+                geometry.faceVertexUvs[0][6][0].x = 0;
+                geometry.faceVertexUvs[0][6][0].y = 1;
+                geometry.faceVertexUvs[0][6][1].x = 0;
+                geometry.faceVertexUvs[0][6][1].y = 0.666;
+                geometry.faceVertexUvs[0][6][2].x = 0.333;
+                geometry.faceVertexUvs[0][6][2].y = 1;
+
+                geometry.faceVertexUvs[0][7][0].x = 0;
+                geometry.faceVertexUvs[0][7][0].y = 0.666;
+                geometry.faceVertexUvs[0][7][1].x = 0.333;
+                geometry.faceVertexUvs[0][7][1].y = 0.666;
+                geometry.faceVertexUvs[0][7][2].x = 0.333;
+                geometry.faceVertexUvs[0][7][2].y = 1;
+
+                // sciana frontowa:
+                geometry.faceVertexUvs[0][8][0].x = 0.666;
+                geometry.faceVertexUvs[0][8][0].y = 1;
+                geometry.faceVertexUvs[0][8][1].x = 0.666;
+                geometry.faceVertexUvs[0][8][1].y = 0.666;
+                geometry.faceVertexUvs[0][8][2].x = 1;
+                geometry.faceVertexUvs[0][8][2].y = 1;
+
+                geometry.faceVertexUvs[0][9][0].x = 0.666;
+                geometry.faceVertexUvs[0][9][0].y = 0.666;
+                geometry.faceVertexUvs[0][9][1].x = 1;
+                geometry.faceVertexUvs[0][9][1].y = 0.666;
+                geometry.faceVertexUvs[0][9][2].x = 1;
+                geometry.faceVertexUvs[0][9][2].y = 1;
+
+                // sciana tylna
+                geometry.faceVertexUvs[0][10][0].x = 0;
+                geometry.faceVertexUvs[0][10][0].y = 1;
+                geometry.faceVertexUvs[0][10][1].x = 0;
+                geometry.faceVertexUvs[0][10][1].y = 0.666;
+                geometry.faceVertexUvs[0][10][2].x = 0.333;
+                geometry.faceVertexUvs[0][10][2].y = 1;
+
+                geometry.faceVertexUvs[0][11][0].x = 0;
+                geometry.faceVertexUvs[0][11][0].y = 0.666;
+                geometry.faceVertexUvs[0][11][1].x = 0.333;
+                geometry.faceVertexUvs[0][11][1].y = 0.666;
+                geometry.faceVertexUvs[0][11][2].x = 0.333;
+                geometry.faceVertexUvs[0][11][2].y = 1;
+            }
+
+
+            if (p.equals(new THREE.Vector3(-1, 0, -1))) {
+                //console.log("jest ");
+
+                // sciana prawa
+                geometry.faceVertexUvs[0][0][0].x = 0;
+                geometry.faceVertexUvs[0][0][0].y = 1;
+                geometry.faceVertexUvs[0][0][1].x = 0;
+                geometry.faceVertexUvs[0][0][1].y = 0.666;
+                geometry.faceVertexUvs[0][0][2].x = 0.333;
+                geometry.faceVertexUvs[0][0][2].y = 1;
+
+                geometry.faceVertexUvs[0][1][0].x = 0;
+                geometry.faceVertexUvs[0][1][0].y = 0.666;
+                geometry.faceVertexUvs[0][1][1].x = 0.333;
+                geometry.faceVertexUvs[0][1][1].y = 0.666;
+                geometry.faceVertexUvs[0][1][2].x = 0.333;
+                geometry.faceVertexUvs[0][1][2].y = 1;
+
+                // sciana lewa
+                //console.log(geometry.faces[2]);
+                geometry.faceVertexUvs[0][2][0].x = 0;
+                geometry.faceVertexUvs[0][2][0].y = 0.666;
+                geometry.faceVertexUvs[0][2][1].x = 0;
+                geometry.faceVertexUvs[0][2][1].y = 0.333;
+                geometry.faceVertexUvs[0][2][2].x = 0.333;
+                geometry.faceVertexUvs[0][2][2].y = 0.666;
+
+                geometry.faceVertexUvs[0][3][0].x = 0;
+                geometry.faceVertexUvs[0][3][0].y = 0.333;
+                geometry.faceVertexUvs[0][3][1].x = 0.333;
+                geometry.faceVertexUvs[0][3][1].y = 0.333;
+                geometry.faceVertexUvs[0][3][2].x = 0.333;
+                geometry.faceVertexUvs[0][3][2].y = 0.666;
+
+                // sciana gora
+                geometry.faceVertexUvs[0][4][0].x = 0;
+                geometry.faceVertexUvs[0][4][0].y = 0.333;
+                geometry.faceVertexUvs[0][4][1].x = 0;
+                geometry.faceVertexUvs[0][4][1].y = 0;
+                geometry.faceVertexUvs[0][4][2].x = 0.333;
+                geometry.faceVertexUvs[0][4][2].y = 0.333;
+
+                geometry.faceVertexUvs[0][5][0].x = 0;
+                geometry.faceVertexUvs[0][5][0].y = 0;
+                geometry.faceVertexUvs[0][5][1].x = 0.333;
+                geometry.faceVertexUvs[0][5][1].y = 0;
+                geometry.faceVertexUvs[0][5][2].x = 0.333;
+                geometry.faceVertexUvs[0][5][2].y = 0.333;
+
+                // sciana dolna
+                geometry.faceVertexUvs[0][6][0].x = 0;
+                geometry.faceVertexUvs[0][6][0].y = 1;
+                geometry.faceVertexUvs[0][6][1].x = 0;
+                geometry.faceVertexUvs[0][6][1].y = 0.666;
+                geometry.faceVertexUvs[0][6][2].x = 0.333;
+                geometry.faceVertexUvs[0][6][2].y = 1;
+
+                geometry.faceVertexUvs[0][7][0].x = 0;
+                geometry.faceVertexUvs[0][7][0].y = 0.666;
+                geometry.faceVertexUvs[0][7][1].x = 0.333;
+                geometry.faceVertexUvs[0][7][1].y = 0.666;
+                geometry.faceVertexUvs[0][7][2].x = 0.333;
+                geometry.faceVertexUvs[0][7][2].y = 1;
+
+                // sciana frontowa:
+                geometry.faceVertexUvs[0][8][0].x = 0;
+                geometry.faceVertexUvs[0][8][0].y = 0.666;
+                geometry.faceVertexUvs[0][8][1].x = 0;
+                geometry.faceVertexUvs[0][8][1].y = 0.333;
+                geometry.faceVertexUvs[0][8][2].x = 0.333;
+                geometry.faceVertexUvs[0][8][2].y = 0.666;
+
+                geometry.faceVertexUvs[0][9][0].x = 0;
+                geometry.faceVertexUvs[0][9][0].y = 0.333;
+                geometry.faceVertexUvs[0][9][1].x = 0.333;
+                geometry.faceVertexUvs[0][9][1].y = 0.333;
+                geometry.faceVertexUvs[0][9][2].x = 0.333;
+                geometry.faceVertexUvs[0][9][2].y = 0.666;
+
+                // sciana tylna
+                geometry.faceVertexUvs[0][10][0].x = 0.666;
+                geometry.faceVertexUvs[0][10][0].y = 0.666;
+                geometry.faceVertexUvs[0][10][1].x = 0.666;
+                geometry.faceVertexUvs[0][10][1].y = 0.333;
+                geometry.faceVertexUvs[0][10][2].x = 1;
+                geometry.faceVertexUvs[0][10][2].y = 0.666;
+
+                geometry.faceVertexUvs[0][11][0].x = 0.666;
+                geometry.faceVertexUvs[0][11][0].y = 0.3333;
+                geometry.faceVertexUvs[0][11][1].x = 1;
+                geometry.faceVertexUvs[0][11][1].y = 0.333;
+                geometry.faceVertexUvs[0][11][2].x = 1;
+                geometry.faceVertexUvs[0][11][2].y = 0.666;
+            }
+
+            if (p.equals(new THREE.Vector3(0, 0, -1))) {
+                //console.log("jest ");
+
+                // sciana prawa
+                geometry.faceVertexUvs[0][0][0].x = 0;
+                geometry.faceVertexUvs[0][0][0].y = 1;
+                geometry.faceVertexUvs[0][0][1].x = 0;
+                geometry.faceVertexUvs[0][0][1].y = 0.666;
+                geometry.faceVertexUvs[0][0][2].x = 0.333;
+                geometry.faceVertexUvs[0][0][2].y = 1;
+
+                geometry.faceVertexUvs[0][1][0].x = 0;
+                geometry.faceVertexUvs[0][1][0].y = 0.666;
+                geometry.faceVertexUvs[0][1][1].x = 0.333;
+                geometry.faceVertexUvs[0][1][1].y = 0.666;
+                geometry.faceVertexUvs[0][1][2].x = 0.333;
+                geometry.faceVertexUvs[0][1][2].y = 1;
+
+                // sciana lewa
+                geometry.faceVertexUvs[0][2][0].x = 0.666;
+                geometry.faceVertexUvs[0][2][0].y = 1;
+                geometry.faceVertexUvs[0][2][1].x = 0.666;
+                geometry.faceVertexUvs[0][2][1].y = 0.666;
+                geometry.faceVertexUvs[0][2][2].x = 1;
+                geometry.faceVertexUvs[0][2][2].y = 1;
+
+                geometry.faceVertexUvs[0][3][0].x = 0.666;
+                geometry.faceVertexUvs[0][3][0].y = 0.666;
+                geometry.faceVertexUvs[0][3][1].x = 1;
+                geometry.faceVertexUvs[0][3][1].y = 0.666;
+                geometry.faceVertexUvs[0][3][2].x = 1;
+                geometry.faceVertexUvs[0][3][2].y = 1;
+
+                // sciana gora
+                geometry.faceVertexUvs[0][4][0].x = 0.333;
+                geometry.faceVertexUvs[0][4][0].y = 0.333;
+                geometry.faceVertexUvs[0][4][1].x = 0.333;
+                geometry.faceVertexUvs[0][4][1].y = 0;
+                geometry.faceVertexUvs[0][4][2].x = 0.666;
+                geometry.faceVertexUvs[0][4][2].y = 0.333;
+
+                geometry.faceVertexUvs[0][5][0].x = 0.333;
+                geometry.faceVertexUvs[0][5][0].y = 0;
+                geometry.faceVertexUvs[0][5][1].x = 0.666;
+                geometry.faceVertexUvs[0][5][1].y = 0.0;
+                geometry.faceVertexUvs[0][5][2].x = 0.666;
+                geometry.faceVertexUvs[0][5][2].y = 0.333;
+
+                // sciana dolna
+                geometry.faceVertexUvs[0][6][0].x = 0;
+                geometry.faceVertexUvs[0][6][0].y = 1;
+                geometry.faceVertexUvs[0][6][1].x = 0;
+                geometry.faceVertexUvs[0][6][1].y = 0.666;
+                geometry.faceVertexUvs[0][6][2].x = 0.333;
+                geometry.faceVertexUvs[0][6][2].y = 1;
+
+                geometry.faceVertexUvs[0][7][0].x = 0;
+                geometry.faceVertexUvs[0][7][0].y = 0.666;
+                geometry.faceVertexUvs[0][7][1].x = 0.333;
+                geometry.faceVertexUvs[0][7][1].y = 0.666;
+                geometry.faceVertexUvs[0][7][2].x = 0.333;
+                geometry.faceVertexUvs[0][7][2].y = 1;
+
+                // sciana frontowa:
+                geometry.faceVertexUvs[0][8][0].x = 0.333;
+                geometry.faceVertexUvs[0][8][0].y = 0.666;
+                geometry.faceVertexUvs[0][8][1].x = 0.333;
+                geometry.faceVertexUvs[0][8][1].y = 0.333;
+                geometry.faceVertexUvs[0][8][2].x = 0.666;
+                geometry.faceVertexUvs[0][8][2].y = 0.666;
+
+                geometry.faceVertexUvs[0][9][0].x = 0.333;
+                geometry.faceVertexUvs[0][9][0].y = 0.333;
+                geometry.faceVertexUvs[0][9][1].x = 0.666;
+                geometry.faceVertexUvs[0][9][1].y = 0.333;
+                geometry.faceVertexUvs[0][9][2].x = 0.666;
+                geometry.faceVertexUvs[0][9][2].y = 0.666;
+
+                // sciana tylna
+                geometry.faceVertexUvs[0][10][0].x = 0.333;
+                geometry.faceVertexUvs[0][10][0].y = 0.666;
+                geometry.faceVertexUvs[0][10][1].x = 0.333;
+                geometry.faceVertexUvs[0][10][1].y = 0.333;
+                geometry.faceVertexUvs[0][10][2].x = 0.666;
+                geometry.faceVertexUvs[0][10][2].y = 0.666;
+
+                geometry.faceVertexUvs[0][11][0].x = 0.333;
+                geometry.faceVertexUvs[0][11][0].y = 0.333;
+                geometry.faceVertexUvs[0][11][1].x = 0.666;
+                geometry.faceVertexUvs[0][11][1].y = 0.333;
+                geometry.faceVertexUvs[0][11][2].x = 0.666;
+                geometry.faceVertexUvs[0][11][2].y = 0.666;
+            }
+
+            if (p.equals(new THREE.Vector3(1, 0, -1))) {
+                //console.log("jest ");
+
+                // sciana prawa
+                geometry.faceVertexUvs[0][0][0].x = 0.666;
+                geometry.faceVertexUvs[0][0][0].y = 0.666;
+                geometry.faceVertexUvs[0][0][1].x = 0.666;
+                geometry.faceVertexUvs[0][0][1].y = 0.333;
+                geometry.faceVertexUvs[0][0][2].x = 1;
+                geometry.faceVertexUvs[0][0][2].y = 0.666;
+
+                geometry.faceVertexUvs[0][1][0].x = 0.666;
+                geometry.faceVertexUvs[0][1][0].y = 0.333;
+                geometry.faceVertexUvs[0][1][1].x = 1;
+                geometry.faceVertexUvs[0][1][1].y = 0.333;
+                geometry.faceVertexUvs[0][1][2].x = 1;
+                geometry.faceVertexUvs[0][1][2].y = 0.666;
+
+                // sciana lewa
+                geometry.faceVertexUvs[0][2][0].x = 0.666;
+                geometry.faceVertexUvs[0][2][0].y = 1;
+                geometry.faceVertexUvs[0][2][1].x = 0.666;
+                geometry.faceVertexUvs[0][2][1].y = 0.666;
+                geometry.faceVertexUvs[0][2][2].x = 1;
+                geometry.faceVertexUvs[0][2][2].y = 1;
+
+                geometry.faceVertexUvs[0][3][0].x = 0.666;
+                geometry.faceVertexUvs[0][3][0].y = 0.666;
+                geometry.faceVertexUvs[0][3][1].x = 1;
+                geometry.faceVertexUvs[0][3][1].y = 0.666;
+                geometry.faceVertexUvs[0][3][2].x = 1;
+                geometry.faceVertexUvs[0][3][2].y = 1;
+
+                // sciana gora
+                geometry.faceVertexUvs[0][4][0].x = 0.666;
+                geometry.faceVertexUvs[0][4][0].y = 0.333;
+                geometry.faceVertexUvs[0][4][1].x = 0.666;
+                geometry.faceVertexUvs[0][4][1].y = 0;
+                geometry.faceVertexUvs[0][4][2].x = 1;
+                geometry.faceVertexUvs[0][4][2].y = 0.333;
+
+                geometry.faceVertexUvs[0][5][0].x = 0.666;
+                geometry.faceVertexUvs[0][5][0].y = 0;
+                geometry.faceVertexUvs[0][5][1].x = 1;
+                geometry.faceVertexUvs[0][5][1].y = 0.0;
+                geometry.faceVertexUvs[0][5][2].x = 1;
+                geometry.faceVertexUvs[0][5][2].y = 0.333;
+
+                // sciana dolna
+                geometry.faceVertexUvs[0][6][0].x = 0;
+                geometry.faceVertexUvs[0][6][0].y = 1;
+                geometry.faceVertexUvs[0][6][1].x = 0;
+                geometry.faceVertexUvs[0][6][1].y = 0.666;
+                geometry.faceVertexUvs[0][6][2].x = 0.333;
+                geometry.faceVertexUvs[0][6][2].y = 1;
+
+                geometry.faceVertexUvs[0][7][0].x = 0;
+                geometry.faceVertexUvs[0][7][0].y = 0.666;
+                geometry.faceVertexUvs[0][7][1].x = 0.333;
+                geometry.faceVertexUvs[0][7][1].y = 0.666;
+                geometry.faceVertexUvs[0][7][2].x = 0.333;
+                geometry.faceVertexUvs[0][7][2].y = 1;
+
+                // sciana frontowa:
+                geometry.faceVertexUvs[0][8][0].x = 0.666;
+                geometry.faceVertexUvs[0][8][0].y = 0.666;
+                geometry.faceVertexUvs[0][8][1].x = 0.666;
+                geometry.faceVertexUvs[0][8][1].y = 0.333;
+                geometry.faceVertexUvs[0][8][2].x = 1;
+                geometry.faceVertexUvs[0][8][2].y = 0.666;
+
+                geometry.faceVertexUvs[0][9][0].x = 0.666;
+                geometry.faceVertexUvs[0][9][0].y = 0.333;
+                geometry.faceVertexUvs[0][9][1].x = 1;
+                geometry.faceVertexUvs[0][9][1].y = 0.333;
+                geometry.faceVertexUvs[0][9][2].x = 1;
+                geometry.faceVertexUvs[0][9][2].y = 0.666;
+
+                // sciana tylna
+                geometry.faceVertexUvs[0][10][0].x = 0;
+                geometry.faceVertexUvs[0][10][0].y = 0.666;
+                geometry.faceVertexUvs[0][10][1].x = 0;
+                geometry.faceVertexUvs[0][10][1].y = 0.333;
+                geometry.faceVertexUvs[0][10][2].x = 0.333;
+                geometry.faceVertexUvs[0][10][2].y = 0.666;
+
+                geometry.faceVertexUvs[0][11][0].x = 0;
+                geometry.faceVertexUvs[0][11][0].y = 0.333;
+                geometry.faceVertexUvs[0][11][1].x = 0.333;
+                geometry.faceVertexUvs[0][11][1].y = 0.333;
+                geometry.faceVertexUvs[0][11][2].x = 0.333;
+                geometry.faceVertexUvs[0][11][2].y = 0.666;
+            }
+
+
+            if (p.equals(new THREE.Vector3(-1, -1, -1))) {
+                //console.log("jest ");
+
+                // sciana prawa
+                geometry.faceVertexUvs[0][0][0].x = 0;
+                geometry.faceVertexUvs[0][0][0].y = 1;
+                geometry.faceVertexUvs[0][0][1].x = 0;
+                geometry.faceVertexUvs[0][0][1].y = 0.666;
+                geometry.faceVertexUvs[0][0][2].x = 0.333;
+                geometry.faceVertexUvs[0][0][2].y = 1;
+
+                geometry.faceVertexUvs[0][1][0].x = 0;
+                geometry.faceVertexUvs[0][1][0].y = 0.666;
+                geometry.faceVertexUvs[0][1][1].x = 0.333;
+                geometry.faceVertexUvs[0][1][1].y = 0.666;
+                geometry.faceVertexUvs[0][1][2].x = 0.333;
+                geometry.faceVertexUvs[0][1][2].y = 1;
+
+                // sciana lewa
+                //console.log(geometry.faces[2]);
+                geometry.faceVertexUvs[0][2][0].x = 0;
+                geometry.faceVertexUvs[0][2][0].y = 0.333;
+                geometry.faceVertexUvs[0][2][1].x = 0;
+                geometry.faceVertexUvs[0][2][1].y = 0;
+                geometry.faceVertexUvs[0][2][2].x = 0.333;
+                geometry.faceVertexUvs[0][2][2].y = 0.333;
+
+                geometry.faceVertexUvs[0][3][0].x = 0;
+                geometry.faceVertexUvs[0][3][0].y = 0;
+                geometry.faceVertexUvs[0][3][1].x = 0.333;
+                geometry.faceVertexUvs[0][3][1].y = 0;
+                geometry.faceVertexUvs[0][3][2].x = 0.333;
+                geometry.faceVertexUvs[0][3][2].y = 0.333;
+
+                // sciana gora
+                geometry.faceVertexUvs[0][4][0].x = 0;
+                geometry.faceVertexUvs[0][4][0].y = 0.333;
+                geometry.faceVertexUvs[0][4][1].x = 0;
+                geometry.faceVertexUvs[0][4][1].y = 0;
+                geometry.faceVertexUvs[0][4][2].x = 0.333;
+                geometry.faceVertexUvs[0][4][2].y = 0.333;
+
+                geometry.faceVertexUvs[0][5][0].x = 0;
+                geometry.faceVertexUvs[0][5][0].y = 0;
+                geometry.faceVertexUvs[0][5][1].x = 0.333;
+                geometry.faceVertexUvs[0][5][1].y = 0;
+                geometry.faceVertexUvs[0][5][2].x = 0.333;
+                geometry.faceVertexUvs[0][5][2].y = 0.333;
+
+                // sciana dolna
+                geometry.faceVertexUvs[0][6][0].x = 0;
+                geometry.faceVertexUvs[0][6][0].y = 0.333;
+                geometry.faceVertexUvs[0][6][1].x = 0;
+                geometry.faceVertexUvs[0][6][1].y = 0;
+                geometry.faceVertexUvs[0][6][2].x = 0.333;
+                geometry.faceVertexUvs[0][6][2].y = 0.333;
+
+                geometry.faceVertexUvs[0][7][0].x = 0;
+                geometry.faceVertexUvs[0][7][0].y = 0;
+                geometry.faceVertexUvs[0][7][1].x = 0.333;
+                geometry.faceVertexUvs[0][7][1].y = 0;
+                geometry.faceVertexUvs[0][7][2].x = 0.333;
+                geometry.faceVertexUvs[0][7][2].y = 0.333;
+
+                // sciana frontowa:
+                geometry.faceVertexUvs[0][8][0].x = 0;
+                geometry.faceVertexUvs[0][8][0].y = 0.333;
+                geometry.faceVertexUvs[0][8][1].x = 0;
+                geometry.faceVertexUvs[0][8][1].y = 0;
+                geometry.faceVertexUvs[0][8][2].x = 0.333;
+                geometry.faceVertexUvs[0][8][2].y = 0.333;
+
+                geometry.faceVertexUvs[0][9][0].x = 0;
+                geometry.faceVertexUvs[0][9][0].y = 0;
+                geometry.faceVertexUvs[0][9][1].x = 0.333;
+                geometry.faceVertexUvs[0][9][1].y = 0;
+                geometry.faceVertexUvs[0][9][2].x = 0.333;
+                geometry.faceVertexUvs[0][9][2].y = 0.333;
+
+                // sciana tylna
+                geometry.faceVertexUvs[0][10][0].x = 0.666;
+                geometry.faceVertexUvs[0][10][0].y = 0.333;
+                geometry.faceVertexUvs[0][10][1].x = 0.666;
+                geometry.faceVertexUvs[0][10][1].y = 0;
+                geometry.faceVertexUvs[0][10][2].x = 1;
+                geometry.faceVertexUvs[0][10][2].y = 0.333;
+
+                geometry.faceVertexUvs[0][11][0].x = 0.666;
+                geometry.faceVertexUvs[0][11][0].y = 0;
+                geometry.faceVertexUvs[0][11][1].x = 1;
+                geometry.faceVertexUvs[0][11][1].y = 0;
+                geometry.faceVertexUvs[0][11][2].x = 1;
+                geometry.faceVertexUvs[0][11][2].y = 0.333;
+            }
+
+            if (p.equals(new THREE.Vector3(0, -1, -1))) {
+                //console.log("jest ");
+
+                // sciana prawa
+                geometry.faceVertexUvs[0][0][0].x = 0;
+                geometry.faceVertexUvs[0][0][0].y = 1;
+                geometry.faceVertexUvs[0][0][1].x = 0;
+                geometry.faceVertexUvs[0][0][1].y = 0.666;
+                geometry.faceVertexUvs[0][0][2].x = 0.333;
+                geometry.faceVertexUvs[0][0][2].y = 1;
+
+                geometry.faceVertexUvs[0][1][0].x = 0;
+                geometry.faceVertexUvs[0][1][0].y = 0.666;
+                geometry.faceVertexUvs[0][1][1].x = 0.333;
+                geometry.faceVertexUvs[0][1][1].y = 0.666;
+                geometry.faceVertexUvs[0][1][2].x = 0.333;
+                geometry.faceVertexUvs[0][1][2].y = 1;
+
+                // sciana lewa
+                geometry.faceVertexUvs[0][2][0].x = 0.666;
+                geometry.faceVertexUvs[0][2][0].y = 1;
+                geometry.faceVertexUvs[0][2][1].x = 0.666;
+                geometry.faceVertexUvs[0][2][1].y = 0.666;
+                geometry.faceVertexUvs[0][2][2].x = 1;
+                geometry.faceVertexUvs[0][2][2].y = 1;
+
+                geometry.faceVertexUvs[0][3][0].x = 0.666;
+                geometry.faceVertexUvs[0][3][0].y = 0.666;
+                geometry.faceVertexUvs[0][3][1].x = 1;
+                geometry.faceVertexUvs[0][3][1].y = 0.666;
+                geometry.faceVertexUvs[0][3][2].x = 1;
+                geometry.faceVertexUvs[0][3][2].y = 1;
+
+                // sciana gora
+                geometry.faceVertexUvs[0][4][0].x = 0.333;
+                geometry.faceVertexUvs[0][4][0].y = 0.333;
+                geometry.faceVertexUvs[0][4][1].x = 0.333;
+                geometry.faceVertexUvs[0][4][1].y = 0;
+                geometry.faceVertexUvs[0][4][2].x = 0.666;
+                geometry.faceVertexUvs[0][4][2].y = 0.333;
+
+                geometry.faceVertexUvs[0][5][0].x = 0.333;
+                geometry.faceVertexUvs[0][5][0].y = 0;
+                geometry.faceVertexUvs[0][5][1].x = 0.666;
+                geometry.faceVertexUvs[0][5][1].y = 0.0;
+                geometry.faceVertexUvs[0][5][2].x = 0.666;
+                geometry.faceVertexUvs[0][5][2].y = 0.333;
+
+                // sciana dolna
+                geometry.faceVertexUvs[0][6][0].x = 0.333;
+                geometry.faceVertexUvs[0][6][0].y = 0.333;
+                geometry.faceVertexUvs[0][6][1].x = 0.333;
+                geometry.faceVertexUvs[0][6][1].y = 0;
+                geometry.faceVertexUvs[0][6][2].x = 0.666;
+                geometry.faceVertexUvs[0][6][2].y = 0.333;
+
+                geometry.faceVertexUvs[0][7][0].x = 0.333;
+                geometry.faceVertexUvs[0][7][0].y = 0;
+                geometry.faceVertexUvs[0][7][1].x = 0.666;
+                geometry.faceVertexUvs[0][7][1].y = 0;
+                geometry.faceVertexUvs[0][7][2].x = 0.666;
+                geometry.faceVertexUvs[0][7][2].y = 0.333;
+
+                // sciana frontowa:
+                geometry.faceVertexUvs[0][8][0].x = 0.333;
+                geometry.faceVertexUvs[0][8][0].y = 0.333;
+                geometry.faceVertexUvs[0][8][1].x = 0.333;
+                geometry.faceVertexUvs[0][8][1].y = 0;
+                geometry.faceVertexUvs[0][8][2].x = 0.666;
+                geometry.faceVertexUvs[0][8][2].y = 0.333;
+
+                geometry.faceVertexUvs[0][9][0].x = 0.333;
+                geometry.faceVertexUvs[0][9][0].y = 0;
+                geometry.faceVertexUvs[0][9][1].x = 0.666;
+                geometry.faceVertexUvs[0][9][1].y = 0;
+                geometry.faceVertexUvs[0][9][2].x = 0.666;
+                geometry.faceVertexUvs[0][9][2].y = 0.333;
+
+                // sciana tylna
+                geometry.faceVertexUvs[0][10][0].x = 0.333;
+                geometry.faceVertexUvs[0][10][0].y = 0.333;
+                geometry.faceVertexUvs[0][10][1].x = 0.333;
+                geometry.faceVertexUvs[0][10][1].y = 0;
+                geometry.faceVertexUvs[0][10][2].x = 0.666;
+                geometry.faceVertexUvs[0][10][2].y = 0.333;
+
+                geometry.faceVertexUvs[0][11][0].x = 0.333;
+                geometry.faceVertexUvs[0][11][0].y = 0;
+                geometry.faceVertexUvs[0][11][1].x = 0.666;
+                geometry.faceVertexUvs[0][11][1].y = 0;
+                geometry.faceVertexUvs[0][11][2].x = 0.666;
+                geometry.faceVertexUvs[0][11][2].y = 0.333;
+            }
+
+            if (p.equals(new THREE.Vector3(1, -1, -1))) {
+                //console.log("jest ");
+
+                // sciana prawa
+                geometry.faceVertexUvs[0][0][0].x = 0.666;
+                geometry.faceVertexUvs[0][0][0].y = 0.333;
+                geometry.faceVertexUvs[0][0][1].x = 0.666;
+                geometry.faceVertexUvs[0][0][1].y = 0;
+                geometry.faceVertexUvs[0][0][2].x = 1;
+                geometry.faceVertexUvs[0][0][2].y = 0.333;
+
+                geometry.faceVertexUvs[0][1][0].x = 0.666;
+                geometry.faceVertexUvs[0][1][0].y = 0;
+                geometry.faceVertexUvs[0][1][1].x = 1;
+                geometry.faceVertexUvs[0][1][1].y = 0;
+                geometry.faceVertexUvs[0][1][2].x = 1;
+                geometry.faceVertexUvs[0][1][2].y = 0.333;
+
+                // sciana lewa
+                geometry.faceVertexUvs[0][2][0].x = 0.666;
+                geometry.faceVertexUvs[0][2][0].y = 1;
+                geometry.faceVertexUvs[0][2][1].x = 0.666;
+                geometry.faceVertexUvs[0][2][1].y = 0.666;
+                geometry.faceVertexUvs[0][2][2].x = 1;
+                geometry.faceVertexUvs[0][2][2].y = 1;
+
+                geometry.faceVertexUvs[0][3][0].x = 0.666;
+                geometry.faceVertexUvs[0][3][0].y = 0.666;
+                geometry.faceVertexUvs[0][3][1].x = 1;
+                geometry.faceVertexUvs[0][3][1].y = 0.666;
+                geometry.faceVertexUvs[0][3][2].x = 1;
+                geometry.faceVertexUvs[0][3][2].y = 1;
+
+                // sciana gora
+                geometry.faceVertexUvs[0][4][0].x = 0.666;
+                geometry.faceVertexUvs[0][4][0].y = 0.333;
+                geometry.faceVertexUvs[0][4][1].x = 0.666;
+                geometry.faceVertexUvs[0][4][1].y = 0;
+                geometry.faceVertexUvs[0][4][2].x = 1;
+                geometry.faceVertexUvs[0][4][2].y = 0.333;
+
+                geometry.faceVertexUvs[0][5][0].x = 0.666;
+                geometry.faceVertexUvs[0][5][0].y = 0;
+                geometry.faceVertexUvs[0][5][1].x = 1;
+                geometry.faceVertexUvs[0][5][1].y = 0.0;
+                geometry.faceVertexUvs[0][5][2].x = 1;
+                geometry.faceVertexUvs[0][5][2].y = 0.333;
+
+                // sciana dolna
+                geometry.faceVertexUvs[0][6][0].x = 0.666;
+                geometry.faceVertexUvs[0][6][0].y = 0.333;
+                geometry.faceVertexUvs[0][6][1].x = 0.666;
+                geometry.faceVertexUvs[0][6][1].y = 0;
+                geometry.faceVertexUvs[0][6][2].x = 1;
+                geometry.faceVertexUvs[0][6][2].y = 0.333;
+
+                geometry.faceVertexUvs[0][7][0].x = 0.666;
+                geometry.faceVertexUvs[0][7][0].y = 0;
+                geometry.faceVertexUvs[0][7][1].x = 1;
+                geometry.faceVertexUvs[0][7][1].y = 0;
+                geometry.faceVertexUvs[0][7][2].x = 1;
+                geometry.faceVertexUvs[0][7][2].y = 0.333;
+
+                // sciana frontowa:
+                geometry.faceVertexUvs[0][8][0].x = 0.666;
+                geometry.faceVertexUvs[0][8][0].y = 0.333;
+                geometry.faceVertexUvs[0][8][1].x = 0.666;
+                geometry.faceVertexUvs[0][8][1].y = 0;
+                geometry.faceVertexUvs[0][8][2].x = 1;
+                geometry.faceVertexUvs[0][8][2].y = 0.333;
+
+                geometry.faceVertexUvs[0][9][0].x = 0.666;
+                geometry.faceVertexUvs[0][9][0].y = 0;
+                geometry.faceVertexUvs[0][9][1].x = 1;
+                geometry.faceVertexUvs[0][9][1].y = 0;
+                geometry.faceVertexUvs[0][9][2].x = 1;
+                geometry.faceVertexUvs[0][9][2].y = 0.333;
+
+                // sciana tylna
+                geometry.faceVertexUvs[0][10][0].x = 0;
+                geometry.faceVertexUvs[0][10][0].y = 0.333;
+                geometry.faceVertexUvs[0][10][1].x = 0;
+                geometry.faceVertexUvs[0][10][1].y = 0;
+                geometry.faceVertexUvs[0][10][2].x = 0.333;
+                geometry.faceVertexUvs[0][10][2].y = 0.333;
+
+                geometry.faceVertexUvs[0][11][0].x = 0;
+                geometry.faceVertexUvs[0][11][0].y = 0;
+                geometry.faceVertexUvs[0][11][1].x = 0.333;
+                geometry.faceVertexUvs[0][11][1].y = 0;
+                geometry.faceVertexUvs[0][11][2].x = 0.333;
+                geometry.faceVertexUvs[0][11][2].y = 0.333;
+            }
+
+
+
+            //geometry.faceVertexUvs[0][8][0].x = 0;
+            //geometry.faceVertexUvs[0][8][0].y = 1;
+            //geometry.faceVertexUvs[0][8][1].x = 0;
+            //geometry.faceVertexUvs[0][8][1].y = 0.666;
+            //geometry.faceVertexUvs[0][8][2].x = 0.333;
+            //geometry.faceVertexUvs[0][8][2].y = 1;
+
+            //geometry.faceVertexUvs[0][9][0].x = 0;
+            //geometry.faceVertexUvs[0][9][0].y = 0.666;
+            //geometry.faceVertexUvs[0][9][1].x = 0.333;
+            //geometry.faceVertexUvs[0][9][1].y = 0.666;
+            //geometry.faceVertexUvs[0][9][2].x = 0.333;
+            //geometry.faceVertexUvs[0][9][2].y = 1;
+
+            //console.log(geometry.faceVertexUvs);
+            //console.log(geometry.faceVertexUvs[0]);
+            //console.log(geometry.faceVertexUvs[0][8]);
+            //console.log(geometry.faceVertexUvs[0][9]);
+            //console.log(geometry.faceVertexUvs[0][0][0]);
+
+            return cube;
+        };
+
+        // Rotate an object around an arbitrary axis in world space
+        function rotateAroundWorldAxis(object, axis, radians) {
+            var rotationMatrix = new THREE.Matrix4();
+            rotationMatrix.makeRotationAxis(axis.normalize(), radians);
+            rotationMatrix.multiply(object.matrix);                       // pre-multiply
+            object.matrix = rotationMatrix;
+            object.rotation.setFromRotationMatrix(object.matrix);
+        }
+
+        function getCubics2(commonPosElement, commonPosElementVal) {
+            //console.log("getCubics : " + commonPosElement + " => " + commonPosElementVal);
+            //var retCubs = [];
+            rotatingCubes = [];
+            if( commonPosElement < 0 ) return retCubs;
+            for (var i = 0 ; i < cubics.length ; ++i) {
+                switch(commonPosElement)
+                {
+                    case 0: //x
+                        if (cubics[i].position.x == commonPosElementVal)
+                            rotatingCubes.push(cubics[i]);
+                        break;
+                    case 1: //y
+                        if (cubics[i].position.y == commonPosElementVal)
+                            rotatingCubes.push(cubics[i]);
+                        break;
+                    case 2: //z
+                        if (cubics[i].position.z == commonPosElementVal)
+                            rotatingCubes.push(cubics[i]);
+                        break;
+                }
+            }
+            //return retCubs;
+        }
+
+        function getCubicsBy(_cube1, _cube2) {
+            var cubRotInfo = new THREE.Vector3(0,0,0);
+
+            rotatingCubes = [];
+
+            if (!draggedCubicFaceNormal.equals(newTouchedCubicFaceNormal)) {
+                //    console.warn("normalki sie nie zgadaja... - jeszcze poki co nie obsluguje tego przypadku");
+                //    return retCubs;
+            }
+            var commonPosElement = -1;
+            var commonPosElementVal = 0;
+            if (_cube1.position.x != _cube2.position.x) {
+                if (newTouchedCubicFaceNormal.z != 0) {
+                    if (_cube1.position.y == _cube2.position.y) {
+                        commonPosElement = 1;
+                        commonPosElementVal = _cube1.position.y;
+                        cubRotInfo.z = (_cube2.position.x - _cube1.position.x) * newTouchedCubicFaceNormal.z;
+                    } else {
+                        console.warn("getCubicsBy");
+                    }
+                } else {
+                    if (_cube1.position.z == _cube2.position.z) {
+                        commonPosElement = 2;
+                        commonPosElementVal = _cube1.position.z;
+                        cubRotInfo.z = (_cube1.position.x - _cube2.position.x) * newTouchedCubicFaceNormal.y;
+                    } else {
+                        console.warn("getCubicsBy");
+                    }
+                }
+            }
+            else if (_cube1.position.y != _cube2.position.y) {
+                if (newTouchedCubicFaceNormal.x != 0) {
+                    if (_cube1.position.z == _cube2.position.z) {
+                        commonPosElement = 2;
+                        commonPosElementVal = _cube1.position.z;
+                        cubRotInfo.z = (_cube2.position.y - _cube1.position.y) * newTouchedCubicFaceNormal.x;
+                    } else {
+                        console.warn("getCubicsBy");
+                    }
+                } else {
+                    if (_cube1.position.x == _cube2.position.x) {
+                        commonPosElement = 0;
+                        commonPosElementVal = _cube1.position.x;
+                        cubRotInfo.z = (_cube1.position.y - _cube2.position.y) * newTouchedCubicFaceNormal.z;
+                    } else {
+                        console.warn("getCubicsBy");
+                    }
+                }
+            }
+            else if (_cube1.position.z != _cube2.position.z) {
+                if (newTouchedCubicFaceNormal.y != 0) {
+                    if (_cube1.position.x == _cube2.position.x) {
+                        commonPosElement = 0;
+                        commonPosElementVal = _cube1.position.x;
+                        cubRotInfo.z = (_cube2.position.z - _cube1.position.z) * newTouchedCubicFaceNormal.y;
+                    } else {
+                        console.warn("getCubicsBy");
+                    }
+                } else {
+                    if (_cube1.position.y == _cube2.position.y) {
+                        commonPosElement = 1;
+                        commonPosElementVal = _cube1.position.y;
+                        cubRotInfo.z = (_cube1.position.z - _cube2.position.z) * newTouchedCubicFaceNormal.x;
+                    } else {
+                        console.warn("getCubicsBy");
+                    }
+                }
+            }
+
+            if (commonPosElement < 0) return;
+
+            getCubics2(commonPosElement, commonPosElementVal);
+            cubRotInfo.x = commonPosElement;
+            cubRotInfo.y = commonPosElementVal;
+            return cubRotInfo;
+        }
+
+        var RCBlock = false;
+        var RCDuration = 0;
+        var RCRotTime = 0.5;
+        var RCStep = 0.0;
+        var RCCubRotInfo = new THREE.Vector3();
+        var RCRotationCenterPos = new THREE.Vector3();
+        var RCBeginAngles = [];
+        var RCBeginAngles2 = [];
+        var RCRs = [];
+        var RCRotAxises = [];
+
+        function rotateCubes(cubRotInfo) {
+            //console.log(" " + cubRotInfo.x + " " + cubRotInfo.y + " " + cubRotInfo.z);
+
+            RCBlock = true;
+            RCDuration = 0;
+            RCCubRotInfo = cubRotInfo;
+            RCBeginAngles = [];
+            RCRs = [];
+            RCRotAxises = [];
+            RCBeginAngles2 = [];
+
+            var rotationCenterPos = new THREE.Vector3(0, 0, 0);
+            switch (cubRotInfo.x) {
+                case 0:
+                    rotationCenterPos = new THREE.Vector3(cubRotInfo.y, 0, 0);
+
+                    for (var i = 0 ; i < rotatingCubes.length ; ++i) {
+                        var _d = rotatingCubes[i].position.clone().sub(rotationCenterPos);
+                        //if (_d.length() == 0) continue;
+                        var beginAngle = Math.atan2(_d.y, _d.z);
+                        RCBeginAngles.push(beginAngle);
+                        RCRs.push(_d.length());
+
+                        var _t = rotatingCubes[i].position.clone().add( new THREE.Vector3(1, 0, 0) );
+                        pivot.localToWorld(_t);
+                        rotatingCubes[i].worldToLocal(_t);
+                        //console.log(_t);
+                        RCRotAxises.push(_t);
+
+                        RCBeginAngles2.push(rotatingCubes[i].rotation.clone());
+
+                        continue;
+                    }
+                    break;
+                case 1:
+                    rotationCenterPos = new THREE.Vector3(0, cubRotInfo.y, 0);
+                    for (var i = 0 ; i < rotatingCubes.length ; ++i) {
+                        var _d = rotatingCubes[i].position.clone().sub(rotationCenterPos);
+                        //if (_d.length() == 0) continue;
+                        var beginAngle = Math.atan2(_d.x, _d.z);
+                        RCBeginAngles.push(beginAngle);
+                        RCRs.push(_d.length());
+
+                        var _t = rotatingCubes[i].position.clone().add(new THREE.Vector3(0, 1, 0));
+                        pivot.localToWorld(_t);
+                        rotatingCubes[i].worldToLocal(_t);
+                        //console.log(_t);
+                        RCRotAxises.push(_t);
+
+                        RCBeginAngles2.push(rotatingCubes[i].rotation.clone());
+
+                        continue;
+                    }
+                    break;
+                case 2:
+                    rotationCenterPos = new THREE.Vector3(0, 0, cubRotInfo.y);
+                    for (var i = 0 ; i < rotatingCubes.length ; ++i) {
+                        var _d = rotatingCubes[i].position.clone().sub(rotationCenterPos);
+                        //if (_d.length() == 0) continue;
+                        var beginAngle = Math.atan2(_d.x, _d.y);
+                        RCBeginAngles.push(beginAngle);
+                        RCRs.push(_d.length());
+
+                        var _t = rotatingCubes[i].position.clone().add(new THREE.Vector3(0, 0, 1));
+                        pivot.localToWorld(_t);
+                        rotatingCubes[i].worldToLocal(_t);
+                        //console.log(_t);
+                        RCRotAxises.push(_t);
+
+                        RCBeginAngles2.push(rotatingCubes[i].rotation.clone());
+
+                        continue;
+                    }
+                    break;
+            }
+            RCRotationCenterPos = rotationCenterPos;
+            //rotateCubesStep(Math.PI / 2);
+        }
+
+
+        function rotateCubesStep(dt) {
+            RCDuration += dt;
+            if (RCDuration > RCRotTime) {
+                dt -= (RCDuration - RCRotTime);
+                RCDuration = RCRotTime;
+            }
+            //RCDuration = Math.min(RCDuration, RCRotTime);
+            
+            //RCStep = (RCDuration / RCRotTime) * (Math.PI / 2);
+            RCStep = EasingFunctions.easeInOutCubic((RCDuration / RCRotTime)) * (Math.PI / 2);
+            //dt *= EasingFunctions.easeInOutCubic(RCDuration / RCRotTime) / (RCDuration / RCRotTime);
+            //var RCStep2 = (dt / RCRotTime) * (Math.PI / 2);
+
+            
+            //var RCStep2 = _RCStep2
+
+            //console.log(dt);
+            //console.log(RCDuration);
+            switch (RCCubRotInfo.x) {
+                case 0:
+                    for (var i = 0 ; i < rotatingCubes.length ; ++i) {
+
+                        var th = -RCCubRotInfo.z * RCStep + RCBeginAngles[i];
+                        var nz = Math.cos(th) * RCRs[i] + x0;
+                        var ny = Math.sin(th) * RCRs[i] + y0;
+
+                        rotatingCubes[i].position.set(rotatingCubes[i].position.x, ny, nz);
+                        rotatingCubes[i].rotation.copy(RCBeginAngles2[i]);
+                        rotatingCubes[i].rotateOnAxis(RCRotAxises[i], RCCubRotInfo.z * RCStep);
+                    }
+                    break;
+                case 1:
+                    for (var i = 0 ; i < rotatingCubes.length ; ++i) {
+                        
+                        var th = RCCubRotInfo.z * RCStep + RCBeginAngles[i];
+                        var nz = Math.cos(th) * RCRs[i] + x0;
+                        var nx = Math.sin(th) * RCRs[i] + y0;
+
+                        rotatingCubes[i].position.set(nx, rotatingCubes[i].position.y, nz);
+                        rotatingCubes[i].rotation.copy(RCBeginAngles2[i]);
+                        rotatingCubes[i].rotateOnAxis(RCRotAxises[i], RCCubRotInfo.z * RCStep);
+                    }
+                    break;
+                case 2:
+                    for (var i = 0 ; i < rotatingCubes.length ; ++i) {
+
+                        var th = -RCCubRotInfo.z * RCStep + RCBeginAngles[i];
+                        var ny = Math.cos(th) * RCRs[i] + x0;
+                        var nx = Math.sin(th) * RCRs[i] + y0;
+
+                        rotatingCubes[i].position.set(nx, ny, rotatingCubes[i].position.z);
+                        rotatingCubes[i].rotation.copy(RCBeginAngles2[i]);
+                        rotatingCubes[i].rotateOnAxis(RCRotAxises[i], RCCubRotInfo.z * RCStep);
+                    }
+                    break;
+            }
+
+            if (RCDuration >= RCRotTime) {
+                //console.log("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-");
+                for (var i = 0 ; i < rotatingCubes.length ; ++i) {
+                    //console.log(rotatingCubes[i].position);
+                    rotatingCubes[i].position.round();
+                    //console.log(rotatingCubes[i].position);
+                    //rotatingCubes[i].updateMatrix();
+                    //rotatingCubes[i].updateMatrixWorld();
+                }
+                //console.log("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-");
+                RCBlock = false;
+            }
+        }
+
+        /*
+ * Easing Functions - inspired from http://gizma.com/easing/
+ * only considering the t value for the range [0, 1] => [0, 1]
+ */
+        EasingFunctions = {
+            // no easing, no acceleration
+            linear: function (t) { return t },
+            // accelerating from zero velocity
+            easeInQuad: function (t) { return t * t },
+            // decelerating to zero velocity
+            easeOutQuad: function (t) { return t * (2 - t) },
+            // acceleration until halfway, then deceleration
+            easeInOutQuad: function (t) { return t < .5 ? 2 * t * t : -1 + (4 - 2 * t) * t },
+            // accelerating from zero velocity 
+            easeInCubic: function (t) { return t * t * t },
+            // decelerating to zero velocity 
+            easeOutCubic: function (t) { return (--t) * t * t + 1 },
+            // acceleration until halfway, then deceleration 
+            easeInOutCubic: function (t) { return t < .5 ? 4 * t * t * t : (t - 1) * (2 * t - 2) * (2 * t - 2) + 1 },
+            // accelerating from zero velocity 
+            easeInQuart: function (t) { return t * t * t * t },
+            // decelerating to zero velocity 
+            easeOutQuart: function (t) { return 1 - (--t) * t * t * t },
+            // acceleration until halfway, then deceleration
+            easeInOutQuart: function (t) { return t < .5 ? 8 * t * t * t * t : 1 - 8 * (--t) * t * t * t },
+            // accelerating from zero velocity
+            easeInQuint: function (t) { return t * t * t * t * t },
+            // decelerating to zero velocity
+            easeOutQuint: function (t) { return 1 + (--t) * t * t * t * t },
+            // acceleration until halfway, then deceleration 
+            easeInOutQuint: function (t) { return t < .5 ? 16 * t * t * t * t * t : 1 + 16 * (--t) * t * t * t * t }
+        }
+
+    </script>
+</body>
+</html>
