@@ -1,0 +1,5 @@
+1) on/off full screen : view-source:https://stemkoski.github.io/Three.js/GUI.html
+2) tam (w 1) tez jest scrol i orbitcontrol
+3) rozwiac jakos to ze w edgu nie pokazuja sie kontrolki jak sie je wylaczy na starcie... moze update spozniony o klatke pomoze
+
+

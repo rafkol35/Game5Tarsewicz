@@ -7,8 +7,12 @@
         </style>
     </head>
     <body>
+        <link rel="Stylesheet" type="text/css" href="style.css" />
+
+        <script src="js/jquery-1.10.2.min.js"></script>
         <script src="js/three.min.js"></script>
         <!--<script src="js/controls/PointerLockControls.js"></script>-->
+        <script type="text/javascript" src="js/dat.gui.min.js"></script>
         <script src="js/gamemodes/gamemode.js"></script>
         <script src="js/gamemodes/gamemodeproject.js"></script>
         <script src="js/gamemodes/gamemodevisit.js"></script>
@@ -23,11 +27,19 @@
             var walls = [];
             var controls;
             
-            var gamemode = 0; // 0 - projektowanie 1 - zwiedzanie
+            //var gamemode = 0; // 0 - projektowanie 1 - zwiedzanie
             
-            var gameModeProject = new GameModeProject('project','qwer');
-            var gameModeVisit = new GameModeVisit('visit','asdf');
-            var currentGameMode = gameModeProject;
+            var gameModeProject = new GameModeProject('project');
+            var gameModeVisit = new GameModeVisit('visit');
+            var currentGameMode = null; //gameModeVisit; //gameModeProject;
+            //setMode(gameModeVisit); // bo w egde sie nie pokaza kontrolki
+            setMode(gameModeProject);
+            
+            function setMode(newMode){
+                if( currentGameMode !== null ) currentGameMode.deactivate();
+                currentGameMode = newMode;
+                if( currentGameMode !== null ) currentGameMode.activate();
+            }
             
             function onWindowResize() {
                 camera.aspect = window.innerWidth / window.innerHeight;
@@ -38,16 +50,19 @@
             function onDocumentMouseDown(event) {
                 event.preventDefault();
 
-                gamemode = (gamemode+1) % 2;
+                //gamemode = (gamemode+1) % 2;
                 //console.log(gamemode);
                 
                 //tgm.f1();
                 //tgm.f2();
-                if( currentGameMode === gameModeProject ) currentGameMode = gameModeVisit;
-                else currentGameMode = gameModeProject;
+                if( currentGameMode === gameModeProject ) setMode(gameModeVisit);
+                else setMode(gameModeProject);
                 
-                currentGameMode.f1();
-                currentGameMode.f2();
+                //currentGameMode.f1();
+                //currentGameMode.f2();
+                
+                //gui.close();
+                //$(gui.domElement).attr("hidden", gamemode === 0 ? true : false);
                 
                 mousePressed = true;
                 mouseClickPos.x = (event.clientX / window.innerWidth) * 2 - 1;
@@ -57,14 +72,14 @@
                 //mousePressedPos.x = mouseClickPos.x;
                 //mousePressedPos.y = mouseClickPos.y;
 
-                raycasterTouch.setFromCamera(mouse, camera);
-                var intersects = raycasterTouch.intersectObjects(walls);
-                if (intersects.length > 0) {
-                //    draggedCubic = intersects[0].object;
-                //    draggedCubicFaceNormal = intersects[0].face.normal.clone();
-                //    newTouchedCubic = null;
-                //    console.log("asdf");
-                }                    
+//                raycasterTouch.setFromCamera(mouse, camera);
+//                var intersects = raycasterTouch.intersectObjects(walls);
+//                if (intersects.length > 0) {
+//                //    draggedCubic = intersects[0].object;
+//                //    draggedCubicFaceNormal = intersects[0].face.normal.clone();
+//                //    newTouchedCubic = null;
+//                //    console.log("asdf");
+//                }                    
             }
             
             function onDocumentMouseUp(event) {
@@ -88,11 +103,11 @@
                 mouseLast.set(mouse.x, mouse.y);
             }
             
-            var scene = new THREE.Scene();
-            var camera = new THREE.PerspectiveCamera(90, window.innerWidth / window.innerHeight, 0.1, 1000);
-
-            var scene2 = new THREE.Scene();
-            var camera2 = new THREE.PerspectiveCamera(90, window.innerWidth / window.innerHeight, 0.1, 1000);
+//            var scene = new THREE.Scene();
+//            var camera = new THREE.PerspectiveCamera(90, window.innerWidth / window.innerHeight, 0.1, 1000);
+//
+//            var scene2 = new THREE.Scene();
+//            var camera2 = new THREE.PerspectiveCamera(90, window.innerWidth / window.innerHeight, 0.1, 1000);
             
             var renderer = new THREE.WebGLRenderer();
             renderer.setSize(window.innerWidth, window.innerHeight);
@@ -103,14 +118,26 @@
             document.addEventListener('mouseup', onDocumentMouseUp, false);
             window.addEventListener('resize', onWindowResize, false);
             
-            var geometry = new THREE.BoxGeometry(1, 1, 1);
-            var material = new THREE.MeshBasicMaterial({color: 0x00ff00});
-            var cube = new THREE.Mesh(geometry, material);
-            scene.add(cube);
-            walls.push(cube);
+//            var gui = new dat.GUI({
+//                height : 5 * 32 - 1
+//            });
+//            var params = {
+//                interation: 5000
+//            };
+//            gui.add(params, 'interation');
             
-            camera.position.z = 5;
-//            controls = new THREE.PointerLockControls( camera );
+            //gui.close();
+            
+            //gui.add(params, 'width').min(128).max(256).step(16);
+
+//            var geometry = new THREE.BoxGeometry(1, 1, 1);
+//            var material = new THREE.MeshBasicMaterial({color: 0x00ff00});
+//            var cube = new THREE.Mesh(geometry, material);
+//            scene.add(cube);
+//            walls.push(cube);
+//            
+//            camera.position.z = 5;
+////            controls = new THREE.PointerLockControls( camera );
 
             var render = function () {
                 requestAnimationFrame(render);
@@ -118,16 +145,21 @@
                 //cube.rotation.x += 0.1;
                 //cube.rotation.y += 0.1;
                 
-                if( gamemode === 0 ){
-                    renderer.setClearColor(0xffffff);
-                    renderer.render(scene, camera);
-                }else{
-                    renderer.setClearColor(0xffffff);
-                    renderer.render(scene2, camera2);
-                }
+//                if( gamemode === 0 ){
+//                    renderer.setClearColor(0xffffff);
+//                    renderer.render(scene, camera);
+//                }else{
+//                    renderer.setClearColor(0xffffff);
+//                    renderer.render(scene2, camera2);
+//                }
+
+                //renderer.setClearColor(currentGameMode.getClearColor());
+                currentGameMode.render(renderer);
             };
 
             render();
         </script>
+        <div class="moveGUI">
+        </div>
     </body>
 </html>
