@@ -29,3 +29,8 @@ GameMode.prototype.render = function(renderer){
 
 GameMode.prototype.activate = function(){};
 GameMode.prototype.deactivate = function(){};
+
+GameMode.prototype.mouseMove = function(event){};
+
+GameMode.prototype.keyDown = function(event){};
+GameMode.prototype.keyUp = function(event){};

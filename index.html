@@ -26,6 +26,7 @@
             var raycasterTouch = new THREE.Raycaster();
             var walls = [];
             var controls;
+            var firstMouseMove = true;
             
             //var gamemode = 0; // 0 - projektowanie 1 - zwiedzanie
             
@@ -33,7 +34,7 @@
             var gameModeVisit = new GameModeVisit('visit');
             var currentGameMode = null; //gameModeVisit; //gameModeProject;
             //setMode(gameModeVisit); // bo w egde sie nie pokaza kontrolki
-            setMode(gameModeProject);
+            setMode(gameModeVisit);
             
             function setMode(newMode){
                 if( currentGameMode !== null ) currentGameMode.deactivate();
@@ -53,13 +54,8 @@
                 //gamemode = (gamemode+1) % 2;
                 //console.log(gamemode);
                 
-                //tgm.f1();
-                //tgm.f2();
-                if( currentGameMode === gameModeProject ) setMode(gameModeVisit);
-                else setMode(gameModeProject);
-                
-                //currentGameMode.f1();
-                //currentGameMode.f2();
+                //if( currentGameMode === gameModeProject ) setMode(gameModeVisit);
+                //else setMode(gameModeProject);
                 
                 //gui.close();
                 //$(gui.domElement).attr("hidden", gamemode === 0 ? true : false);
@@ -97,26 +93,46 @@
             }
 
             function onDocumentMouseMove(event) {
-                event.preventDefault();
+                event.preventDefault();                
                 mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-                mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;                
+                mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+                if( firstMouseMove ){
+                    firstMouseMove = false;
+                    mouseLast.set(mouse.x, mouse.y);
+                }
+                if( currentGameMode ) currentGameMode.mouseMove(event);
                 mouseLast.set(mouse.x, mouse.y);
             }
             
-//            var scene = new THREE.Scene();
-//            var camera = new THREE.PerspectiveCamera(90, window.innerWidth / window.innerHeight, 0.1, 1000);
-//
-//            var scene2 = new THREE.Scene();
-//            var camera2 = new THREE.PerspectiveCamera(90, window.innerWidth / window.innerHeight, 0.1, 1000);
-            
+            var clock = new THREE.Clock();
+            var deltaTime = 0.0;
+             
             var renderer = new THREE.WebGLRenderer();
             renderer.setSize(window.innerWidth, window.innerHeight);
             
             document.body.appendChild(renderer.domElement);
             document.addEventListener('mousemove', onDocumentMouseMove, false);
             document.addEventListener('mousedown', onDocumentMouseDown, false);
-            document.addEventListener('mouseup', onDocumentMouseUp, false);
+            document.addEventListener('mouseup', onDocumentMouseUp, false);            
             window.addEventListener('resize', onWindowResize, false);
+            
+            var pressedKeys = []; //new Array();
+            
+            var onKeyDown = function (event) {
+                pressedKeys[event.keyCode] = true;
+                //console.log(pressedKeys);
+                if( currentGameMode ) currentGameMode.keyDown(event);
+            };
+            
+            var onKeyUp = function (event) {
+                pressedKeys[event.keyCode] = false;
+                //console.log(pressedKeys);
+                if( currentGameMode ) currentGameMode.keyUp(event);
+            };
+            
+            document.addEventListener('keydown', onKeyDown, false);
+            document.addEventListener('keyup', onKeyUp, false);
+            
             
 //            var gui = new dat.GUI({
 //                height : 5 * 32 - 1
@@ -140,21 +156,9 @@
 ////            controls = new THREE.PointerLockControls( camera );
 
             var render = function () {
+                deltaTime = clock.getDelta();                
                 requestAnimationFrame(render);
-
-                //cube.rotation.x += 0.1;
-                //cube.rotation.y += 0.1;
-                
-//                if( gamemode === 0 ){
-//                    renderer.setClearColor(0xffffff);
-//                    renderer.render(scene, camera);
-//                }else{
-//                    renderer.setClearColor(0xffffff);
-//                    renderer.render(scene2, camera2);
-//                }
-
-                //renderer.setClearColor(currentGameMode.getClearColor());
-                currentGameMode.render(renderer);
+                if( currentGameMode ) currentGameMode.render(renderer);
             };
 
             render();
