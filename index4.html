@@ -8,11 +8,8 @@
     </head>
     <body>
         <script src="js/three.min.js"></script>
-        <!--<script src="js/controls/PointerLockControls.js"></script>-->
-        <script src="js/gamemodes/gamemode.js"></script>
-        <script src="js/gamemodes/gamemodeproject.js"></script>
-        <script src="js/gamemodes/gamemodevisit.js"></script>
-        
+        <script src="js/controls/PointerLockControls.js"></script>
+
         <script>
             var mousePressed = false;
             var mouse = new THREE.Vector2(), INTERSECTED;
@@ -23,12 +20,6 @@
             var walls = [];
             var controls;
             
-            var gamemode = 0; // 0 - projektowanie 1 - zwiedzanie
-            
-            var gameModeProject = new GameModeProject('project','qwer');
-            var gameModeVisit = new GameModeVisit('visit','asdf');
-            var currentGameMode = gameModeProject;
-            
             function onWindowResize() {
                 camera.aspect = window.innerWidth / window.innerHeight;
                 camera.updateProjectionMatrix();
@@ -38,17 +29,6 @@
             function onDocumentMouseDown(event) {
                 event.preventDefault();
 
-                gamemode = (gamemode+1) % 2;
-                //console.log(gamemode);
-                
-                //tgm.f1();
-                //tgm.f2();
-                if( currentGameMode === gameModeProject ) currentGameMode = gameModeVisit;
-                else currentGameMode = gameModeProject;
-                
-                currentGameMode.f1();
-                currentGameMode.f2();
-                
                 mousePressed = true;
                 mouseClickPos.x = (event.clientX / window.innerWidth) * 2 - 1;
                 mouseClickPos.y = -(event.clientY / window.innerHeight) * 2 + 1;
@@ -63,7 +43,7 @@
                 //    draggedCubic = intersects[0].object;
                 //    draggedCubicFaceNormal = intersects[0].face.normal.clone();
                 //    newTouchedCubic = null;
-                //    console.log("asdf");
+                    console.log("asdf");
                 }                    
             }
             
@@ -91,12 +71,9 @@
             var scene = new THREE.Scene();
             var camera = new THREE.PerspectiveCamera(90, window.innerWidth / window.innerHeight, 0.1, 1000);
 
-            var scene2 = new THREE.Scene();
-            var camera2 = new THREE.PerspectiveCamera(90, window.innerWidth / window.innerHeight, 0.1, 1000);
-            
             var renderer = new THREE.WebGLRenderer();
             renderer.setSize(window.innerWidth, window.innerHeight);
-            
+            renderer.setClearColor(0xffffff);
             document.body.appendChild(renderer.domElement);
             document.addEventListener('mousemove', onDocumentMouseMove, false);
             document.addEventListener('mousedown', onDocumentMouseDown, false);
@@ -117,14 +94,8 @@
 
                 //cube.rotation.x += 0.1;
                 //cube.rotation.y += 0.1;
-                
-                if( gamemode === 0 ){
-                    renderer.setClearColor(0xffffff);
-                    renderer.render(scene, camera);
-                }else{
-                    renderer.setClearColor(0xffffff);
-                    renderer.render(scene2, camera2);
-                }
+
+                renderer.render(scene, camera);
             };
 
             render();
