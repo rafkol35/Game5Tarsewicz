@@ -28,21 +28,26 @@ function GameModeVisit(name) {
     var customContainer = $('.moveGUI').append($(this.gui.domElement));
     //$(this.gui.domElement).attr("hidden", true);
 
-
     var geometry = new THREE.BoxGeometry(1, 1, 1);
     var material = new THREE.MeshBasicMaterial({color: 0x00ff00});
     var cube = new THREE.Mesh(geometry, material);
     cube.position.set(0, 0, -5);
     this.scene.add(cube);
-    //walls.push(cube);
+    walls.push(cube);
 
     //var geometry2 = new THREE.BoxGeometry(1, 1, 1);
     //material.color = 0xffffff;
+    
     cube = new THREE.Mesh(geometry, material);
-
     cube.position.set(0, 0, 5);
     this.scene.add(cube);
+    walls.push(cube);
 
+    cube = new THREE.Mesh(geometry, material);
+    cube.position.set(5, 0, 0);
+    this.scene.add(cube);
+    walls.push(cube);
+    
     //this.camera.position.z = 5;
 
     this.camera.rotation.set(0, 0, 0);
