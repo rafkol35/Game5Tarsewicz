@@ -70,6 +70,8 @@ function GameModeVisit(name) {
     this.moveLeft = false;
     this.moveBackward = false;
     this.moveRight = false;
+    
+    this.raycaster = new THREE.Raycaster();
 }
 
 GameModeVisit.prototype = Object.create(GameMode.prototype);
@@ -134,7 +136,7 @@ GameModeVisit.prototype.render = function (renderer) {
     var trans = new THREE.Vector3();
     
     if( this.moveForward ){ 
-        trans.z -= 3.0 * deltaTime;
+        trans.z -= 3.0 * deltaTime;        
     }else if( this.moveBackward ){
         trans.z += 3.0 * deltaTime;
     }
@@ -157,10 +159,55 @@ GameModeVisit.prototype.render = function (renderer) {
 
     //console.log(this.getDirection());
     
-    this.yawObject.translateX(trans.x);
-    this.yawObject.translateY(trans.y);
-    this.yawObject.translateZ(trans.z);
-                    
+    var canMove = true;
+    
+    //var oldPos = this.yawObject.position.clone();
+    
+    //if( trans.lengthSq() !== 0 ) console.log(this.pitchObject.localToWorld(trans.clone()));
+    
+    //var cpOldPos = this.camera.localToWorld( new THREE.Vector3() );
+    //var cpNewPos = this.camera.localToWorld( new THREE.Vector3() );
+    
+    
+    var trLen = trans.length()
+    if( trLen !== 0 ) {
+        //console.log(trans);
+        //console.log(moveDir);
+        
+        var moveDir = this.yawObject.localToWorld(trans.clone()).sub( this.yawObject.position.clone() ).normalize();
+        
+        this.raycaster.set(this.yawObject.position.clone(),moveDir);
+        this.raycaster.far = 1;//trLen;
+        
+        var intersects = this.raycaster.intersectObjects(walls);
+        if (intersects.length > 0) {
+//            if (INTERSECTED != intersects[ 0 ].object) {
+//                if (INTERSECTED)
+//                    INTERSECTED.material.emissive.setHex(INTERSECTED.currentHex);
+//                INTERSECTED = intersects[ 0 ].object;
+//                INTERSECTED.currentHex = INTERSECTED.material.emissive.getHex();
+//                INTERSECTED.material.emissive.setHex(0xff0000);
+//            }
+            canMove = false;
+        } else {
+//            if (INTERSECTED)
+//                INTERSECTED.material.emissive.setHex(INTERSECTED.currentHex);
+//            INTERSECTED = null;
+        }
+    }
+    
+    if( canMove ){
+        this.yawObject.translateX(trans.x);
+        this.yawObject.translateY(trans.y);
+        this.yawObject.translateZ(trans.z);
+    }
+    
+    
+    
+    //if( !canMove ){        
+    //    this.yawObject.position.copy(oldPos);
+    //}  
+    
     renderer.setClearColor(this.getClearColor());
     renderer.render(this.scene, this.camera);
 
