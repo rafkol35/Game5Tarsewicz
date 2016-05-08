@@ -24,8 +24,8 @@ function GameModeVisit(name) {
     };
     this.gui.add(params2, 'visit2');
 
-    this.gui.domElement.id = 'guiVisit';
-    var customContainer = $('.moveGUI').append($(this.gui.domElement));
+    //this.gui.domElement.id = 'guiVisit';
+    //var customContainer = $('.moveGUI').append($(this.gui.domElement));
     //$(this.gui.domElement).attr("hidden", true);
 
     var geometry = new THREE.BoxGeometry(1, 1, 1);

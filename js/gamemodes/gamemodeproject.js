@@ -23,7 +23,11 @@ var SOScale = function () {
 };
 
 var SOD = function () {
-    this.pos = new SOPos();    
+    this.pos = new SOPos();
+    this.rot = new SORot();
+    this.scale = new SOScale();
+    
+    this.Color = "#000000";
 };
         
 function GameModeProject(name) {
@@ -53,30 +57,75 @@ function GameModeProject(name) {
 //        autoPlace: false
     });
     
-    var folderPosition = this.gui.addFolder('Position');
-
     this.sod = new SOD();
 
-    var cntr = folderPosition.add(this.sod.pos, 'X').listen();
-    cntr.step(0.1);
-    cntr.onChange(selObjPosChanged);
-    cntr.onFinishChange(selObjPosChanged);
+    {
+        var folderPosition = this.gui.addFolder('Position');
 
-    cntr = folderPosition.add(this.sod.pos, 'Y').listen();
-    cntr.step(0.1).min(0);
-    cntr.onChange(selObjPosChanged);
-    cntr.onFinishChange(selObjPosChanged);
+        var cntr = folderPosition.add(this.sod.pos, 'X').listen();
+        cntr.step(0.1);
+        cntr.onChange(selObjPosChanged);
+        cntr.onFinishChange(selObjPosChanged);
 
-    cntr = folderPosition.add(this.sod.pos, 'Z').listen();
-    cntr.step(0.1);
-    cntr.onChange(selObjPosChanged);
-    cntr.onFinishChange(selObjPosChanged);
-       
+        cntr = folderPosition.add(this.sod.pos, 'Y').listen();
+        cntr.step(0.1).min(0);
+        cntr.onChange(selObjPosChanged);
+        cntr.onFinishChange(selObjPosChanged);
+
+        cntr = folderPosition.add(this.sod.pos, 'Z').listen();
+        cntr.step(0.1);
+        cntr.onChange(selObjPosChanged);
+        cntr.onFinishChange(selObjPosChanged);
+    }
+
+    {
+        var folder = this.gui.addFolder('Rotation');
+
+        var cntr = folder.add(this.sod.rot, 'X').listen();
+        //cntr.step(0.1);
+        cntr.onChange(selObjRotChanged);
+        cntr.onFinishChange(selObjRotChanged);
+
+        cntr = folder.add(this.sod.rot, 'Y').listen();
+        //cntr.step(0.1);
+        cntr.onChange(selObjRotChanged);
+        cntr.onFinishChange(selObjRotChanged);
+
+        cntr = folder.add(this.sod.rot, 'Z').listen();
+        //cntr.step(0.1);
+        cntr.onChange(selObjRotChanged);
+        cntr.onFinishChange(selObjRotChanged);
+    }
     
-    this.gui.domElement.id = 'guiProject';
-    var customContainer = $('.moveGUI').append($(this.gui.domElement));
-    
+    {
+        var folder = this.gui.addFolder('Scale');
 
+        var cntr = folder.add(this.sod.scale, 'X').listen();
+        cntr.step(0.1).min(0.1);;
+        cntr.onChange(selObjScaleChanged);
+        cntr.onFinishChange(selObjScaleChanged);
+
+        cntr = folder.add(this.sod.scale, 'Y').listen();
+        cntr.step(0.1).min(0.1);
+        cntr.onChange(selObjScaleChanged);
+        cntr.onFinishChange(selObjScaleChanged);
+
+        cntr = folder.add(this.sod.scale, 'Z').listen();
+        cntr.step(0.1).min(0.1);
+        cntr.onChange(selObjScaleChanged);
+        cntr.onFinishChange(selObjScaleChanged);
+    }
+    
+    {
+        var cntr = null;
+        cntr = this.gui.addColor(this.sod, 'Color').listen();
+        cntr.onChange(selObjColorChanged);
+        cntr.onFinishChange(selObjColorChanged);
+    }
+
+    //this.gui.domElement.id = 'guiProject';
+    //var customContainer = $('.moveGUI').append($(this.gui.domElement));
+        
     // Grid
     this.gridStep = 50;
     this.stageSize = 10;
@@ -128,6 +177,8 @@ function GameModeProject(name) {
     this.zrat = Math.PI * 0.25;
     
     this.raycaster = new THREE.Raycaster();
+    
+    this.setSelected(null);
 }
 
 GameModeProject.prototype = Object.create(GameMode.prototype);
@@ -143,12 +194,6 @@ GameModeProject.prototype.f2 = function () {
 
 var selObjPosChanged = function (val) {
     if( gameModeProject.selectedCube === null ) return;
-    
-    //console.log("GameModeProject::posChanged " + val);
-    //console.log(this);
-    //console.log(this.property + " : " + val);
-    
-    //if( this.property === "X" )
     switch(this.property){
         case "X":
             gameModeProject.selectedCube.position.x = val * gameModeProject.gridStep;
@@ -161,6 +206,47 @@ var selObjPosChanged = function (val) {
             break;
     }
 };
+
+var selObjRotChanged = function (val) {
+    if( gameModeProject.selectedCube === null ) return;
+    
+    var newRot = gameModeProject.selectedCube.rotation;
+    var rad = THREE.Math.degToRad(val);
+    
+    switch(this.property){
+        case "X":
+            newRot.x = rad;
+            break;
+        case "Y":
+            newRot.y = rad;
+            break;
+        case "Z":
+            newRot.z = rad;
+            break;
+    }
+    
+    gameModeProject.selectedCube.rotation = newRot;
+};
+
+var selObjScaleChanged = function (val) {
+    if( gameModeProject.selectedCube === null ) return;
+    switch(this.property){
+        case "X":
+            gameModeProject.selectedCube.scale.x = val;
+            break;
+        case "Y":
+            gameModeProject.selectedCube.scale.y = val;
+            break;
+        case "Z":
+            gameModeProject.selectedCube.scale.z = val;
+            break;
+    }
+};
+
+var selObjColorChanged = function(val){
+    if( gameModeProject.selectedCube === null ) return;
+    gameModeProject.selectedCube.material.color = new THREE.Color(val);
+}
 
 GameModeProject.prototype.getClearColor = function () {
     return 0xffffff;
@@ -386,13 +472,37 @@ GameModeProject.prototype.setSelected = function(cube){
     this.selectedCube = cube;
     if( this.selectedCube !== null ) {
         this.selectedCube.material.opacity = 0.5;
+        
         this.sod.pos.X = this.selectedCube.position.x / this.gridStep;
         this.sod.pos.Y = this.selectedCube.position.y / this.gridStep;
         this.sod.pos.Z = this.selectedCube.position.z / this.gridStep;
+        
+        var sor = this.selectedCube.rotation;
+        this.sod.rot.X = THREE.Math.radToDeg(sor.x);
+        this.sod.rot.Y = THREE.Math.radToDeg(sor.y);
+        this.sod.rot.Z = THREE.Math.radToDeg(sor.z);
+        
+        this.sod.scale.X = this.selectedCube.scale.x;
+        this.sod.scale.Y = this.selectedCube.scale.y;
+        this.sod.scale.Z = this.selectedCube.scale.z;
+        
+        //this.sod.Color = "#000000";
+        this.sod.Color = "#"+this.selectedCube.material.color.getHexString();
+        
     }else{
-        this.sod.pos.X = "";
-        this.sod.pos.Y = "";
-        this.sod.pos.X = "";
+        this.sod.pos.X = "Nan";
+        this.sod.pos.Y = "Nan";
+        this.sod.pos.Z = "Nan";
+        
+        this.sod.rot.X = "Nan";
+        this.sod.rot.Y = "Nan";
+        this.sod.rot.Z = "Nan";
+        
+        this.sod.scale.X = "Nan";
+        this.sod.scale.Y = "Nan";
+        this.sod.scale.Z = "Nan";
+        
+        this.sod.Color = "#000000";
     }
     
 //    if( cube === null ){ //zerowanie
