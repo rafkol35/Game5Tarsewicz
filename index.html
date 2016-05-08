@@ -57,14 +57,18 @@
                 mouseClickPos.x = (event.clientX / window.innerWidth) * 2 - 1;
                 mouseClickPos.y = -(event.clientY / window.innerHeight) * 2 + 1;
                 mouseLast = mouseClickPos;
+                
+                if( currentGameMode ) currentGameMode.mouseDown(event);
             }
             
             function onDocumentMouseUp(event) {
                 event.preventDefault();
                 mousePressed = false;
-                var mouseClickPos2 = new THREE.Vector2(0, 0);
-                mouseClickPos2.x = (event.clientX / window.innerWidth) * 2 - 1;
-                mouseClickPos2.y = -(event.clientY / window.innerHeight) * 2 + 1;                
+                if( currentGameMode ) currentGameMode.mouseUp(event);
+                
+//                var mouseClickPos2 = new THREE.Vector2(0, 0);
+//                mouseClickPos2.x = (event.clientX / window.innerWidth) * 2 - 1;
+//                mouseClickPos2.y = -(event.clientY / window.innerHeight) * 2 + 1;                
             }
 
             function onDocumentMouseMove(event) {

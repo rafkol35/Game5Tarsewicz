@@ -224,6 +224,18 @@ GameModeProject.prototype.onWindowResize = function(){
     }
 };
 
+GameModeProject.prototype.mouseDown = function(event){
+//    if( this.highlightCube === null ) return; 
+//    if( this.selectedCube ){
+//        this.selectedCube
+//    }
+//    this.selectedCube = this.highlightCube;
+    this.setSelected(this.highlightCube);
+};
+GameModeProject.prototype.mouseUp = function(event){
+    
+};
+
 GameModeProject.prototype.render = function (renderer) {
     
 //    camera.position.x = Math.cos( timer ) * 200;
@@ -274,14 +286,17 @@ GameModeProject.prototype.render = function (renderer) {
 //    }
     if( intersects.length > 0 ){
         //console.log("this.highlightOn1");
-        if( this.highlightCube !== intersects[0].object ){
-            //console.log("this.highlightOn2");
-            this.highlightOff();
-            this.highlightOn(intersects[0].object);
-        }
+//        if( this.highlightCube !== intersects[0].object ){//&& this.highlightCube !== this.selectedCube ){
+//            //console.log("this.highlightOn2");
+//            //this.highlightOff();
+//            //this.highlightOn(intersects[0].object);                 
+//            this.setHighlighted(intersects[0].object);
+//        }
+        this.setHighlighted(intersects[0].object);
     }else{
         //console.log("this.highlightOff");
-        this.highlightOff();
+        //this.highlightOff();
+        this.setHighlighted(null);
     }
         
     
@@ -289,6 +304,38 @@ GameModeProject.prototype.render = function (renderer) {
     renderer.render(this.scene, this.camera);
 
 };
+
+GameModeProject.prototype.setHighlighted = function(cube){
+    if( cube === null ){ //zerowanie
+        if( this.highlightCube !== null && this.highlightCube !== this.selectedCube ) {
+            this.highlightCube.material.opacity = 1;
+            this.highlightCube = null;
+        }
+    }else{ //ustawianie
+        if( this.highlightCube !== cube ){
+            if( this.highlightCube !== null && this.highlightCube !== this.selectedCube ){
+                this.highlightCube.material.opacity = 1;
+            }
+            this.highlightCube = cube;
+            this.highlightCube.material.opacity = 0.5;
+        }        
+    }
+}
+
+GameModeProject.prototype.setSelected = function(cube){
+    if( cube === null ){ //zerowanie
+        if( this.selectedCube !== null ) {
+            this.selectedCube.material.opacity = 1;
+            this.selectedCube = null;
+        }
+    }else{ //ustawianie
+        if( this.selectedCube !== cube ){
+            if( this.selectedCube !== null ) this.selectedCube.material.opacity = 1;
+            this.selectedCube = cube;
+            this.selectedCube.material.opacity = 0.5;
+        }        
+    }
+}
 
 GameModeProject.prototype.highlightOn = function (cube) {
     this.highlightCube = cube;
@@ -299,8 +346,27 @@ GameModeProject.prototype.highlightOn = function (cube) {
 GameModeProject.prototype.highlightOff = function () {
     //console.log(this.highlightCube);
     if(this.highlightCube === null) return;
+    if(this.highlightCube === this.selectedCube) return;
+    
     this.highlightCube.material.opacity = 1.0;
     //console.log("this.highlightOff");
     //console.log(this.highlightCube);
     this.highlightCube = null;
 };
+
+GameModeProject.prototype.highlightOnOff = function (cube,hl) {
+    //this.highlightCube = cube;
+    //console.log("this.highlightOn");
+    this.highlightCube.material.opacity = hl === true ? 0.5 : 1;
+};
+//
+//GameModeProject.prototype.highlightOff = function () {
+//    //console.log(this.highlightCube);
+//    if(this.highlightCube === null) return;
+//    if(this.highlightCube === this.selectedCube) return;
+//    
+//    this.highlightCube.material.opacity = 1.0;
+//    //console.log("this.highlightOff");
+//    //console.log(this.highlightCube);
+//    this.highlightCube = null;
+//};
