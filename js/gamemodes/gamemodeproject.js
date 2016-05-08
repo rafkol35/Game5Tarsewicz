@@ -15,6 +15,9 @@ function GameModeProject(name) {
         this.camera = new THREE.OrthographicCamera( 
             window.innerWidth / -2, window.innerWidth / 2,
             window.innerHeight / 2, window.innerHeight / -2, -500, 1000);
+            //-2.5, 2.5,
+            //2.5, -2.5, 
+            //-500, 1000);
     } else {
         this.camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
     }
@@ -127,18 +130,18 @@ GameModeProject.prototype.keyDown = function (event) {
         case 81: //q
             //this.pressedKeys[event.keyCode] = true;
             
-            this.camera.zoom = this.camera.zoom+1;
-            console.log( this.camera.zoom );
-            this.onWindowResize();
+            //this.camera.zoom = Math.min(5,this.camera.zoom+0.1);
+            //console.log( this.camera.zoom );
+            //this.onWindowResize();
             
             break;
             
         case 69: //e
             //this.pressedKeys[event.keyCode] = true;
             
-            this.camera.zoom = this.camera.zoom-1;
-            console.log( this.camera.zoom );
-            this.onWindowResize();
+            //this.camera.zoom = Math.max(0.1,this.camera.zoom-0.1);
+            //console.log( this.camera.zoom );
+            //this.onWindowResize();
             
             break;
             
@@ -226,22 +229,32 @@ GameModeProject.prototype.render = function (renderer) {
 //    camera.position.x = Math.cos( timer ) * 200;
 //    camera.position.z = Math.sin( timer ) * 200;
 //    camera.lookAt( scene.position );
+
+    var ms = 1.5;
+    
+    if( pressedKeys[81] ){
+        this.camera.zoom = Math.min(5,this.camera.zoom + deltaTime*ms);
+        this.onWindowResize();
+    }else if( pressedKeys[69] ){
+        this.camera.zoom = Math.max(0.1,this.camera.zoom-deltaTime*ms);
+        this.onWindowResize();
+    }
     
     if( this.moveLeft ){
         //deltaTime
-        this.xrat -= deltaTime;
-        this.zrat -= deltaTime;
+        this.xrat -= deltaTime * ms;
+        this.zrat -= deltaTime * ms;
     }
     else if( this.moveRight ){
-        this.xrat += deltaTime;
-        this.zrat += deltaTime;
+        this.xrat += deltaTime * ms;
+        this.zrat += deltaTime * ms;
     }
     
     if( this.moveUp ){
-        this.yrat = Math.min(Math.PI*0.5,this.yrat+deltaTime);
+        this.yrat = Math.min(Math.PI*0.5,this.yrat+deltaTime*ms);
     }
     else if( this.moveDown ){
-        this.yrat = Math.max(0,this.yrat-deltaTime);
+        this.yrat = Math.max(0,this.yrat-deltaTime*ms);
     }
     
     //this.xrat = 0;
