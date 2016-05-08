@@ -4,6 +4,24 @@
  * and open the template in the editor.
  */
 
+var SOPos = function () {
+    this.X = 0;
+    this.Y = 0;
+    this.Z = 0;    
+};
+
+var SOD = function () {
+    //this.asdf = 'dat.gui';
+    //this.speed = 0.8;
+    //this.displayOutline = false;
+    this.pos = new SOPos();
+    //this.X = 123;
+    //this.X = 321;
+    //this.explode = function () {
+    //    console.log('explode');
+    //};
+};
+        
 function GameModeProject(name) {
     GameMode.call(this, name);
 
@@ -30,10 +48,49 @@ function GameModeProject(name) {
 //        height: 5 * 32 - 1
 //        autoPlace: false
     });
-    var params = {
-        project: 5000
-    };
-    this.gui.add(params, 'project');
+    
+    //{
+        
+    
+        var folderPosition = this.gui.addFolder('Position');
+        //f1.add(text, 'speed');
+        //f1.add(text, 'noiseStrength');
+
+        var params = {
+            X: 0,
+            Y: 0,
+            Z: 0
+        };
+        
+        this.sod = new SOD();
+         
+        var cntr = folderPosition.add(this.sod.pos, 'X').listen();
+        cntr.onChange(this.posChanged);
+        cntr.onFinishChange(this.posChanged);
+        
+//        var params2 = {
+//            project2: 12345
+//        };
+        var cntrPosY = folderPosition.add(params, 'Y');
+
+        cntrPosY.onChange(function (value) {
+            //console.log("1: " + value);
+        });
+
+        cntrPosY.onFinishChange(function (value) {
+            //console.log("2: The new value is " + value);
+        });
+        
+        var cntrPosZ = folderPosition.add(params, 'Z');
+
+        cntrPosZ.onChange(function (value) {
+            //console.log("1: " + value);
+        });
+
+        cntrPosZ.onFinishChange(function (value) {
+            //console.log("2: The new value is " + value);
+        });
+    //}
     
     this.gui.domElement.id = 'guiProject';
     var customContainer = $('.moveGUI').append($(this.gui.domElement));
@@ -98,6 +155,11 @@ GameModeProject.prototype.f2 = function () {
     console.log("GameModeProject::f2 " + this.name);
 };
 
+GameModeProject.prototype.posChanged = function (val) {
+    console.log("GameModeProject::posChanged " + val);
+    console.log(this.text);
+};
+
 GameModeProject.prototype.getClearColor = function () {
     return 0xffffff;
 };
@@ -124,6 +186,9 @@ GameModeProject.prototype.deactivate = function(){
 GameModeProject.prototype.keyDown = function (event) {
 
     //console.log(event.keyCode);
+    //console.log(this.text.PosX++);
+
+    //this.text.PosX = "asdf";
 
     switch (event.keyCode) {
 
@@ -231,9 +296,12 @@ GameModeProject.prototype.mouseDown = function(event){
 //    }
 //    this.selectedCube = this.highlightCube;
     
-    //console.log(event.srcElement);
+    //console.log(event.target);
     //console.log(renderer.domElement);
-    if(event.srcElement === renderer.domElement){
+    
+    if(event.srcElement === renderer.domElement //chrome
+            || event.target === renderer.domElement //firefox
+            ){
         this.setSelected(this.getFirstUnderMouse());
     }
 };
