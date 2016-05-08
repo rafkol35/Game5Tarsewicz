@@ -181,18 +181,8 @@ GameModeVisit.prototype.render = function (renderer) {
         
         var intersects = this.raycaster.intersectObjects(walls);
         if (intersects.length > 0) {
-//            if (INTERSECTED != intersects[ 0 ].object) {
-//                if (INTERSECTED)
-//                    INTERSECTED.material.emissive.setHex(INTERSECTED.currentHex);
-//                INTERSECTED = intersects[ 0 ].object;
-//                INTERSECTED.currentHex = INTERSECTED.material.emissive.getHex();
-//                INTERSECTED.material.emissive.setHex(0xff0000);
-//            }
             canMove = false;
         } else {
-//            if (INTERSECTED)
-//                INTERSECTED.material.emissive.setHex(INTERSECTED.currentHex);
-//            INTERSECTED = null;
         }
     }
     
@@ -294,6 +284,11 @@ GameModeVisit.prototype.keyUp = function (event) {
 
     }
 
+};
+
+GameModeVisit.prototype.onWindowResize = function(){
+    this.camera.aspect = window.innerWidth / window.innerHeight;
+    this.camera.updateProjectionMatrix();        
 };
 
 GameModeVisit.prototype.getDirection = function () {

@@ -18,6 +18,7 @@
         <script src="js/gamemodes/gamemodevisit.js"></script>
         
         <script>
+            var firstFrame = true;
             var mousePressed = false;
             var mouse = new THREE.Vector2(), INTERSECTED;
             var mouseClickPos = new THREE.Vector2();
@@ -28,12 +29,10 @@
             var controls;
             var firstMouseMove = true;
             
-            //var gamemode = 0; // 0 - projektowanie 1 - zwiedzanie
-            
             var gameModeProject = new GameModeProject('project');
             var gameModeVisit = new GameModeVisit('visit');
             var currentGameMode = null; //gameModeVisit; //gameModeProject;
-            //setMode(gameModeVisit); // bo w egde sie nie pokaza kontrolki
+            //setMode(gameModeProject); // bo w egde sie nie pokaza kontrolki
             setMode(gameModeVisit);
             
             function setMode(newMode){
@@ -43,53 +42,29 @@
             }
             
             function onWindowResize() {
-                camera.aspect = window.innerWidth / window.innerHeight;
-                camera.updateProjectionMatrix();
-                renderer.setSize(window.innerWidth, window.innerHeight);
+                //camera.aspect = window.innerWidth / window.innerHeight;
+                //camera.updateProjectionMatrix();
+                //renderer.setSize(window.innerWidth, window.innerHeight);
+                
+                renderer.setSize(window.innerWidth, window.innerHeight);                
+                if( currentGameMode ) currentGameMode.onWindowResize();
             }
             
             function onDocumentMouseDown(event) {
                 event.preventDefault();
 
-                //gamemode = (gamemode+1) % 2;
-                //console.log(gamemode);
-                
-                //if( currentGameMode === gameModeProject ) setMode(gameModeVisit);
-                //else setMode(gameModeProject);
-                
-                //gui.close();
-                //$(gui.domElement).attr("hidden", gamemode === 0 ? true : false);
-                
                 mousePressed = true;
                 mouseClickPos.x = (event.clientX / window.innerWidth) * 2 - 1;
                 mouseClickPos.y = -(event.clientY / window.innerHeight) * 2 + 1;
                 mouseLast = mouseClickPos;
-
-                //mousePressedPos.x = mouseClickPos.x;
-                //mousePressedPos.y = mouseClickPos.y;
-
-//                raycasterTouch.setFromCamera(mouse, camera);
-//                var intersects = raycasterTouch.intersectObjects(walls);
-//                if (intersects.length > 0) {
-//                //    draggedCubic = intersects[0].object;
-//                //    draggedCubicFaceNormal = intersects[0].face.normal.clone();
-//                //    newTouchedCubic = null;
-//                //    console.log("asdf");
-//                }                    
             }
             
             function onDocumentMouseUp(event) {
                 event.preventDefault();
                 mousePressed = false;
-                //draggedCubic = null;
-                //newTouchedCubic = null;
                 var mouseClickPos2 = new THREE.Vector2(0, 0);
                 mouseClickPos2.x = (event.clientX / window.innerWidth) * 2 - 1;
-                mouseClickPos2.y = -(event.clientY / window.innerHeight) * 2 + 1;
-                //var dist = mousePressedPos.distanceTo(mouseClickPos2);
-                //if (dist < 0.01) {
-                //    //blockOnRotate = false;
-                //}
+                mouseClickPos2.y = -(event.clientY / window.innerHeight) * 2 + 1;                
             }
 
             function onDocumentMouseMove(event) {
@@ -119,9 +94,18 @@
             var pressedKeys = []; //new Array();
             
             var onKeyDown = function (event) {
-                pressedKeys[event.keyCode] = true;
-                //console.log(pressedKeys);
-                if( currentGameMode ) currentGameMode.keyDown(event);
+                switch(event.keyCode){
+                    case 79: //o
+                        if( currentGameMode !== gameModeVisit ) setMode(gameModeVisit);
+                        break;
+                    case 80: //p
+                        if( currentGameMode !== gameModeProject ) setMode(gameModeProject);
+                        break;
+                    default:
+                        pressedKeys[event.keyCode] = true;
+                        if( currentGameMode ) currentGameMode.keyDown(event);
+                        break;
+                }                
             };
             
             var onKeyUp = function (event) {
@@ -132,33 +116,16 @@
             
             document.addEventListener('keydown', onKeyDown, false);
             document.addEventListener('keyup', onKeyUp, false);
-            
-            
-//            var gui = new dat.GUI({
-//                height : 5 * 32 - 1
-//            });
-//            var params = {
-//                interation: 5000
-//            };
-//            gui.add(params, 'interation');
-            
-            //gui.close();
-            
-            //gui.add(params, 'width').min(128).max(256).step(16);
-
-//            var geometry = new THREE.BoxGeometry(1, 1, 1);
-//            var material = new THREE.MeshBasicMaterial({color: 0x00ff00});
-//            var cube = new THREE.Mesh(geometry, material);
-//            scene.add(cube);
-//            walls.push(cube);
-//            
-//            camera.position.z = 5;
-////            controls = new THREE.PointerLockControls( camera );
 
             var render = function () {
                 deltaTime = clock.getDelta();                
                 requestAnimationFrame(render);
                 if( currentGameMode ) currentGameMode.render(renderer);
+                
+                if( firstFrame ){
+                    firstFrame = false;
+                    setMode(gameModeProject);
+                }
             };
 
             render();

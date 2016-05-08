@@ -34,3 +34,5 @@ GameMode.prototype.mouseMove = function(event){};
 
 GameMode.prototype.keyDown = function(event){};
 GameMode.prototype.keyUp = function(event){};
+
+GameMode.prototype.onWindowResize = function(){};
