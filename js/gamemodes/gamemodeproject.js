@@ -8,36 +8,20 @@ function GameModeProject(name) {
     GameMode.call(this, name);
 
     this.scene = new THREE.Scene();
-    //this.camera = new THREE.OrthographicCamera( 
-    //        window.innerWidth / - 2, window.innerWidth / 2, 
-    //        window.innerHeight / 2, window.innerHeight / - 2, - 500, 1000 );
     
-    var SCREEN_WIDTH = window.innerWidth;
-    var SCREEN_HEIGHT = window.innerHeight;
-    var aspect = SCREEN_WIDTH / SCREEN_HEIGHT;
-    var frustumSize = 600;
+    this.cameraType = 1;
     
-//    this.camera = new THREE.OrthographicCamera( 
-//            0.5 * frustumSize * aspect / - 2, 
-//            0.5 * frustumSize * aspect / 2,
-//            frustumSize / 2,
-//            frustumSize / - 2, 
-//            150, 1000 );
-            
-    this.camera = new THREE.OrthographicCamera( 
-        window.innerWidth / -2, window.innerWidth / 2, 
-        window.innerHeight / 2, window.innerHeight / -2, - 500, 1000 );
-				
-                                
-    //this.camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
-    
+    if( this.cameraType === 1 ){
+        this.camera = new THREE.OrthographicCamera( 
+            window.innerWidth / -2, window.innerWidth / 2,
+            window.innerHeight / 2, window.innerHeight / -2, -500, 1000);
+    } else {
+        this.camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+    }
+        
     this.camera.position.set(0,100,100);
     
     this.camera.lookAt(new THREE.Vector3(0, 0, 0));		
-    this.camera.zoom = 2;
-    //this.camera.position.x = 200;
-    //this.camera.position.y = 100;
-    //this.camera.position.z = 200;
     
     this.gui = new dat.GUI({
 //        height: 5 * 32 - 1
@@ -65,13 +49,39 @@ function GameModeProject(name) {
     var gridLine = new THREE.LineSegments(gridGeometry, gridMaterial);
     this.scene.add(gridLine);
 
+    this.cubes = [];
+    this.selectedCube = null;
+    this.highlightCube = null;
+    
     var geometry = new THREE.BoxGeometry(50, 50, 50);
-    var material = new THREE.MeshBasicMaterial({color: 0x00ff00});
+    var material = new THREE.MeshBasicMaterial({color: 0xff8000});
+    material.transparent = true;
     var cube = new THREE.Mesh(geometry, material);
-    cube.position.set(0, 0, 0);
+    cube.position.set(0, 25, 0);
     this.scene.add(cube);
+    this.cubes.push(cube);
+    
+    var material2 = new THREE.MeshBasicMaterial({color: 0xff8000});
+    material2.transparent = true;    
+    var cube2 = new THREE.Mesh(geometry, material2);
+    this.scene.add(cube2);
+    cube2.position.set(0, 175, 0);    
+    //cube2.material.transparent = true;
+    //cube2.material.opacity = 0.5;
+    this.cubes.push(cube2);
     
     //$(this.gui.domElement).attr("hidden", true);
+    
+    this.moveUp = false;
+    this.moveDown = false;
+    this.moveLeft = false;
+    this.moveRight = false;
+    
+    this.xrat = Math.PI * 0.25;
+    this.yrat = Math.PI * 0.25;
+    this.zrat = Math.PI * 0.25;
+    
+    this.raycaster = new THREE.Raycaster();
 }
 
 GameModeProject.prototype = Object.create(GameMode.prototype);
@@ -92,10 +102,20 @@ GameModeProject.prototype.getClearColor = function () {
 GameModeProject.prototype.activate = function(){
     console.log('activate project');
     $(this.gui.domElement).attr("hidden", false);
+    
+    this.moveUp = false;
+    this.moveDown = false;  
+    this.moveLeft = false;
+    this.moveRight = false;
 };
 GameModeProject.prototype.deactivate = function(){
     console.log('deactivate project');
     $(this.gui.domElement).attr("hidden", true);
+    
+    this.moveUp = false;
+    this.moveDown = false;
+    this.moveLeft = false;
+    this.moveRight = false;
 };
 
 GameModeProject.prototype.keyDown = function (event) {
@@ -124,22 +144,22 @@ GameModeProject.prototype.keyDown = function (event) {
             
         case 38: // up
         case 87: // w
-            //this.moveForward = true;
+            this.moveUp = true;
             break;
 
         case 37: // left
         case 65: // a
-           // this.moveLeft = true;
+            this.moveLeft = true;
             break;
 
         case 40: // down
         case 83: // s
-            //this.moveBackward = true;
+            this.moveDown = true;
             break;
 
         case 39: // right
         case 68: // d
-           // this.moveRight = true;
+            this.moveRight = true;
             break;
 
         case 32: // space
@@ -147,9 +167,7 @@ GameModeProject.prototype.keyDown = function (event) {
 //                velocity.y += 350;
 //            canJump = false;
             break;
-
     }
-
 };
 
 GameModeProject.prototype.keyUp = function (event) {
@@ -168,22 +186,22 @@ GameModeProject.prototype.keyUp = function (event) {
             
         case 38: // up
         case 87: // w
-            //this.moveForward = false;
+            this.moveUp = false;
             break;
 
         case 37: // left
         case 65: // a
-           // this.moveLeft = false;
+            this.moveLeft = false;
             break;
 
         case 40: // down
         case 83: // s
-            //this.moveBackward = false;
+            this.moveDown = false;
             break;
 
         case 39: // right
         case 68: // d
-           // this.moveRight = false;
+            this.moveRight = false;
             break;
 
     }
@@ -191,15 +209,85 @@ GameModeProject.prototype.keyUp = function (event) {
 };
 
 GameModeProject.prototype.onWindowResize = function(){
-    this.camera.left = window.innerWidth / -2;
-    this.camera.right = window.innerWidth / 2;
-    this.camera.top = window.innerHeight / 2;
-    this.camera.bottom = window.innerHeight / -2;
-    this.camera.updateProjectionMatrix();
-                                
-//    this.camera.left = -0.5 * frustumSize * aspect / 2;
-//    this.camera.right = 0.5 * frustumSize * aspect / 2;
-//    this.camera.top = frustumSize / 2;
-//    this.camera.bottom = -frustumSize / 2;
-//    this.camera.updateProjectionMatrix();
+    if( this.cameraType === 1 ){
+        this.camera.left = window.innerWidth / -2;
+        this.camera.right = window.innerWidth / 2;
+        this.camera.top = window.innerHeight / 2;
+        this.camera.bottom = window.innerHeight / -2;
+        this.camera.updateProjectionMatrix();    
+    }else {
+        this.camera.aspect = window.innerWidth / window.innerHeight;
+        this.camera.updateProjectionMatrix();
+    }
+};
+
+GameModeProject.prototype.render = function (renderer) {
+    
+//    camera.position.x = Math.cos( timer ) * 200;
+//    camera.position.z = Math.sin( timer ) * 200;
+//    camera.lookAt( scene.position );
+    
+    if( this.moveLeft ){
+        //deltaTime
+        this.xrat -= deltaTime;
+        this.zrat -= deltaTime;
+    }
+    else if( this.moveRight ){
+        this.xrat += deltaTime;
+        this.zrat += deltaTime;
+    }
+    
+    if( this.moveUp ){
+        this.yrat = Math.min(Math.PI*0.5,this.yrat+deltaTime);
+    }
+    else if( this.moveDown ){
+        this.yrat = Math.max(0,this.yrat-deltaTime);
+    }
+    
+    //this.xrat = 0;
+    //this.zrat = 0;
+    
+    this.camera.position.x = Math.sin( this.xrat ) * 100;
+    this.camera.position.y = Math.sin( this.yrat ) * 100;
+    this.camera.position.z = Math.cos( this.zrat ) * 100;
+    
+    this.camera.lookAt( this.scene.position );
+
+    this.raycaster.setFromCamera(mouse, this.camera);
+    var intersects = this.raycaster.intersectObjects(this.cubes);
+//    for (var i = 0; i < intersects.length; i++) {
+//        //intersects[ i ].object.material.color.set(0xff0000);
+//        console.log(intersects[ i ]);
+//    }
+    if( intersects.length > 0 ){
+        //console.log("this.highlightOn1");
+        if( this.highlightCube !== intersects[0].object ){
+            //console.log("this.highlightOn2");
+            this.highlightOff();
+            this.highlightOn(intersects[0].object);
+        }
+    }else{
+        //console.log("this.highlightOff");
+        this.highlightOff();
+    }
+        
+    
+    renderer.setClearColor(this.getClearColor());
+    renderer.render(this.scene, this.camera);
+
+};
+
+GameModeProject.prototype.highlightOn = function (cube) {
+    this.highlightCube = cube;
+    //console.log("this.highlightOn");
+    this.highlightCube.material.opacity = 0.5;
+};
+
+GameModeProject.prototype.highlightOff = function () {
+    //console.log(this.highlightCube);
+    if(this.highlightCube === null) return;
+    this.highlightCube.material.opacity = 1.0;
+    //console.log("this.highlightOff");
+    //console.log(this.highlightCube);
+    this.highlightCube = null;
 };
