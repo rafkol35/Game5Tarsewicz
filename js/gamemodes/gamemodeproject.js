@@ -10,16 +10,20 @@ var SOPos = function () {
     this.Z = 0;    
 };
 
+var SORot = function () {
+    this.X = 0;
+    this.Y = 0;
+    this.Z = 0;    
+};
+
+var SOScale = function () {
+    this.X = 0;
+    this.Y = 0;
+    this.Z = 0;    
+};
+
 var SOD = function () {
-    //this.asdf = 'dat.gui';
-    //this.speed = 0.8;
-    //this.displayOutline = false;
-    this.pos = new SOPos();
-    //this.X = 123;
-    //this.X = 321;
-    //this.explode = function () {
-    //    console.log('explode');
-    //};
+    this.pos = new SOPos();    
 };
         
 function GameModeProject(name) {
@@ -32,15 +36,15 @@ function GameModeProject(name) {
     if( this.cameraType === 1 ){
         this.camera = new THREE.OrthographicCamera( 
             window.innerWidth / -2, window.innerWidth / 2,
-            window.innerHeight / 2, window.innerHeight / -2, -500, 1000);
+            window.innerHeight / 2, window.innerHeight / -2, -1000, 10000);
             //-2.5, 2.5,
             //2.5, -2.5, 
             //-500, 1000);
     } else {
         this.camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
     }
-        
-    this.camera.position.set(0,100,100);
+    this.cameraRestrict = new THREE.Vector3(1000,1000,1000);    
+    this.camera.position.set(0,this.cameraRestrict.y,this.cameraRestrict.z);
     
     this.camera.lookAt(new THREE.Vector3(0, 0, 0));		
     
@@ -49,61 +53,43 @@ function GameModeProject(name) {
 //        autoPlace: false
     });
     
-    //{
-        
-    
-        var folderPosition = this.gui.addFolder('Position');
-        //f1.add(text, 'speed');
-        //f1.add(text, 'noiseStrength');
+    var folderPosition = this.gui.addFolder('Position');
 
-        var params = {
-            X: 0,
-            Y: 0,
-            Z: 0
-        };
-        
-        this.sod = new SOD();
-         
-        var cntr = folderPosition.add(this.sod.pos, 'X').listen();
-        cntr.onChange(this.posChanged);
-        cntr.onFinishChange(this.posChanged);
-        
-//        var params2 = {
-//            project2: 12345
-//        };
-        var cntrPosY = folderPosition.add(params, 'Y');
+    this.sod = new SOD();
 
-        cntrPosY.onChange(function (value) {
-            //console.log("1: " + value);
-        });
+    var cntr = folderPosition.add(this.sod.pos, 'X').listen();
+    cntr.step(0.1);
+    cntr.onChange(selObjPosChanged);
+    cntr.onFinishChange(selObjPosChanged);
 
-        cntrPosY.onFinishChange(function (value) {
-            //console.log("2: The new value is " + value);
-        });
-        
-        var cntrPosZ = folderPosition.add(params, 'Z');
+    cntr = folderPosition.add(this.sod.pos, 'Y').listen();
+    cntr.step(0.1).min(0);
+    cntr.onChange(selObjPosChanged);
+    cntr.onFinishChange(selObjPosChanged);
 
-        cntrPosZ.onChange(function (value) {
-            //console.log("1: " + value);
-        });
-
-        cntrPosZ.onFinishChange(function (value) {
-            //console.log("2: The new value is " + value);
-        });
-    //}
+    cntr = folderPosition.add(this.sod.pos, 'Z').listen();
+    cntr.step(0.1);
+    cntr.onChange(selObjPosChanged);
+    cntr.onFinishChange(selObjPosChanged);
+       
     
     this.gui.domElement.id = 'guiProject';
     var customContainer = $('.moveGUI').append($(this.gui.domElement));
     
 
     // Grid
-    var gridSize = 500, gridStep = 50;
+    this.gridStep = 50;
+    this.stageSize = 10;
+    var gridSize = this.stageSize * this.gridStep;
+    this.halfGridStep = this.gridStep * 0.5;
+    
     var gridGeometry = new THREE.Geometry();
-    for (var i = -gridSize; i <= gridSize; i += gridStep) {
-        gridGeometry.vertices.push(new THREE.Vector3(-gridSize, 0, i));
-        gridGeometry.vertices.push(new THREE.Vector3(gridSize, 0, i));
-        gridGeometry.vertices.push(new THREE.Vector3(i, 0, -gridSize));
-        gridGeometry.vertices.push(new THREE.Vector3(i, 0, gridSize));
+    
+    for (var i = -gridSize; i <= gridSize; i += this.gridStep) {
+        gridGeometry.vertices.push(new THREE.Vector3(-gridSize, -this.halfGridStep, i));
+        gridGeometry.vertices.push(new THREE.Vector3(gridSize, -this.halfGridStep, i));
+        gridGeometry.vertices.push(new THREE.Vector3(i, -this.halfGridStep, -gridSize));
+        gridGeometry.vertices.push(new THREE.Vector3(i, -this.halfGridStep, gridSize));
     }
     var gridMaterial = new THREE.LineBasicMaterial({color: 0x000000, opacity: 0.2});
     var gridLine = new THREE.LineSegments(gridGeometry, gridMaterial);
@@ -117,7 +103,7 @@ function GameModeProject(name) {
     var material = new THREE.MeshBasicMaterial({color: 0xff8000});
     material.transparent = true;
     var cube = new THREE.Mesh(geometry, material);
-    cube.position.set(0, 25, 0);
+    cube.position.set(0, 0, 0);
     this.scene.add(cube);
     this.cubes.push(cube);
     
@@ -125,7 +111,7 @@ function GameModeProject(name) {
     material2.transparent = true;    
     var cube2 = new THREE.Mesh(geometry, material2);
     this.scene.add(cube2);
-    cube2.position.set(0, 175, 0);    
+    cube2.position.set(0, 150, 0);    
     //cube2.material.transparent = true;
     //cube2.material.opacity = 0.5;
     this.cubes.push(cube2);
@@ -155,9 +141,25 @@ GameModeProject.prototype.f2 = function () {
     console.log("GameModeProject::f2 " + this.name);
 };
 
-GameModeProject.prototype.posChanged = function (val) {
-    console.log("GameModeProject::posChanged " + val);
-    console.log(this.text);
+var selObjPosChanged = function (val) {
+    if( gameModeProject.selectedCube === null ) return;
+    
+    //console.log("GameModeProject::posChanged " + val);
+    //console.log(this);
+    //console.log(this.property + " : " + val);
+    
+    //if( this.property === "X" )
+    switch(this.property){
+        case "X":
+            gameModeProject.selectedCube.position.x = val * gameModeProject.gridStep;
+            break;
+        case "Y":
+            gameModeProject.selectedCube.position.y = val * gameModeProject.gridStep;
+            break;
+        case "Z":
+            gameModeProject.selectedCube.position.z = val * gameModeProject.gridStep;
+            break;
+    }
 };
 
 GameModeProject.prototype.getClearColor = function () {
@@ -189,6 +191,8 @@ GameModeProject.prototype.keyDown = function (event) {
     //console.log(this.text.PosX++);
 
     //this.text.PosX = "asdf";
+
+    //console.log(this.gui);
 
     switch (event.keyCode) {
 
@@ -337,21 +341,13 @@ GameModeProject.prototype.render = function (renderer) {
         this.yrat = Math.max(0,this.yrat-deltaTime*ms);
     }
     
-    this.camera.position.x = Math.sin( this.xrat ) * 100;
-    this.camera.position.y = Math.sin( this.yrat ) * 100;
-    this.camera.position.z = Math.cos( this.zrat ) * 100;
+    this.camera.position.x = Math.sin( this.xrat ) * this.cameraRestrict.x;
+    this.camera.position.y = Math.sin( this.yrat ) * this.cameraRestrict.y;
+    this.camera.position.z = Math.cos( this.zrat ) * this.cameraRestrict.z;
     
     this.camera.lookAt( this.scene.position );
 
     this.setHighlighted(this.getFirstUnderMouse());
-    
-//    this.raycaster.setFromCamera(mouse, this.camera);
-//    var intersects = this.raycaster.intersectObjects(this.cubes);
-//    if( intersects.length > 0 ){        
-//        this.setHighlighted(intersects[0].object);
-//    }else{
-//        this.setHighlighted(null);
-//    }
     
     renderer.setClearColor(this.getClearColor());
     renderer.render(this.scene, this.camera);
@@ -388,7 +384,16 @@ GameModeProject.prototype.setHighlighted = function(cube){
 GameModeProject.prototype.setSelected = function(cube){
     if( this.selectedCube !== null ) this.selectedCube.material.opacity = 1;
     this.selectedCube = cube;
-    if( this.selectedCube !== null ) this.selectedCube.material.opacity = 0.5;
+    if( this.selectedCube !== null ) {
+        this.selectedCube.material.opacity = 0.5;
+        this.sod.pos.X = this.selectedCube.position.x / this.gridStep;
+        this.sod.pos.Y = this.selectedCube.position.y / this.gridStep;
+        this.sod.pos.Z = this.selectedCube.position.z / this.gridStep;
+    }else{
+        this.sod.pos.X = "";
+        this.sod.pos.Y = "";
+        this.sod.pos.X = "";
+    }
     
 //    if( cube === null ){ //zerowanie
 //        if( this.selectedCube !== null ) {
