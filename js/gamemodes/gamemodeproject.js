@@ -5,9 +5,9 @@
  */
 
 var SOPos = function () {
-    this.X = 0;
-    this.Y = 0;
-    this.Z = 0;    
+    this.X = 0.0;
+    this.Y = 0.0;
+    this.Z = 0.0;    
 };
 
 var SORot = function () {
@@ -17,9 +17,9 @@ var SORot = function () {
 };
 
 var SOScale = function () {
-    this.X = 0;
-    this.Y = 0;
-    this.Z = 0;    
+    this.X = 0.0;
+    this.Y = 0.0;
+    this.Z = 0.0;    
 };
 
 var SOD = function () {
@@ -62,6 +62,11 @@ function GameModeProject(name) {
     
     this.camera.lookAt(new THREE.Vector3(0, 0, 0));		
     
+    this.gridStep = 50;
+    this.stageSize = 10;
+    this.gridSize = this.stageSize * this.gridStep;
+    this.halfGridStep = this.gridStep * 0.5;
+    
     this.gui = new dat.GUI({
 //        height: 5 * 32 - 1
 //        autoPlace: false
@@ -72,18 +77,20 @@ function GameModeProject(name) {
     {
         var folderPosition = this.gui.addFolder('Position');
 
-        var cntr = folderPosition.add(this.sod.pos, 'X').listen();
+        var cntr = folderPosition.add(this.sod.pos, 'X',-this.stageSize,this.stageSize).listen();
         cntr.step(0.1);
+        //cntr.min(-this.stageSize/2);
+        //cntr.max(this.stageSize/2);
         cntr.onChange(selObjPosChanged);
         cntr.onFinishChange(selObjPosChanged);
 
-        cntr = folderPosition.add(this.sod.pos, 'Y').listen();
-        cntr.step(0.1).min(0);
+        cntr = folderPosition.add(this.sod.pos, 'Y',0,10).listen();
+        cntr.step(0.1);//.min(0).max(30);
         cntr.onChange(selObjPosChanged);
         cntr.onFinishChange(selObjPosChanged);
 
-        cntr = folderPosition.add(this.sod.pos, 'Z').listen();
-        cntr.step(0.1);
+        cntr = folderPosition.add(this.sod.pos, 'Z',-this.stageSize,this.stageSize).listen();
+        cntr.step(0.1).min(-this.stageSize).max(this.stageSize);
         cntr.onChange(selObjPosChanged);
         cntr.onFinishChange(selObjPosChanged);
     }
@@ -111,7 +118,7 @@ function GameModeProject(name) {
         var folder = this.gui.addFolder('Scale');
 
         var cntr = folder.add(this.sod.scale, 'X').listen();
-        cntr.step(0.1).min(0.1);;
+        cntr.step(0.1).min(0.1);
         cntr.onChange(selObjScaleChanged);
         cntr.onFinishChange(selObjScaleChanged);
 
@@ -150,12 +157,15 @@ function GameModeProject(name) {
     this.textures["rbn_1"] = ( THREE.ImageUtils.loadTexture('textures/rbn_1.png') );
     this.textures["rbn_2"] = ( THREE.ImageUtils.loadTexture('textures/rbn_2.png') );
     
+    this.textures["rbn_0"].wrapS = THREE.RepeatWrapping;
+    this.textures["rbn_0"].wrapT = THREE.RepeatWrapping;
+    this.textures["rbn_0"].repeat = new THREE.Vector2(2,2);
     
     // Grid
-    this.gridStep = 50;
-    this.stageSize = 10;
-    var gridSize = this.stageSize * this.gridStep;
-    this.halfGridStep = this.gridStep * 0.5;
+//    this.gridStep = 50;
+//    this.stageSize = 10;
+//    var gridSize = this.stageSize * this.gridStep;
+//    this.halfGridStep = this.gridStep * 0.5;
     
     var draggedFloorGeometry = new THREE.BoxGeometry(this.gridStep * this.stageSize * 4, 10, this.gridStep * this.stageSize * 4);
     var draggedFloorMaterial = new THREE.MeshBasicMaterial({color: 0x888888});
@@ -177,10 +187,6 @@ function GameModeProject(name) {
             
     //var floorGeometry = new THREE.PlaneGeometry(100, 100);
     
-    this.textures["rbn_0"].wrapS = THREE.RepeatWrapping;
-    this.textures["rbn_0"].wrapT = THREE.RepeatWrapping;
-    this.textures["rbn_0"].repeat = new THREE.Vector2(2,2);
-    
     var floorMaterial = new THREE.MeshBasicMaterial({color: 0xbbbbbb, map: this.textures["rbn_0"]});
     //floorMaterial.transparent = false;
     this.floor = new THREE.Mesh(floorGeometry, floorMaterial);
@@ -189,19 +195,30 @@ function GameModeProject(name) {
     var rad = THREE.Math.degToRad(-90);    
     newRot.x = rad;
     this.floor.rotation = newRot;
-    //this.floor.receiveShadow = true;
-    
+    //this.floor.receiveShadow = true;    
     //this.floor.visible = true;
     this.scene.add(this.floor);
-    console.log(this.floor);
+    //console.log(this.floor);
+    
+    var draggedIndicatorGeometry = new THREE.PlaneGeometry(this.gridStep, this.gridStep);            
+    var draggedIndicatorMaterial = new THREE.MeshBasicMaterial({color: 0xff0000});
+    this.draggedIndicator = new THREE.Mesh(draggedIndicatorGeometry, draggedIndicatorMaterial);
+    this.draggedIndicator.position.set(100, -this.halfGridStep+0.1, 100);
+    var newRot = this.draggedIndicator.rotation;
+    var rad = THREE.Math.degToRad(-90);    
+    newRot.x = rad;
+    this.draggedIndicator.rotation = newRot;
+    this.draggedIndicator.visible = false;
+    this.scene.add(this.draggedIndicator);
+    //console.log(this.floor);
     
     var ggoffset = 0.5;
     var gridGeometry = new THREE.Geometry();
-    for (var i = -gridSize; i <= gridSize; i += this.gridStep) {
-        gridGeometry.vertices.push(new THREE.Vector3(-gridSize, -this.halfGridStep+ggoffset, i));
-        gridGeometry.vertices.push(new THREE.Vector3(gridSize, -this.halfGridStep+ggoffset, i));
-        gridGeometry.vertices.push(new THREE.Vector3(i, -this.halfGridStep+ggoffset, -gridSize));
-        gridGeometry.vertices.push(new THREE.Vector3(i, -this.halfGridStep+ggoffset, gridSize));
+    for (var i = -this.gridSize; i <= this.gridSize; i += this.gridStep) {
+        gridGeometry.vertices.push(new THREE.Vector3(-this.gridSize, -this.halfGridStep+ggoffset, i));
+        gridGeometry.vertices.push(new THREE.Vector3(this.gridSize, -this.halfGridStep+ggoffset, i));
+        gridGeometry.vertices.push(new THREE.Vector3(i, -this.halfGridStep+ggoffset, -this.gridSize));
+        gridGeometry.vertices.push(new THREE.Vector3(i, -this.halfGridStep+ggoffset, this.gridSize));
     }
     var gridMaterial = new THREE.LineBasicMaterial({color: 0x000000, opacity: 1.0});
     var gridLine = new THREE.LineSegments(gridGeometry, gridMaterial);
@@ -283,6 +300,8 @@ var selObjPosChanged = function (val) {
             gameModeProject.selectedCube.position.z = val * gameModeProject.gridStep;
             break;
     }
+    gameModeProject.draggedIndicator.position.x = gameModeProject.selectedCube.position.x;
+    gameModeProject.draggedIndicator.position.z = gameModeProject.selectedCube.position.z;
 };
 
 var selObjRotChanged = function (val) {
@@ -520,11 +539,16 @@ GameModeProject.prototype.mouseUp = function(event){
 
 GameModeProject.prototype.mouseMove = function (event){
     if( this.draggedCube ){
+        //console.log("asdf");
         this.raycaster.setFromCamera(mouse, this.camera);
         var intersects = this.raycaster.intersectObject(this.draggedFloor);
         if( intersects.length > 0 ){        
             var newPos = intersects[0].point.clone().sub(this.draggedCubeOffset.clone());
+            newPos.x = Math.min( Math.max(-this.gridSize,newPos.x), this.gridSize );
+            newPos.z = Math.min( Math.max(-this.gridSize,newPos.z), this.gridSize );
             this.draggedCube.position.set(newPos.x,this.draggedCube.position.y,newPos.z);            
+            this.draggedIndicator.position.x = this.draggedCube.position.x;
+            this.draggedIndicator.position.z = this.draggedCube.position.z;
             this.udpateGUIPos(this.selectedCube);
         }
     }
@@ -584,8 +608,9 @@ GameModeProject.prototype.setHighlighted = function(cube){
     if( cube === null ){ //zerowanie
         if( this.highlightCube !== null && this.highlightCube !== this.selectedCube ) {
             this.highlightCube.material.opacity = 1;
-            this.highlightCube = null;
-        }
+            this.highlightCube = null;  
+            this.draggedIndicator.visible = false;
+        }        
     }else{ //ustawianie
         if( this.highlightCube !== cube ){
             if( this.highlightCube !== null && this.highlightCube !== this.selectedCube ){
@@ -593,6 +618,9 @@ GameModeProject.prototype.setHighlighted = function(cube){
             }
             this.highlightCube = cube;
             this.highlightCube.material.opacity = 0.5;
+            this.draggedIndicator.visible = true;
+            this.draggedIndicator.position.x = cube.position.x;
+            this.draggedIndicator.position.z = cube.position.z;
         }        
     }
 };
