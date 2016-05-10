@@ -143,25 +143,64 @@ function GameModeProject(name) {
     //this.gui.domElement.id = 'guiProject';
     //var customContainer = $('.moveGUI').append($(this.gui.domElement));
         
+    this.textures = [];
+    this.textures[""] = null;
+    this.textures["rbn_0"] = ( THREE.ImageUtils.loadTexture('textures/rbn_0.png') );
+    this.textures["rbn_1"] = ( THREE.ImageUtils.loadTexture('textures/rbn_1.png') );
+    this.textures["rbn_2"] = ( THREE.ImageUtils.loadTexture('textures/rbn_2.png') );
+    
+    
     // Grid
     this.gridStep = 50;
     this.stageSize = 10;
     var gridSize = this.stageSize * this.gridStep;
     this.halfGridStep = this.gridStep * 0.5;
     
-    var floorGeometry = new THREE.BoxGeometry(this.gridStep * this.stageSize * 2, this.gridStep, this.gridStep * this.stageSize * 2);
-    var floorMaterial = new THREE.MeshBasicMaterial({color: 0x888888});
-    floorMaterial.transparent = true;
-    this.floor = new THREE.Mesh(floorGeometry, floorMaterial);
-    this.floor.position.set(0, -this.gridStep-1.0, 0);
-    this.scene.add(this.floor);
+    var draggedFloorGeometry = new THREE.BoxGeometry(this.gridStep * this.stageSize * 4, 10, this.gridStep * this.stageSize * 4);
+    var draggedFloorMaterial = new THREE.MeshBasicMaterial({color: 0x888888});
+    draggedFloorMaterial.transparent = true;
+    this.draggedFloor = new THREE.Mesh(draggedFloorGeometry, draggedFloorMaterial);
+    this.draggedFloor.position.set(0, -this.halfGridStep-5-0.5, 0);
+    this.draggedFloor.visible = true;
+    this.scene.add(this.draggedFloor);
     
+    //var geometry = new THREE.PlaneGeometry( 5, 20, 32 );
+    //var material = new THREE.MeshBasicMaterial( {color: 0xffff00, side: THREE.DoubleSide} );
+    //var plane = new THREE.Mesh( geometry, material );
+    //scene.add( plane );
+
+    var floorGeometry = new THREE.PlaneGeometry(
+            this.gridStep * this.stageSize * 2, 
+            this.gridStep * this.stageSize * 2, 
+            this.stageSize, this.stageSize);
+            
+    //var floorGeometry = new THREE.PlaneGeometry(100, 100);
+    
+    this.textures["rbn_0"].wrapS = THREE.RepeatWrapping;
+    this.textures["rbn_0"].wrapT = THREE.RepeatWrapping;
+    this.textures["rbn_0"].repeat = new THREE.Vector2(2,2);
+    
+    var floorMaterial = new THREE.MeshStandardMaterial({color: 0xbbbbbb, map: this.textures["rbn_0"]});
+    //floorMaterial.transparent = false;
+    this.floor = new THREE.Mesh(floorGeometry, floorMaterial);
+    this.floor.position.set(0, -this.halfGridStep, 0);
+    var newRot = this.floor.rotation;
+    var rad = THREE.Math.degToRad(-90);    
+    newRot.x = rad;
+    this.floor.rotation = newRot;
+    this.floor.receiveShadow = true;
+    
+    //this.floor.visible = true;
+    this.scene.add(this.floor);
+    console.log(this.floor);
+    
+    var ggoffset = 0.5;
     var gridGeometry = new THREE.Geometry();
     for (var i = -gridSize; i <= gridSize; i += this.gridStep) {
-        gridGeometry.vertices.push(new THREE.Vector3(-gridSize, -this.halfGridStep, i));
-        gridGeometry.vertices.push(new THREE.Vector3(gridSize, -this.halfGridStep, i));
-        gridGeometry.vertices.push(new THREE.Vector3(i, -this.halfGridStep, -gridSize));
-        gridGeometry.vertices.push(new THREE.Vector3(i, -this.halfGridStep, gridSize));
+        gridGeometry.vertices.push(new THREE.Vector3(-gridSize, -this.halfGridStep+ggoffset, i));
+        gridGeometry.vertices.push(new THREE.Vector3(gridSize, -this.halfGridStep+ggoffset, i));
+        gridGeometry.vertices.push(new THREE.Vector3(i, -this.halfGridStep+ggoffset, -gridSize));
+        gridGeometry.vertices.push(new THREE.Vector3(i, -this.halfGridStep+ggoffset, gridSize));
     }
     var gridMaterial = new THREE.LineBasicMaterial({color: 0x000000, opacity: 1.0});
     var gridLine = new THREE.LineSegments(gridGeometry, gridMaterial);
@@ -173,22 +212,18 @@ function GameModeProject(name) {
     this.draggedCube = null;
     this.draggedCubeOffset = null;
     
-    this.textures = [];
-    this.textures[""] = null;
-    this.textures["rbn_0"] = ( THREE.ImageUtils.loadTexture('textures/rbn_0.png') );
-    this.textures["rbn_1"] = ( THREE.ImageUtils.loadTexture('textures/rbn_1.png') );
-    this.textures["rbn_2"] = ( THREE.ImageUtils.loadTexture('textures/rbn_2.png') );
     
     var geometry = new THREE.BoxGeometry(this.gridStep, this.gridStep, this.gridStep);
-    var material = new THREE.MeshBasicMaterial({color: 0xff8000, map: this.textures["rbn_0"]});
+    var material = new THREE.MeshStandardMaterial({color: 0xff8000, map: this.textures["rbn_0"]});
     //var material = new THREE.MeshLambertMaterial({ map: map1, color: 0xffffff, vertexColors: THREE.VertexColors });
     material.transparent = true;
     var cube = new THREE.Mesh(geometry, material);
-    cube.position.set(-220, 0, -150);
+    cube.position.set(0, 0, 0);
     this.scene.add(cube);
     this.cubes.push(cube);
+    cube.castShadow = true;
     
-    var material2 = new THREE.MeshBasicMaterial({color: 0xff8000, map: this.textures["rbn_1"]});
+    var material2 = new THREE.MeshStandardMaterial({color: 0xff8000, map: this.textures["rbn_1"]});
     material2.transparent = true;
     material2.map = null;
     var cube2 = new THREE.Mesh(geometry, material2);
@@ -197,7 +232,15 @@ function GameModeProject(name) {
     //cube2.material.transparent = true;
     //cube2.material.opacity = 0.5;
     this.cubes.push(cube2);
+    cube.castShadow = true;
     
+    this.light = new THREE.PointLight( 0xffffff, 1, 1000 );
+    this.light.position.set( 0, 0, 0 );
+    this.light.castShadow = true;
+    cube2.add( this.light );
+    //var light = new THREE.AmbientLight( 0x000000 ); // soft white light
+    //this.scene.add( light );
+
     //$(this.gui.domElement).attr("hidden", true);
     
     this.moveUp = false;
@@ -459,9 +502,14 @@ GameModeProject.prototype.mouseDown = function(event){
             ){
         this.setSelected(this.getFirstUnderMouse());
         
-        this.draggedCube = this.selectedCube;
-    
-        this.draggedCubeOffset;
+        this.raycaster.setFromCamera(mouse, this.camera);
+        var intersects = this.raycaster.intersectObject(this.draggedFloor);
+        if( intersects.length > 0 ){
+            this.draggedCube = this.selectedCube;
+            this.draggedCubeOffset = intersects[0].point.clone().sub(this.draggedCube.position.clone());
+            this.draggedCubeOffset.y = 0;
+            //console.log(this.draggedCubeOffset);            
+        }        
     }
 };
 GameModeProject.prototype.mouseUp = function(event){
@@ -471,28 +519,10 @@ GameModeProject.prototype.mouseUp = function(event){
 GameModeProject.prototype.mouseMove = function (event){
     if( this.draggedCube ){
         this.raycaster.setFromCamera(mouse, this.camera);
-        var intersects = this.raycaster.intersectObject(this.floor);
+        var intersects = this.raycaster.intersectObject(this.draggedFloor);
         if( intersects.length > 0 ){        
-//            //console.log(this.floor.worldToLocal(intersects[0].point.clone()));
-//            var _point = this.floor.worldToLocal(intersects[0].point.clone());
-//            _point.x = _point.x / this.gridStep;
-//            _point.z = _point.z / this.gridStep;
-//            //console.log(_point.x + " " + _point.z);
-
-            //console.log(this.floor.worldToLocal(intersects[0].point.clone()));
-
-            var newPos = intersects[0].point.clone() + this.draggedCubeOffset;
-            
-            //console.log(this.floor.worldToLocal(intersects[0].point.clone()));
-            
-            //newPos.y = 25;//this.draggedCube.position.y;
-            //console.log(newPos);
-            //console.log(this.draggedCube.position);
-            
-            this.draggedCube.position.set(newPos.x,this.draggedCube.position.y,newPos.z);
-            
-            //console.log(this.draggedCube.position);
-            
+            var newPos = intersects[0].point.clone().sub(this.draggedCubeOffset.clone());
+            this.draggedCube.position.set(newPos.x,this.draggedCube.position.y,newPos.z);            
             this.udpateGUIPos(this.selectedCube);
         }
     }
