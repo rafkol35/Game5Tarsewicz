@@ -28,6 +28,15 @@ var SOD = function () {
     this.scale = new SOScale();
     
     this.Color = "#000000";
+    
+    //this.Textures = [];
+    //this.Textures = 0; //{ Stopped: 0, Slow: 0.1, Fast: 5 }; //["asdf","qwer","zxcv"];
+    
+    //this.textures["rbn_0"] = ( THREE.ImageUtils.loadTexture('textures/rbn_0.png') );
+    //this.textures["rbn_1"] = ( THREE.ImageUtils.loadTexture('textures/rbn_1.png') );
+    //this.textures["rbn_2"] = ( THREE.ImageUtils.loadTexture('textures/rbn_2.png') );
+    
+    this.Textures = ["","rbn_0","rbn_1","rbn_2"];
 };
         
 function GameModeProject(name) {
@@ -123,6 +132,14 @@ function GameModeProject(name) {
         cntr.onFinishChange(selObjColorChanged);
     }
 
+    {
+        var cntr = null;
+        //cntr = this.gui.add(this.sod, 'Textures', ["asdf","qwer","zxcv"]); // { Stopped: 0, Slow: 0.1, Fast: 5 });
+        cntr = this.gui.add(this.sod, 'Textures', this.sod.Textures);
+        cntr.onChange(selObjTextureChanged);
+        cntr.onFinishChange(selObjTextureChanged);
+    }
+    
     //this.gui.domElement.id = 'guiProject';
     //var customContainer = $('.moveGUI').append($(this.gui.domElement));
         
@@ -148,16 +165,24 @@ function GameModeProject(name) {
     this.selectedCube = null;
     this.highlightCube = null;
     
-    var geometry = new THREE.BoxGeometry(50, 50, 50);
-    var material = new THREE.MeshBasicMaterial({color: 0xff8000});
+    this.textures = [];
+    this.textures[""] = null;
+    this.textures["rbn_0"] = ( THREE.ImageUtils.loadTexture('textures/rbn_0.png') );
+    this.textures["rbn_1"] = ( THREE.ImageUtils.loadTexture('textures/rbn_1.png') );
+    this.textures["rbn_2"] = ( THREE.ImageUtils.loadTexture('textures/rbn_2.png') );
+    
+    var geometry = new THREE.BoxGeometry(this.gridStep, this.gridStep, this.gridStep);
+    var material = new THREE.MeshBasicMaterial({color: 0xff8000, map: this.textures["rbn_0"]});
+    //var material = new THREE.MeshLambertMaterial({ map: map1, color: 0xffffff, vertexColors: THREE.VertexColors });
     material.transparent = true;
     var cube = new THREE.Mesh(geometry, material);
     cube.position.set(0, 0, 0);
     this.scene.add(cube);
     this.cubes.push(cube);
     
-    var material2 = new THREE.MeshBasicMaterial({color: 0xff8000});
-    material2.transparent = true;    
+    var material2 = new THREE.MeshBasicMaterial({color: 0xff8000, map: this.textures["rbn_1"]});
+    material2.transparent = true;
+    material2.map = null;
     var cube2 = new THREE.Mesh(geometry, material2);
     this.scene.add(cube2);
     cube2.position.set(0, 150, 0);    
@@ -247,6 +272,29 @@ var selObjColorChanged = function(val){
     if( gameModeProject.selectedCube === null ) return;
     gameModeProject.selectedCube.material.color = new THREE.Color(val);
 }
+
+var selObjTextureChanged = function(val){
+    if( gameModeProject.selectedCube === null ) return;
+    
+    var currentMaterial = gameModeProject.selectedCube.material;
+    //console.log(currentMaterial);
+    var newMaterial = new THREE.MeshBasicMaterial({color: currentMaterial.color});
+    if( val !== null ){
+        newMaterial.map = gameModeProject.textures[val];
+    }
+    
+//    if( currentMaterial.map !== null ){
+//        //console.log("set: " + gameModeProject.textures[val]);
+//        var newMaterial = new THREE.MeshBasicMaterial({color: currentMaterial.color});
+//        newMaterial.map = 
+//        currentMaterial.map = gameModeProject.textures[val];
+//    }else{
+//        //console.log("set: " + gameModeProject.textures[val]);
+//        var newMaterial = new THREE.MeshBasicMaterial({color: currentMaterial.color});        
+//    }
+
+    gameModeProject.selectedCube.material = newMaterial;
+};
 
 GameModeProject.prototype.getClearColor = function () {
     return 0xffffff;
@@ -472,6 +520,9 @@ GameModeProject.prototype.setSelected = function(cube){
     this.selectedCube = cube;
     if( this.selectedCube !== null ) {
         this.selectedCube.material.opacity = 0.5;
+        //console.log(this.selectedCube.material.map);
+        //this.selectedCube.material.map = null;
+        //console.log(this.selectedCube.material.map);
         
         this.sod.pos.X = this.selectedCube.position.x / this.gridStep;
         this.sod.pos.Y = this.selectedCube.position.y / this.gridStep;

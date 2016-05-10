@@ -3,6 +3,12 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
+//var FizzyText = function() {
+//  this.message = 'pizza';
+//  this.speed = 0.8;
+//  this.displayOutline = false;  
+//};
+//var text = new FizzyText();
 
 function GameModeVisit(name) {
     GameMode.call(this, name);
@@ -14,6 +20,14 @@ function GameModeVisit(name) {
 //        height: 5 * 32 - 1
 //        autoPlace: false
     });
+    
+    var params3 = {
+        visit3: 'asdf',
+    };
+    //this.gui.add(params3, 'visit3', ['asdf','qwer','zxcv']);
+    //this.gui.add(text, 'message', [ 'pizza', 'chrome', 'hooray' ] );
+    //console.log(text.message);
+    
     var params = {
         visit: 5000
     };
@@ -23,6 +37,8 @@ function GameModeVisit(name) {
         visit2: 500,
     };
     this.gui.add(params2, 'visit2');
+
+    
 
     //this.gui.domElement.id = 'guiVisit';
     //var customContainer = $('.moveGUI').append($(this.gui.domElement));

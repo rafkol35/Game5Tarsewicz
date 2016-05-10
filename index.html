@@ -32,8 +32,9 @@
             var gameModeProject = new GameModeProject('project');
             var gameModeVisit = new GameModeVisit('visit');
             var currentGameMode = null; //gameModeVisit; //gameModeProject;
+            var startedGameMode = gameModeProject;
             //setMode(gameModeProject); // bo w egde sie nie pokaza kontrolki
-            setMode(gameModeVisit);
+            setMode(startedGameMode === gameModeProject ? gameModeVisit : gameModeProject );
             
             function setMode(newMode){
                 if( currentGameMode !== null ) currentGameMode.deactivate();
@@ -51,7 +52,7 @@
             }
             
             function onDocumentMouseDown(event) {
-                event.preventDefault();
+                //event.preventDefault();
 
                 mousePressed = true;
                 mouseClickPos.x = (event.clientX / window.innerWidth) * 2 - 1;
@@ -72,7 +73,7 @@
             }
 
             function onDocumentMouseMove(event) {
-                event.preventDefault();                
+                //event.preventDefault();                
                 mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
                 mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
                 if( firstMouseMove ){
@@ -128,12 +129,13 @@
                 
                 if( firstFrame ){
                     firstFrame = false;
-                    setMode(gameModeProject);
+                    setMode(startedGameMode === gameModeProject ? gameModeProject : gameModeVisit);
                 }
             };
 
             render();
         </script>
+        <!--<div id="ThreeJS" style="position: absolute; left:0px; top:0px"></div>-->
         <div class="moveGUI">
         </div>
     </body>
