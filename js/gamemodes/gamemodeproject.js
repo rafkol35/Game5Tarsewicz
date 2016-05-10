@@ -149,21 +149,29 @@ function GameModeProject(name) {
     var gridSize = this.stageSize * this.gridStep;
     this.halfGridStep = this.gridStep * 0.5;
     
-    var gridGeometry = new THREE.Geometry();
+    var floorGeometry = new THREE.BoxGeometry(this.gridStep * this.stageSize * 2, this.gridStep, this.gridStep * this.stageSize * 2);
+    var floorMaterial = new THREE.MeshBasicMaterial({color: 0x888888});
+    floorMaterial.transparent = true;
+    this.floor = new THREE.Mesh(floorGeometry, floorMaterial);
+    this.floor.position.set(0, -this.gridStep-1.0, 0);
+    this.scene.add(this.floor);
     
+    var gridGeometry = new THREE.Geometry();
     for (var i = -gridSize; i <= gridSize; i += this.gridStep) {
         gridGeometry.vertices.push(new THREE.Vector3(-gridSize, -this.halfGridStep, i));
         gridGeometry.vertices.push(new THREE.Vector3(gridSize, -this.halfGridStep, i));
         gridGeometry.vertices.push(new THREE.Vector3(i, -this.halfGridStep, -gridSize));
         gridGeometry.vertices.push(new THREE.Vector3(i, -this.halfGridStep, gridSize));
     }
-    var gridMaterial = new THREE.LineBasicMaterial({color: 0x000000, opacity: 0.2});
+    var gridMaterial = new THREE.LineBasicMaterial({color: 0x000000, opacity: 1.0});
     var gridLine = new THREE.LineSegments(gridGeometry, gridMaterial);
     this.scene.add(gridLine);
 
     this.cubes = [];
     this.selectedCube = null;
     this.highlightCube = null;
+    this.draggedCube = null;
+    this.draggedCubeOffset = null;
     
     this.textures = [];
     this.textures[""] = null;
@@ -176,7 +184,7 @@ function GameModeProject(name) {
     //var material = new THREE.MeshLambertMaterial({ map: map1, color: 0xffffff, vertexColors: THREE.VertexColors });
     material.transparent = true;
     var cube = new THREE.Mesh(geometry, material);
-    cube.position.set(0, 0, 0);
+    cube.position.set(-220, 0, -150);
     this.scene.add(cube);
     this.cubes.push(cube);
     
@@ -185,7 +193,7 @@ function GameModeProject(name) {
     material2.map = null;
     var cube2 = new THREE.Mesh(geometry, material2);
     this.scene.add(cube2);
-    cube2.position.set(0, 150, 0);    
+    cube2.position.set(-220, 150, -150);    
     //cube2.material.transparent = true;
     //cube2.material.opacity = 0.5;
     this.cubes.push(cube2);
@@ -308,7 +316,12 @@ GameModeProject.prototype.activate = function(){
     this.moveDown = false;  
     this.moveLeft = false;
     this.moveRight = false;
+    
+    this.setSelected(null);
+    this.setHighlighted(null);
+    this.draggedCube = null;
 };
+
 GameModeProject.prototype.deactivate = function(){
     console.log('deactivate project');
     $(this.gui.domElement).attr("hidden", true);
@@ -317,6 +330,10 @@ GameModeProject.prototype.deactivate = function(){
     this.moveDown = false;
     this.moveLeft = false;
     this.moveRight = false;
+    
+    this.setSelected(null);
+    this.setHighlighted(null);
+    this.draggedCube = null;
 };
 
 GameModeProject.prototype.keyDown = function (event) {
@@ -441,10 +458,44 @@ GameModeProject.prototype.mouseDown = function(event){
             || event.target === renderer.domElement //firefox
             ){
         this.setSelected(this.getFirstUnderMouse());
+        
+        this.draggedCube = this.selectedCube;
+    
+        this.draggedCubeOffset;
     }
 };
 GameModeProject.prototype.mouseUp = function(event){
-    
+    this.draggedCube = null;
+};
+
+GameModeProject.prototype.mouseMove = function (event){
+    if( this.draggedCube ){
+        this.raycaster.setFromCamera(mouse, this.camera);
+        var intersects = this.raycaster.intersectObject(this.floor);
+        if( intersects.length > 0 ){        
+//            //console.log(this.floor.worldToLocal(intersects[0].point.clone()));
+//            var _point = this.floor.worldToLocal(intersects[0].point.clone());
+//            _point.x = _point.x / this.gridStep;
+//            _point.z = _point.z / this.gridStep;
+//            //console.log(_point.x + " " + _point.z);
+
+            //console.log(this.floor.worldToLocal(intersects[0].point.clone()));
+
+            var newPos = intersects[0].point.clone() + this.draggedCubeOffset;
+            
+            //console.log(this.floor.worldToLocal(intersects[0].point.clone()));
+            
+            //newPos.y = 25;//this.draggedCube.position.y;
+            //console.log(newPos);
+            //console.log(this.draggedCube.position);
+            
+            this.draggedCube.position.set(newPos.x,this.draggedCube.position.y,newPos.z);
+            
+            //console.log(this.draggedCube.position);
+            
+            this.udpateGUIPos(this.selectedCube);
+        }
+    }
 };
 
 GameModeProject.prototype.render = function (renderer) {
@@ -485,7 +536,6 @@ GameModeProject.prototype.render = function (renderer) {
     
     renderer.setClearColor(this.getClearColor());
     renderer.render(this.scene, this.camera);
-
 };
 
 GameModeProject.prototype.getFirstUnderMouse = function(){
@@ -514,19 +564,23 @@ GameModeProject.prototype.setHighlighted = function(cube){
         }        
     }
 };
+GameModeProject.prototype.udpateGUIPos = function(cube){
+    this.sod.pos.X = cube.position.x / this.gridStep;
+    this.sod.pos.Y = cube.position.y / this.gridStep;
+    this.sod.pos.Z = cube.position.z / this.gridStep;
+}
 
 GameModeProject.prototype.setSelected = function(cube){
     if( this.selectedCube !== null ) this.selectedCube.material.opacity = 1;
     this.selectedCube = cube;
+    
     if( this.selectedCube !== null ) {
         this.selectedCube.material.opacity = 0.5;
-        //console.log(this.selectedCube.material.map);
-        //this.selectedCube.material.map = null;
-        //console.log(this.selectedCube.material.map);
         
-        this.sod.pos.X = this.selectedCube.position.x / this.gridStep;
-        this.sod.pos.Y = this.selectedCube.position.y / this.gridStep;
-        this.sod.pos.Z = this.selectedCube.position.z / this.gridStep;
+        //this.sod.pos.X = this.selectedCube.position.x / this.gridStep;
+        //this.sod.pos.Y = this.selectedCube.position.y / this.gridStep;
+        //this.sod.pos.Z = this.selectedCube.position.z / this.gridStep;        
+        this.udpateGUIPos(this.selectedCube);
         
         var sor = this.selectedCube.rotation;
         this.sod.rot.X = THREE.Math.radToDeg(sor.x);
