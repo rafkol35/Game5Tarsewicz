@@ -2,9 +2,16 @@
 2) tam (w 1) tez jest scrol i orbitcontrol
 3) rozwiac jakos to ze w edgu nie pokazuja sie kontrolki jak sie je wylaczy na starcie... moze update spozniony o klatke pomoze
 
-) dodwanie i usuwanie obiektów
+ ) update teksury w comboboxsie
+ ) dopracowac przesuwanie mysza
+ ) obroty mysza
+ ) skalowanie mysza
+ ) obracanie sceny mysza
+ ) wszystko na alfie a wybrany obiekt nie
+ ) dodwanie i usuwanie obiektów
  ) lista obiektow wszystkich i ich widoczosci wl/wyl
  ) pozycja gracza
+ ) odtworzenie sceny w visit
  ) save i load projektu   
  ) ustawienia podlogi
 4) flipy tekstur

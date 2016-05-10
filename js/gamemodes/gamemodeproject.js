@@ -37,6 +37,7 @@ var SOD = function () {
     //this.textures["rbn_2"] = ( THREE.ImageUtils.loadTexture('textures/rbn_2.png') );
     
     this.Textures = ["","rbn_0","rbn_1","rbn_2"];
+    this.Texture = this.Textures[0];
 };
         
 function GameModeProject(name) {
@@ -135,7 +136,7 @@ function GameModeProject(name) {
     {
         var cntr = null;
         //cntr = this.gui.add(this.sod, 'Textures', ["asdf","qwer","zxcv"]); // { Stopped: 0, Slow: 0.1, Fast: 5 });
-        cntr = this.gui.add(this.sod, 'Textures', this.sod.Textures);
+        cntr = this.gui.add(this.sod, 'Texture', this.sod.Textures).listen();
         cntr.onChange(selObjTextureChanged);
         cntr.onFinishChange(selObjTextureChanged);
     }
@@ -180,7 +181,7 @@ function GameModeProject(name) {
     this.textures["rbn_0"].wrapT = THREE.RepeatWrapping;
     this.textures["rbn_0"].repeat = new THREE.Vector2(2,2);
     
-    var floorMaterial = new THREE.MeshStandardMaterial({color: 0xbbbbbb, map: this.textures["rbn_0"]});
+    var floorMaterial = new THREE.MeshBasicMaterial({color: 0xbbbbbb, map: this.textures["rbn_0"]});
     //floorMaterial.transparent = false;
     this.floor = new THREE.Mesh(floorGeometry, floorMaterial);
     this.floor.position.set(0, -this.halfGridStep, 0);
@@ -188,7 +189,7 @@ function GameModeProject(name) {
     var rad = THREE.Math.degToRad(-90);    
     newRot.x = rad;
     this.floor.rotation = newRot;
-    this.floor.receiveShadow = true;
+    //this.floor.receiveShadow = true;
     
     //this.floor.visible = true;
     this.scene.add(this.floor);
@@ -214,16 +215,16 @@ function GameModeProject(name) {
     
     
     var geometry = new THREE.BoxGeometry(this.gridStep, this.gridStep, this.gridStep);
-    var material = new THREE.MeshStandardMaterial({color: 0xff8000, map: this.textures["rbn_0"]});
+    var material = new THREE.MeshBasicMaterial({color: 0xff8000, map: this.textures["rbn_0"]});
     //var material = new THREE.MeshLambertMaterial({ map: map1, color: 0xffffff, vertexColors: THREE.VertexColors });
     material.transparent = true;
     var cube = new THREE.Mesh(geometry, material);
     cube.position.set(0, 0, 0);
     this.scene.add(cube);
     this.cubes.push(cube);
-    cube.castShadow = true;
+    //cube.castShadow = true;
     
-    var material2 = new THREE.MeshStandardMaterial({color: 0xff8000, map: this.textures["rbn_1"]});
+    var material2 = new THREE.MeshBasicMaterial({color: 0xff8000, map: this.textures["rbn_1"]});
     material2.transparent = true;
     material2.map = null;
     var cube2 = new THREE.Mesh(geometry, material2);
@@ -232,13 +233,14 @@ function GameModeProject(name) {
     //cube2.material.transparent = true;
     //cube2.material.opacity = 0.5;
     this.cubes.push(cube2);
-    cube.castShadow = true;
+    //cube.castShadow = true;
     
-    this.light = new THREE.PointLight( 0xffffff, 1, 1000 );
-    this.light.position.set( 0, 0, 0 );
-    this.light.castShadow = true;
-    cube2.add( this.light );
-    //var light = new THREE.AmbientLight( 0x000000 ); // soft white light
+    //this.light = new THREE.PointLight( 0xffffff, 1, 1000 );
+    //this.light.position.set( 0, 0, 0 );
+    //this.light.castShadow = true;
+    //cube2.add( this.light );
+    
+    //var light = new THREE.AmbientLight( 0xffffff ); // soft white light
     //this.scene.add( light );
 
     //$(this.gui.domElement).attr("hidden", true);
@@ -595,9 +597,15 @@ GameModeProject.prototype.setHighlighted = function(cube){
     }
 };
 GameModeProject.prototype.udpateGUIPos = function(cube){
-    this.sod.pos.X = cube.position.x / this.gridStep;
-    this.sod.pos.Y = cube.position.y / this.gridStep;
-    this.sod.pos.Z = cube.position.z / this.gridStep;
+    if(cube !== null){
+        this.sod.pos.X = cube.position.x / this.gridStep;
+        this.sod.pos.Y = cube.position.y / this.gridStep;
+        this.sod.pos.Z = cube.position.z / this.gridStep;
+    }else{
+        this.sod.pos.X = "Nan";
+        this.sod.pos.Y = "Nan";
+        this.sod.pos.Z = "Nan";
+    }
 }
 
 GameModeProject.prototype.setSelected = function(cube){
@@ -624,10 +632,24 @@ GameModeProject.prototype.setSelected = function(cube){
         //this.sod.Color = "#000000";
         this.sod.Color = "#"+this.selectedCube.material.color.getHexString();
         
+        //console.log(this.selectedCube.material.map);
+        //console.log(this.selectedCube.material.map.image.src);
+        
+        var curMap = this.selectedCube.material.map;
+        if( curMap !== null){
+            var texName = this.selectedCube.material.map.image.src;
+            var n1 = texName.lastIndexOf('/')+1;
+            var n2 = texName.lastIndexOf('.png');
+            this.sod.Texture = texName.substr(n1,n2-n1);
+        }else{
+            this.sod.Texture = "";
+        }
+            
     }else{
-        this.sod.pos.X = "Nan";
-        this.sod.pos.Y = "Nan";
-        this.sod.pos.Z = "Nan";
+        //this.sod.pos.X = "Nan";
+        //this.sod.pos.Y = "Nan";
+        //this.sod.pos.Z = "Nan";
+        this.udpateGUIPos(null);
         
         this.sod.rot.X = "Nan";
         this.sod.rot.Y = "Nan";
@@ -638,6 +660,8 @@ GameModeProject.prototype.setSelected = function(cube){
         this.sod.scale.Z = "Nan";
         
         this.sod.Color = "#000000";
+        
+        this.sod.Texture = "";
     }
     
 //    if( cube === null ){ //zerowanie
