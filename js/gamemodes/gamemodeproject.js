@@ -266,6 +266,8 @@ function GameModeProject(name) {
     this.moveDown = false;
     this.moveLeft = false;
     this.moveRight = false;
+    this.rotateObject = false;
+    this.rotateOrigin = new THREE.Vector2();
     
     this.xrat = Math.PI * 0.25;
     this.yrat = Math.PI * 0.25;
@@ -380,6 +382,7 @@ GameModeProject.prototype.activate = function(){
     this.moveDown = false;  
     this.moveLeft = false;
     this.moveRight = false;
+    this.rotateObject = false;
     
     this.setSelected(null);
     this.setHighlighted(null);
@@ -394,6 +397,7 @@ GameModeProject.prototype.deactivate = function(){
     this.moveDown = false;
     this.moveLeft = false;
     this.moveRight = false;
+    this.rotateObject = false;
     
     this.setSelected(null);
     this.setHighlighted(null);
@@ -411,6 +415,13 @@ GameModeProject.prototype.keyDown = function (event) {
 
     switch (event.keyCode) {
 
+        case 82:
+            if(this.draggedCube !== null ) {
+                this.rotateObject = true;
+                this.rotateOrigin = mouse;
+            }
+            break;
+            
         case 81: //q
             //this.pressedKeys[event.keyCode] = true;
             
@@ -463,6 +474,10 @@ GameModeProject.prototype.keyUp = function (event) {
 
     switch (event.keyCode) {
 
+        case 82:
+            this.rotateObject = false;
+            break;
+            
         case 81: //q
             //this.pressedKeys[event.keyCode] = false;
             break;
@@ -529,12 +544,13 @@ GameModeProject.prototype.mouseDown = function(event){
             this.draggedCube = this.selectedCube;
             this.draggedCubeOffset = intersects[0].point.clone().sub(this.draggedCube.position.clone());
             this.draggedCubeOffset.y = 0;
-            //console.log(this.draggedCubeOffset);            
+            if( pressedKeys[82] ) this.rotateObject = true;
         }        
     }
 };
 GameModeProject.prototype.mouseUp = function(event){
     this.draggedCube = null;
+    this.rotateObject = false;
 };
 
 GameModeProject.prototype.mouseMove = function (event){
@@ -542,14 +558,30 @@ GameModeProject.prototype.mouseMove = function (event){
         //console.log("asdf");
         this.raycaster.setFromCamera(mouse, this.camera);
         var intersects = this.raycaster.intersectObject(this.draggedFloor);
-        if( intersects.length > 0 ){        
-            var newPos = intersects[0].point.clone().sub(this.draggedCubeOffset.clone());
-            newPos.x = Math.min( Math.max(-this.gridSize,newPos.x), this.gridSize );
-            newPos.z = Math.min( Math.max(-this.gridSize,newPos.z), this.gridSize );
-            this.draggedCube.position.set(newPos.x,this.draggedCube.position.y,newPos.z);            
-            this.draggedIndicator.position.x = this.draggedCube.position.x;
-            this.draggedIndicator.position.z = this.draggedCube.position.z;
-            this.udpateGUIPos(this.selectedCube);
+        if( intersects.length > 0 ){ 
+            if( this.rotateObject )
+            {
+                var _diff = intersects[0].point.clone().sub(this.draggedIndicator.position.clone());
+                var diff = new THREE.Vector2(_diff.z,_diff.x);
+                if( diff.length() > this.gridStep ){
+                    //console.log(diff);
+                    //console.log( THREE.Math.radToDeg( Math.atan2(diff.y,diff.x)) );
+                    var rad = Math.atan2(diff.y,diff.x);
+                    
+                    var newRot = this.selectedCube.rotation;
+                    //var rad = THREE.Math.degToRad(val);
+                    newRot.y = rad;               
+                    this.selectedCube.rotation = newRot;
+                }            
+            }else{
+                var newPos = intersects[0].point.clone().sub(this.draggedCubeOffset.clone());
+                newPos.x = Math.min( Math.max(-this.gridSize,newPos.x), this.gridSize );
+                newPos.z = Math.min( Math.max(-this.gridSize,newPos.z), this.gridSize );
+                this.draggedCube.position.set(newPos.x,this.draggedCube.position.y,newPos.z);            
+                this.draggedIndicator.position.x = this.draggedCube.position.x;
+                this.draggedIndicator.position.z = this.draggedCube.position.z;
+                this.udpateGUIPos(this.selectedCube);
+            }
         }
     }
 };
@@ -634,7 +666,20 @@ GameModeProject.prototype.udpateGUIPos = function(cube){
         this.sod.pos.Y = "Nan";
         this.sod.pos.Z = "Nan";
     }
-}
+};
+                          
+GameModeProject.prototype.updateGUIRotation = function(cube){
+    if(cube !== null){
+        var sor = cube.rotation;
+        this.sod.rot.X = THREE.Math.radToDeg(sor.x);
+        this.sod.rot.Y = THREE.Math.radToDeg(sor.y);
+        this.sod.rot.Z = THREE.Math.radToDeg(sor.z);
+    }else{
+        this.sod.rot.X = "Nan";
+        this.sod.rot.Y = "Nan";
+        this.sod.rot.Z = "Nan";
+    }
+};
 
 GameModeProject.prototype.setSelected = function(cube){
     if( this.selectedCube !== null ) this.selectedCube.material.opacity = 1;
@@ -648,11 +693,12 @@ GameModeProject.prototype.setSelected = function(cube){
         //this.sod.pos.Z = this.selectedCube.position.z / this.gridStep;        
         this.udpateGUIPos(this.selectedCube);
         
-        var sor = this.selectedCube.rotation;
-        this.sod.rot.X = THREE.Math.radToDeg(sor.x);
-        this.sod.rot.Y = THREE.Math.radToDeg(sor.y);
-        this.sod.rot.Z = THREE.Math.radToDeg(sor.z);
-        
+        //var sor = this.selectedCube.rotation;
+        //this.sod.rot.X = THREE.Math.radToDeg(sor.x);
+        //this.sod.rot.Y = THREE.Math.radToDeg(sor.y);
+        //this.sod.rot.Z = THREE.Math.radToDeg(sor.z);
+        this.updateGUIRotation(this.selectedCube);
+             
         this.sod.scale.X = this.selectedCube.scale.x;
         this.sod.scale.Y = this.selectedCube.scale.y;
         this.sod.scale.Z = this.selectedCube.scale.z;
@@ -679,9 +725,10 @@ GameModeProject.prototype.setSelected = function(cube){
         //this.sod.pos.Z = "Nan";
         this.udpateGUIPos(null);
         
-        this.sod.rot.X = "Nan";
-        this.sod.rot.Y = "Nan";
-        this.sod.rot.Z = "Nan";
+        //this.sod.rot.X = "Nan";
+        //this.sod.rot.Y = "Nan";
+        //this.sod.rot.Z = "Nan";
+        this.updateGUIRotation(null);
         
         this.sod.scale.X = "Nan";
         this.sod.scale.Y = "Nan";
