@@ -202,6 +202,8 @@ function GameModeProject(name) {
     
     var draggedIndicatorGeometry = new THREE.PlaneGeometry(this.gridStep, this.gridStep);            
     var draggedIndicatorMaterial = new THREE.MeshBasicMaterial({color: 0xff0000});
+    draggedIndicatorMaterial.transparent = true;
+    draggedIndicatorMaterial.opacity = 0.5;
     this.draggedIndicator = new THREE.Mesh(draggedIndicatorGeometry, draggedIndicatorMaterial);
     this.draggedIndicator.position.set(100, -this.halfGridStep+0.1, 100);
     var newRot = this.draggedIndicator.rotation;
@@ -211,6 +213,30 @@ function GameModeProject(name) {
     this.draggedIndicator.visible = false;
     this.scene.add(this.draggedIndicator);
     //console.log(this.floor);
+    
+    var draggedAxisXGeometry = new THREE.PlaneGeometry(this.gridStep*2, this.gridStep/3);
+    var draggedAxisXMaterial = new THREE.MeshBasicMaterial({color: 0xff0000});
+    draggedAxisXMaterial.transparent = false;
+    this.draggedAxisX = new THREE.Mesh(draggedAxisXGeometry, draggedAxisXMaterial);
+    this.draggedAxisX.position.set(this.gridStep, 0.1, 0);
+ //   var newRot = this.draggedAxisX.rotation;
+//    var rad = THREE.Math.degToRad(-90);    
+//    newRot.x = rad;
+//    this.draggedAxisX.rotation = newRot;
+    this.draggedAxisX.visible = false;
+    this.draggedIndicator.add(this.draggedAxisX);
+    
+    var draggedAxisYGeometry = new THREE.PlaneGeometry(this.gridStep/3, this.gridStep*2);
+    var draggedAxisYMaterial = new THREE.MeshBasicMaterial({color: 0x00ff00});
+    draggedAxisYMaterial.transparent = false;
+    this.draggedAxisY = new THREE.Mesh(draggedAxisYGeometry, draggedAxisYMaterial);
+    this.draggedAxisY.position.set(0, -this.gridStep, 1.0);
+//    var newRot = this.draggedAxisY.rotation;
+//    var rad = THREE.Math.degToRad(-90);    
+//    newRot.x = rad;
+//    this.draggedAxisY.rotation = newRot;
+    this.draggedAxisY.visible = false;
+    this.draggedIndicator.add(this.draggedAxisY);
     
     var ggoffset = 0.5;
     var gridGeometry = new THREE.Geometry();
@@ -324,7 +350,12 @@ var selObjRotChanged = function (val) {
             break;
     }
     
+    var axesRot = gameModeProject.selectedCube.rotation;
+    axesRot.x = 0;
+    axesRot.z = 0;
+    axesRot.y = newRot.y;
     gameModeProject.selectedCube.rotation = newRot;
+    gameModeProject.draggedIndicator.rotation = axesRot;
 };
 
 var selObjScaleChanged = function (val) {
@@ -539,14 +570,16 @@ GameModeProject.prototype.mouseDown = function(event){
             ){
         this.setSelected(this.getFirstUnderMouse());
         
-        this.raycaster.setFromCamera(mouse, this.camera);
-        var intersects = this.raycaster.intersectObject(this.draggedFloor);
-        if( intersects.length > 0 ){
-            this.draggedCube = this.selectedCube;
-            this.draggedCubeOffset = intersects[0].point.clone().sub(this.draggedCube.position.clone());
-            this.draggedCubeOffset.y = 0;
-            if( pressedKeys[82] ) this.rotateObject = true;
-        }        
+        if( this.selectedCube ){
+            this.raycaster.setFromCamera(mouse, this.camera);
+            var intersects = this.raycaster.intersectObject(this.draggedFloor);
+            if( intersects.length > 0 ){
+                this.draggedCube = this.selectedCube;
+                this.draggedCubeOffset = intersects[0].point.clone().sub(this.draggedCube.position.clone());
+                this.draggedCubeOffset.y = 0;
+                if( pressedKeys[82] ) this.rotateObject = true;
+            }        
+        }
     }
 };
 GameModeProject.prototype.mouseUp = function(event){
@@ -573,6 +606,12 @@ GameModeProject.prototype.mouseMove = function (event){
                     //var rad = THREE.Math.degToRad(val);
                     newRot.y = rad;               
                     this.selectedCube.rotation = newRot;
+                    
+                    var axesRot = this.draggedIndicator.rotation;
+                    axesRot.z = newRot.y;
+                    this.draggedIndicator.rotation = axesRot;
+                    
+                    this.updateGUIRotation(this.selectedCube);
                 }            
             }else{
                 var newPos = intersects[0].point.clone().sub(this.draggedCubeOffset.clone());
@@ -621,8 +660,9 @@ GameModeProject.prototype.render = function (renderer) {
     
     this.camera.lookAt( this.scene.position );
 
-    this.setHighlighted(this.getFirstUnderMouse());
-    
+    if( this.draggedCube === null){
+        this.setHighlighted(this.getFirstUnderMouse());
+    }
     renderer.setClearColor(this.getClearColor());
     renderer.render(this.scene, this.camera);
 };
@@ -643,6 +683,8 @@ GameModeProject.prototype.setHighlighted = function(cube){
             this.highlightCube.material.opacity = 1;
             this.highlightCube = null;  
             this.draggedIndicator.visible = false;
+            this.draggedAxisX.visible = false;
+            this.draggedAxisY.visible = false;
         }        
     }else{ //ustawianie
         if( this.highlightCube !== cube ){
@@ -652,8 +694,14 @@ GameModeProject.prototype.setHighlighted = function(cube){
             this.highlightCube = cube;
             this.highlightCube.material.opacity = 0.5;
             this.draggedIndicator.visible = true;
+            this.draggedAxisX.visible = true;
+            this.draggedAxisY.visible = true;
             this.draggedIndicator.position.x = cube.position.x;
             this.draggedIndicator.position.z = cube.position.z;
+            //this.draggedIndicator.rotation = cube.rotation.y
+            var axesRot = this.draggedIndicator.rotation;
+            axesRot.z = cube.rotation.y;
+            this.draggedIndicator.rotation = axesRot;
         }        
     }
 };
