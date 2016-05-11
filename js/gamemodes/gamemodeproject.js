@@ -476,6 +476,15 @@ GameModeProject.prototype.keyUp = function (event) {
 
         case 82:
             this.rotateObject = false;
+            if( this.draggedCube !== null){
+                this.raycaster.setFromCamera(mouse, this.camera);
+                var intersects = this.raycaster.intersectObject(this.draggedFloor);
+                if (intersects.length > 0) {
+                    //this.draggedCube = this.selectedCube;
+                    this.draggedCubeOffset = intersects[0].point.clone().sub(this.draggedCube.position.clone());
+                    this.draggedCubeOffset.y = 0;                    
+                }
+            }   
             break;
             
         case 81: //q
@@ -524,15 +533,7 @@ GameModeProject.prototype.onWindowResize = function(){
 };
 
 GameModeProject.prototype.mouseDown = function(event){
-//    if( this.highlightCube === null ) return; 
-//    if( this.selectedCube ){
-//        this.selectedCube
-//    }
-//    this.selectedCube = this.highlightCube;
-    
-    //console.log(event.target);
-    //console.log(renderer.domElement);
-    
+  
     if(event.srcElement === renderer.domElement //chrome
             || event.target === renderer.domElement //firefox
             ){
