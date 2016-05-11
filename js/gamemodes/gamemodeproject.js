@@ -29,13 +29,6 @@ var SOD = function () {
     
     this.Color = "#000000";
     
-    //this.Textures = [];
-    //this.Textures = 0; //{ Stopped: 0, Slow: 0.1, Fast: 5 }; //["asdf","qwer","zxcv"];
-    
-    //this.textures["rbn_0"] = ( THREE.ImageUtils.loadTexture('textures/rbn_0.png') );
-    //this.textures["rbn_1"] = ( THREE.ImageUtils.loadTexture('textures/rbn_1.png') );
-    //this.textures["rbn_2"] = ( THREE.ImageUtils.loadTexture('textures/rbn_2.png') );
-    
     this.Textures = ["","rbn_0","rbn_1","rbn_2"];
     this.Texture = this.Textures[0];
 };
@@ -294,6 +287,9 @@ function GameModeProject(name) {
     this.moveRight = false;
     this.rotateObject = false;
     this.rotateOrigin = new THREE.Vector2();
+    this.scaleX = false;
+    this.scaleY = false;
+    this.scaleOrigin = new THREE.Vector2();
     
     this.xrat = Math.PI * 0.25;
     this.yrat = Math.PI * 0.25;
@@ -349,19 +345,21 @@ var selObjRotChanged = function (val) {
             newRot.z = rad;
             break;
     }
-    
-    var axesRot = gameModeProject.selectedCube.rotation;
-    axesRot.x = 0;
-    axesRot.z = 0;
-    axesRot.y = newRot.y;
     gameModeProject.selectedCube.rotation = newRot;
-    gameModeProject.draggedIndicator.rotation = axesRot;
+    
+    var axesRot = gameModeProject.draggedIndicator.rotation;
+    //axesRot.x = 0;
+    //axesRot.z = 0;
+    //axesRot.y = newRot.y;
+    axesRot.z = newRot.y;
+    console.log(axesRot.y);
+    gameModeProject.draggedIndicator.rotation = axesRot.clone();
 };
 
 var selObjScaleChanged = function (val) {
     if( gameModeProject.selectedCube === null ) return;
     switch(this.property){
-        case "X":
+        case "X":            
             gameModeProject.selectedCube.scale.x = val;
             break;
         case "Y":
@@ -406,7 +404,7 @@ GameModeProject.prototype.getClearColor = function () {
 };
 
 GameModeProject.prototype.activate = function(){
-    console.log('activate project');
+    //console.log('activate project');
     $(this.gui.domElement).attr("hidden", false);
     
     this.moveUp = false;
@@ -414,6 +412,8 @@ GameModeProject.prototype.activate = function(){
     this.moveLeft = false;
     this.moveRight = false;
     this.rotateObject = false;
+    this.scaleX = false;
+    this.scaleY = false;
     
     this.setSelected(null);
     this.setHighlighted(null);
@@ -421,7 +421,7 @@ GameModeProject.prototype.activate = function(){
 };
 
 GameModeProject.prototype.deactivate = function(){
-    console.log('deactivate project');
+    //console.log('deactivate project');
     $(this.gui.domElement).attr("hidden", true);
     
     this.moveUp = false;
@@ -429,6 +429,8 @@ GameModeProject.prototype.deactivate = function(){
     this.moveLeft = false;
     this.moveRight = false;
     this.rotateObject = false;
+    this.scaleX = false;
+    this.scaleY = false;
     
     this.setSelected(null);
     this.setHighlighted(null);
@@ -449,7 +451,7 @@ GameModeProject.prototype.keyDown = function (event) {
         case 82:
             if(this.draggedCube !== null ) {
                 this.rotateObject = true;
-                this.rotateOrigin = mouse;
+                this.rotateOrigin = mouse;                
             }
             break;
             
@@ -504,7 +506,21 @@ GameModeProject.prototype.keyUp = function (event) {
     //console.log(event.keyCode);
 
     switch (event.keyCode) {
-
+        case 84:
+            {
+                this.scaleX = false;
+                this.scaleY = false;
+                if( this.draggedCube !== null){
+                this.raycaster.setFromCamera(mouse, this.camera);
+                var intersects = this.raycaster.intersectObject(this.draggedFloor);
+                if (intersects.length > 0) {
+                    this.draggedCubeOffset = intersects[0].point.clone().sub(this.draggedCube.position.clone());
+                    this.draggedCubeOffset.y = 0;                    
+                }
+            }   
+            }
+            break;
+            
         case 82:
             this.rotateObject = false;
             if( this.draggedCube !== null){
@@ -565,6 +581,23 @@ GameModeProject.prototype.onWindowResize = function(){
 
 GameModeProject.prototype.mouseDown = function(event){
   
+    if( pressedKeys[84]){
+        this.raycaster.setFromCamera(mouse, this.camera);
+        var intersects = this.raycaster.intersectObject(this.draggedAxisX);
+        if( intersects.length > 0 ){        
+            this.scaleX = true;
+            this.draggedCube = this.selectedCube;
+            this.scaleOrigin = intersects[0].point.clone();
+            return;
+        }
+        var intersects = this.raycaster.intersectObject(this.draggedAxisY);
+        if( intersects.length > 0 ){        
+            this.scaleY = true;
+            this.draggedCube = this.selectedCube;
+            this.scaleOrigin = intersects[0].point.clone();
+            return;
+        }
+    }
     if(event.srcElement === renderer.domElement //chrome
             || event.target === renderer.domElement //firefox
             ){
@@ -585,6 +618,8 @@ GameModeProject.prototype.mouseDown = function(event){
 GameModeProject.prototype.mouseUp = function(event){
     this.draggedCube = null;
     this.rotateObject = false;
+    this.scaleX = false;
+    this.scaleY = false;
 };
 
 GameModeProject.prototype.mouseMove = function (event){
@@ -593,8 +628,28 @@ GameModeProject.prototype.mouseMove = function (event){
         this.raycaster.setFromCamera(mouse, this.camera);
         var intersects = this.raycaster.intersectObject(this.draggedFloor);
         if( intersects.length > 0 ){ 
-            if( this.rotateObject )
-            {
+            if( this.scaleX ){
+//                var _diffPrev = this.scaleOrigin.clone().sub(this.draggedIndicator.position.clone());
+//                var _diffCurr = intersects[0].point.clone().sub(this.draggedIndicator.position.clone());
+//                
+//                var scl = this.draggedCube.scale.x;
+//                scl += ( (_diffCurr.length()-_diffPrev.length()) / this.gridStep) * 2;
+//                console.log(scl);
+//                scl = Math.max(scl,0.1);
+//                this.draggedCube.scale.x = scl;
+//                
+//                this.scaleOrigin = intersects[0].point.clone();
+//                this.updateGUIScale(this.selectedCube);
+                
+                var _diff = intersects[0].point.clone().sub(this.draggedIndicator.position.clone());
+                this.draggedCube.scale.x = ( _diff.length() / this.gridStep) * 2;
+                this.updateGUIScale(this.selectedCube);
+                
+            }else if( this.scaleY ){
+                var _diff = intersects[0].point.clone().sub(this.draggedIndicator.position.clone());
+                this.draggedCube.scale.z = ( _diff.length() / this.gridStep) * 2;
+                this.updateGUIScale(this.selectedCube);
+            }else if( this.rotateObject ){
                 var _diff = intersects[0].point.clone().sub(this.draggedIndicator.position.clone());
                 var diff = new THREE.Vector2(_diff.z,_diff.x);
                 if( diff.length() > this.gridStep ){
@@ -663,6 +718,7 @@ GameModeProject.prototype.render = function (renderer) {
     if( this.draggedCube === null){
         this.setHighlighted(this.getFirstUnderMouse());
     }
+    
     renderer.setClearColor(this.getClearColor());
     renderer.render(this.scene, this.camera);
 };
@@ -730,6 +786,18 @@ GameModeProject.prototype.updateGUIRotation = function(cube){
     }
 };
 
+GameModeProject.prototype.updateGUIScale = function(cube){
+    if(cube !== null){
+        this.sod.scale.X = cube.scale.x;
+        this.sod.scale.Y = cube.scale.y;
+        this.sod.scale.Z = cube.scale.z;
+    }else{
+        this.sod.scale.X = "Nan";
+        this.sod.scale.Y = "Nan";
+        this.sod.scale.Z = "Nan";
+    }
+};
+
 GameModeProject.prototype.setSelected = function(cube){
     if( this.selectedCube !== null ) this.selectedCube.material.opacity = 1;
     this.selectedCube = cube;
@@ -748,9 +816,10 @@ GameModeProject.prototype.setSelected = function(cube){
         //this.sod.rot.Z = THREE.Math.radToDeg(sor.z);
         this.updateGUIRotation(this.selectedCube);
              
-        this.sod.scale.X = this.selectedCube.scale.x;
-        this.sod.scale.Y = this.selectedCube.scale.y;
-        this.sod.scale.Z = this.selectedCube.scale.z;
+        //this.sod.scale.X = this.selectedCube.scale.x;
+        //this.sod.scale.Y = this.selectedCube.scale.y;
+        //this.sod.scale.Z = this.selectedCube.scale.z;
+        this.updateGUIScale(this.selectedCube);
         
         //this.sod.Color = "#000000";
         this.sod.Color = "#"+this.selectedCube.material.color.getHexString();
@@ -779,9 +848,10 @@ GameModeProject.prototype.setSelected = function(cube){
         //this.sod.rot.Z = "Nan";
         this.updateGUIRotation(null);
         
-        this.sod.scale.X = "Nan";
-        this.sod.scale.Y = "Nan";
-        this.sod.scale.Z = "Nan";
+        //this.sod.scale.X = "Nan";
+        //this.sod.scale.Y = "Nan";
+        //this.sod.scale.Z = "Nan";
+        this.updateGUIScale(null);
         
         this.sod.Color = "#000000";
         
