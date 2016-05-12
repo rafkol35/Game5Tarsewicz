@@ -34,6 +34,7 @@ var PlayerData = function(){
     this.PosX = 0;
     this.PosZ = 0;
     this.Rot = 0;
+    this.Height = 2;
 };
 
 var PGUIData = function (game) {
@@ -271,4 +272,14 @@ var playerRotChanged = function (val) {
     var rad = THREE.Math.degToRad(val);
     newRot.y = rad;
     gameModeProject.playerPos.rotation = newRot;    
+};
+
+var playerHeightChanged = function (val) {
+    if( gameModeProject.playerPos === null ) return;
+    gameModeProject.updatePlayerHeight(val);
+    
+    //var newRot = gameModeProject.playerPos.rotation;
+    //var rad = THREE.Math.degToRad(val);
+    //newRot.y = rad;
+    //gameModeProject.playerPos.rotation = newRot;    
 };

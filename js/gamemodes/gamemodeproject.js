@@ -33,7 +33,7 @@ function GameModeProject(name) {
     this.createFloor();
     this.createAxis();
     this.createGrid();
-    this.createPlayerPos(new THREE.Vector3(0,0,0), 0);
+    this.createPlayerPos(new THREE.Vector2(0,0), 0, 2);
     
     this.walls = [];
     this.selectedWall = null;
@@ -685,6 +685,11 @@ GameModeProject.prototype.createGUI = function () {
         cntr.step(1); //.min(-this.stageSize).max(this.stageSize);
         cntr.onChange(playerRotChanged);
         cntr.onFinishChange(playerRotChanged);
+        
+        cntr = folder.add(this.guiData.pd, 'Height', 1, 5).listen();
+        cntr.step(0.1); //.min(-this.stageSize).max(this.stageSize);
+        cntr.onChange(playerHeightChanged);
+        cntr.onFinishChange(playerHeightChanged);
     }
     
     {
@@ -796,15 +801,20 @@ GameModeProject.prototype.createGrid = function () {
     this.scene.add(gridLine);
 };
     
-GameModeProject.prototype.createPlayerPos = function (pos,rot) {
+GameModeProject.prototype.createPlayerPos = function (pos,rot,height) {
     //console.log(pos);
-    
     var geometry = new THREE.BoxGeometry(this.gridStep*0.5, this.gridStep, this.gridStep*0.5);
     var material = new THREE.MeshBasicMaterial({color: 0xff0000, map: null});
     //material.transparent = true;
     //material.opacity = 0.5;
     this.playerPos = new THREE.Mesh(geometry, material);
-    this.playerPos.position = pos.clone(); 
+    this.playerPos.position.x = pos.x;
+    this.playerPos.position.z = pos.y;
+    
+    
+    this.playerPos.scale.y = height;
+    this.playerPos.position.y = this.gridStep*height / 2 - this.halfGridStep; 
+    
     this.playerPos.rotation.y = rot;
     this.scene.add(this.playerPos); 
     
@@ -812,10 +822,19 @@ GameModeProject.prototype.createPlayerPos = function (pos,rot) {
     var material2 = new THREE.MeshBasicMaterial({color: 0x00ff00, map: null});
     //material.transparent = true;
     //material.opacity = 0.5;
-    var playerPos2 = new THREE.Mesh(geometry2, material2);
-    playerPos2.position.z = -(this.gridStep*0.5 / 2) + (this.gridStep*0.25 / 2); 
-    //playerPos.rotation.y = rot;
-    this.playerPos.add(playerPos2); 
+    this.playerPos2 = new THREE.Mesh(geometry2, material2);
+    this.playerPos2.position.y = ( (this.gridStep*height / 2) - this.halfGridStep ) / height;
+    this.playerPos2.position.z = -(this.gridStep*0.5 / 2) + (this.gridStep*0.25 / 2); 
+    this.playerPos2.scale.y = 1/height;
+    
+    this.playerPos.add(this.playerPos2); 
+};
+
+GameModeProject.prototype.updatePlayerHeight = function(newHeight){
+    this.playerPos.scale.y = newHeight;
+    this.playerPos.position.y = this.gridStep*newHeight / 2 - this.halfGridStep; 
+    this.playerPos2.position.y = ( (this.gridStep*newHeight / 2) - this.halfGridStep ) / newHeight;
+    this.playerPos2.scale.y = 1/newHeight;
 };
 
 GameModeProject.prototype.createWall = function (nwd/*NewWallData*/) {

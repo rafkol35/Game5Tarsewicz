@@ -57,7 +57,7 @@ GameModeVisit.prototype.activate = function () {
     var geometry = new THREE.BoxGeometry(1, 1, 1);
     var material = new THREE.MeshBasicMaterial({color: 0x00ff00});
     var cube = new THREE.Mesh(geometry, material);
-    cube.position.set(0, 0, -5);
+    cube.position.set(0, 0, -1);
     this.scene.add(cube);
     this.walls.push(cube);
 //    
@@ -71,7 +71,7 @@ GameModeVisit.prototype.activate = function () {
 //    this.scene.add(cube);
 //    this.walls.push(cube);
     
-    this.setPlayer(gameModeProject.playerPos);
+    this.setPlayer(gameModeProject.playerPos,gameModeProject.playerPos2);
     this.createFloor(gameModeProject.floor);    
     for(var i = 0 ; i < gameModeProject.walls.length ; ++i ){
        this.createWall( gameModeProject.walls[i] );
@@ -100,9 +100,10 @@ GameModeVisit.prototype.clear = function () {
     //this.scene. = [];
 };
 
-GameModeVisit.prototype.setPlayer = function(projPlayer){
+GameModeVisit.prototype.setPlayer = function(projPlayer,projPlayer2){
     var gmp = gameModeProject;
-    this.yawObject.position.set( projPlayer.position.x / gmp.gridStep, 1, projPlayer.position.z / gmp.gridStep);    
+    var height = projPlayer2.localToWorld(new THREE.Vector3(0,0,0)).y / gmp.gridStep;
+    this.yawObject.position.set( projPlayer.position.x / gmp.gridStep, height, projPlayer.position.z / gmp.gridStep);        
     this.yawObject.rotation.y = projPlayer.rotation.y;
 };
 
