@@ -492,9 +492,9 @@ GameModeProject.prototype.setSelected = function (cube) {
             var texName = this.selectedWall.material.map.image.src;
             var n1 = texName.lastIndexOf('/') + 1;
             var n2 = texName.lastIndexOf('.png');
-            this.sod.Texture = texName.substr(n1, n2 - n1);
+            this.sod.Texture.File = texName.substr(n1, n2 - n1);
         } else {
-            this.sod.Texture = "";
+            this.sod.Texture.File = "";
         }
 
     } else {
@@ -502,7 +502,7 @@ GameModeProject.prototype.setSelected = function (cube) {
         this.updateGUIRotation(null);
         this.updateGUIScale(null);
         this.sod.Color = "#000000";
-        this.sod.Texture = "";
+        this.sod.Texture.File = "";
     }
 };
 
@@ -602,8 +602,10 @@ GameModeProject.prototype.createGUI = function () {
     }
 
     {
+        var folder = this.gui.addFolder('Texture');
+        
         var cntr = null;
-        cntr = this.gui.add(this.sod.Texture, 'File', this.Files).listen();
+        cntr = folder.add(this.sod.Texture, 'File', this.Files).listen();
         //cntr.onChange(selObjTextureChanged);
         cntr.onFinishChange(selObjTextureChanged);
     }
