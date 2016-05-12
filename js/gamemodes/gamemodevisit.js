@@ -16,34 +16,19 @@ function GameModeVisit(name) {
 //        height: 5 * 32 - 1
 //        autoPlace: false
     });
+    this.walls = [];
+    this.floor = null;
     
     var guiData = new VGUIData(this);    
     this.gui.add(guiData, 'GoToProject');
 
-    var geometry = new THREE.BoxGeometry(1, 1, 1);
-    var material = new THREE.MeshBasicMaterial({color: 0x00ff00});
-    var cube = new THREE.Mesh(geometry, material);
-    cube.position.set(0, 0, -5);
-    this.scene.add(cube);
-    walls.push(cube);
-    
-    cube = new THREE.Mesh(geometry, material);
-    cube.position.set(0, 0, 5);
-    this.scene.add(cube);
-    walls.push(cube);
-
-    cube = new THREE.Mesh(geometry, material);
-    cube.position.set(5, 0, 0);
-    this.scene.add(cube);
-    walls.push(cube);
-    
     this.camera.rotation.set(0, 0, 0);
 
     this.pitchObject = new THREE.Object3D();
     this.pitchObject.add(this.camera);
 
     this.yawObject = new THREE.Object3D();
-    this.yawObject.position.y = 0;
+    this.yawObject.position.y = 1;
     this.yawObject.add(this.pitchObject);
     this.scene.add(this.yawObject);
 
@@ -67,22 +52,100 @@ GameModeVisit.prototype.getClearColor = function () {
 GameModeVisit.prototype.activate = function () {
     //console.log('activate visit');
     $(this.gui.domElement).attr("hidden", false);
+    this.clear();
+    
+    var geometry = new THREE.BoxGeometry(1, 1, 1);
+    var material = new THREE.MeshBasicMaterial({color: 0x00ff00});
+    var cube = new THREE.Mesh(geometry, material);
+    cube.position.set(0, 0, -5);
+    this.scene.add(cube);
+    this.walls.push(cube);
+    
+    cube = new THREE.Mesh(geometry, material);
+    cube.position.set(0, 0, 5);
+    this.scene.add(cube);
+    this.walls.push(cube);
 
-    this.moveForward = false;
-    this.moveLeft = false;
-    this.moveBackward = false;
-    this.moveRight = false;
+    cube = new THREE.Mesh(geometry, material);
+    cube.position.set(5, 0, 0);
+    this.scene.add(cube);
+    this.walls.push(cube);
+    
+    this.createFloor(gameModeProject.floor);    
+    for(var i = 0 ; i < gameModeProject.walls.length ; ++i ){
+       this.createWall( gameModeProject.walls[i] );
+    }    
 };
 GameModeVisit.prototype.deactivate = function () {
     //console.log('deactivate visit');
     $(this.gui.domElement).attr("hidden", true);
+    this.clear();
+};
 
+GameModeVisit.prototype.clear = function () {
     this.moveForward = false;
     this.moveLeft = false;
     this.moveBackward = false;
     this.moveRight = false;
+    
+    if( this.floor ) this.scene.remove(this.floor);
+    this.floor = null;
+    
+    for( var i = 0 ; i < this.walls.length ; ++i ){
+        this.scene.remove(this.walls[i]);
+    }
+    this.walls = [];
+    
+    //this.scene. = [];
 };
 
+GameModeVisit.prototype.createFloor = function(projFloor){
+    var gmp = gameModeProject;
+    
+    var floorGeometry = new THREE.PlaneGeometry(
+            gmp.stageSize * 2, gmp.stageSize * 2,
+            gmp.stageSize, gmp.stageSize);
+
+    //var floorMaterial = new THREE.MeshBasicMaterial({color: 0xbbbbbb});    
+    this.floor = new THREE.Mesh(floorGeometry, gmp.floor.material);
+    this.floor.position.set(0, -gmp.halfGridStep / gmp.gridStep, 0);
+    //this.floor.position.set(0, -1, 0);
+    var newRot = this.floor.rotation;
+    var rad = THREE.Math.degToRad(-90);
+    newRot.x = rad;
+    this.floor.rotation = newRot;
+    //this.floor.receiveShadow = true;    
+    //this.floor.visible = true;
+    this.scene.add(this.floor);
+    //console.log(this.floor);
+};
+
+GameModeVisit.prototype.createWall = function(projWall){
+    var gmp = gameModeProject;
+    
+    var geometry = new THREE.BoxGeometry(1,1,1);
+    var material = projWall.material; //new THREE.MeshBasicMaterial({color: nwd.Material.Color, map: null});
+//    material.transparent = true;
+//    if( nwd.Material.File ){
+//        var _tex = this.textures[nwd.Material.File].clone();
+//        _tex.repeat.x = nwd.Material.RepeatX;
+//        _tex.repeat.y = nwd.Material.RepeatY;
+//        _tex.needsUpdate = true;
+//        material.map = _tex;
+//        material.needsUpdate = true;
+//    }
+    var newWall = new THREE.Mesh(geometry, material);
+    
+    //newWall.position.set(nwd.Pos.X * this.gridStep, nwd.Pos.Y * this.gridStep, nwd.Pos.Z * this.gridStep);
+    newWall.position.set( projWall.position.x / gmp.gridStep, projWall.position.y / gmp.gridStep , projWall.position.z / gmp.gridStep);    
+    newWall.rotation = projWall.rotation.clone();
+    newWall.scale = projWall.scale.clone();
+    
+    this.scene.add(newWall);
+    this.walls.push(newWall);
+    return newWall;
+};
+        
 GameModeVisit.prototype.mouseMove = function (event){
     
     if (mousePressed) {
@@ -142,7 +205,7 @@ GameModeVisit.prototype.render = function (renderer) {
     //var cpNewPos = this.camera.localToWorld( new THREE.Vector3() );
     
     
-    var trLen = trans.length()
+    var trLen = trans.length();
     if( trLen !== 0 ) {
         //console.log(trans);
         //console.log(moveDir);
@@ -152,7 +215,7 @@ GameModeVisit.prototype.render = function (renderer) {
         this.raycaster.set(this.yawObject.position.clone(),moveDir);
         this.raycaster.far = 1;//trLen;
         
-        var intersects = this.raycaster.intersectObjects(walls);
+        var intersects = this.raycaster.intersectObjects(this.walls);
         if (intersects.length > 0) {
             canMove = false;
         } else {
@@ -160,6 +223,7 @@ GameModeVisit.prototype.render = function (renderer) {
     }
     
     if( canMove ){
+        //console.log("move : " + trans.x);
         this.yawObject.translateX(trans.x);
         this.yawObject.translateY(trans.y);
         this.yawObject.translateZ(trans.z);

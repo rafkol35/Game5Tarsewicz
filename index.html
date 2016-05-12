@@ -21,20 +21,20 @@
         <script>
             var firstFrame = true;
             var mousePressed = false;
-            var mouse = new THREE.Vector2(-2,-2), INTERSECTED;
+            var mouse = new THREE.Vector2(-2,-2); //, INTERSECTED;
             var mouseClickPos = new THREE.Vector2();
             var mouseLast = new THREE.Vector2();
-            var raycaster = new THREE.Raycaster();
-            var raycasterTouch = new THREE.Raycaster();
-            var walls = [];
+            //var raycaster = new THREE.Raycaster();
+            //var raycasterTouch = new THREE.Raycaster();
+            //var walls = [];
             var controls;
             var firstMouseMove = true;
             
             var gameModeProject = new GameModeProject('project');
             var gameModeVisit = new GameModeVisit('visit');
             var currentGameMode = null; //gameModeVisit; //gameModeProject;
-            var startedGameMode = gameModeProject;
-            setMode(gameModeProject); // bo w egde sie nie pokaza kontrolki
+            var startedGameMode = gameModeVisit;
+            //setMode(gameModeProject); // bo w egde sie nie pokaza kontrolki
             setMode(startedGameMode === gameModeProject ? gameModeVisit : gameModeProject );
             
             function setMode(newMode){
