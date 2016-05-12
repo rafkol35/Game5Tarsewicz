@@ -40,7 +40,11 @@ function GameModeProject(name) {
     this.textures[""] = null;
     for( var i = 0 ; i < this.sod.Textures.length ; ++i ){
         if( this.sod.Textures[i] !== '')
-            this.textures[ this.sod.Textures[i] ] = new THREE.TextureLoader().load('textures/' + this.sod.Textures[i] + '.png');
+            var _tex = new THREE.TextureLoader().load('textures/' + this.sod.Textures[i] + '.png');
+            //_tex.wrapS = THREE.RepeatWrapping;
+            //_tex.wrapT = THREE.RepeatWrapping;
+            //_tex.repeat = new THREE.Vector2(2,2);
+            this.textures[ this.sod.Textures[i] ] = _tex;
     }
     //var texture = new THREE.TextureLoader().load( "textures/water.jpg" );
     //this.textures["rbn_0"] = ( THREE.ImageUtils.loadTexture('textures/rbn_0.png') );
