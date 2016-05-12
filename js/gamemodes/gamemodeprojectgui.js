@@ -23,7 +23,7 @@ var SOD = function () {
     
     this.Color = "#000000";
     
-    this.Textures = ["","rbn_0","rbn_1","rbn_2"];
+    this.Textures = ['','',"rbn_0","rbn_1","rbn_2"];
     this.Texture = this.Textures[0];
     
     this.AddWall = function(){
