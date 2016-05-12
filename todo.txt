@@ -2,8 +2,6 @@
 2) tam (w 1) tez jest scrol i orbitcontrol
 3) rozwiac jakos to ze w edgu nie pokazuja sie kontrolki jak sie je wylaczy na starcie... moze update spozniony o klatke pomoze
 
- ) usunac warningi 
- ) na nowym materiale nie jest ustawiony transparent wiec sie nie ...
  ) obracanie sceny mysza
  ) wszystko na alfie a wybrany obiekt nie
  ) dodwanie i usuwanie obiektów + kopiowanie 

@@ -52,23 +52,12 @@ function GameModeProject(name) {
     this.xrat = Math.PI * 0.25;
     this.yrat = Math.PI * 0.25;
     this.zrat = Math.PI * 0.25;
-
+    this.updateCamera();
+    
     this.raycaster = new THREE.Raycaster();
     this.setSelected(null);
     
     //this.createWall();
-    
-//    var material2 = new THREE.MeshBasicMaterial({color: 0xff8000, map: this.textures["rbn_1"]});
-//    material2.transparent = true;
-//    material2.map = null;
-//    material2.needsUpdate = true;
-//    var cube2 = new THREE.Mesh(geometry, material2);
-//    this.scene.add(cube2);
-//    cube2.position.set(-220, 150, -150);
-//    //cube2.material.transparent = true;
-//    //cube2.material.opacity = 0.5;
-//    this.cubes.push(cube2);
-//    //cube.castShadow = true;
 
     //this.light = new THREE.PointLight( 0xffffff, 1, 1000 );
     //this.light.position.set( 0, 0, 0 );
@@ -355,24 +344,29 @@ GameModeProject.prototype.mouseMove = function (event) {
                 this.udpateGUIPos(this.selectedCube);
             }
         }
+    } else {
+        this.setHighlighted(this.getFirstUnderMouse());
     }
 };
 
 GameModeProject.prototype.render = function (renderer) {
-
     var ms = 1.5;
-
+    //var cm = false;
+    
     if (pressedKeys[81]) {
         this.camera.zoom = Math.min(5, this.camera.zoom + deltaTime * ms);
         this.onWindowResize();
+        //cm = true;
     } else if (pressedKeys[69]) {
         this.camera.zoom = Math.max(0.1, this.camera.zoom - deltaTime * ms);
         this.onWindowResize();
+        //cm = true;
     }
 
     if (this.moveLeft) {
         this.xrat -= deltaTime * ms;
         this.zrat -= deltaTime * ms;
+        //cm = true;
     } else if (this.moveRight) {
         this.xrat += deltaTime * ms;
         this.zrat += deltaTime * ms;
@@ -384,23 +378,36 @@ GameModeProject.prototype.render = function (renderer) {
         this.yrat = Math.max(0, this.yrat - deltaTime * ms);
     }
 
-    this.camera.position.x = Math.sin(this.xrat) * this.cameraRestrict.x;
-    this.camera.position.y = Math.sin(this.yrat) * this.cameraRestrict.y;
-    this.camera.position.z = Math.cos(this.zrat) * this.cameraRestrict.z;
-
-    this.camera.lookAt(this.scene.position);
-
-    if (this.draggedCube === null) {
-        this.setHighlighted(this.getFirstUnderMouse());
-    }
+    // camera moved
+    var cm = pressedKeys[81] || pressedKeys[69] || 
+            this.moveLeft || this.moveRight || this.moveUp || this.moveDown;
+  
+    if(cm) this.updateCamera();
+    
+//    if (cm) {
+//        this.camera.position.x = Math.sin(this.xrat) * this.cameraRestrict.x;
+//        this.camera.position.y = Math.sin(this.yrat) * this.cameraRestrict.y;
+//        this.camera.position.z = Math.cos(this.zrat) * this.cameraRestrict.z;
+//        this.camera.lookAt(this.scene.position);        
+//    }
+    //if (this.draggedCube === null) {
+    //    this.setHighlighted(this.getFirstUnderMouse());
+    //}
 
     renderer.setClearColor(this.getClearColor());
     renderer.render(this.scene, this.camera);
 };
 
+GameModeProject.prototype.updateCamera = function () {
+    this.camera.position.x = Math.sin(this.xrat) * this.cameraRestrict.x;
+    this.camera.position.y = Math.sin(this.yrat) * this.cameraRestrict.y;
+    this.camera.position.z = Math.cos(this.zrat) * this.cameraRestrict.z;
+    this.camera.lookAt(this.scene.position);
+}
+        
 GameModeProject.prototype.getFirstUnderMouse = function () {
     this.raycaster.setFromCamera(mouse, this.camera);
-    var intersects = this.raycaster.intersectObjects(this.cubes);
+    var intersects = this.raycaster.intersectObjects(this.walls);
     if (intersects.length > 0) {
         return intersects[0].object;
     } else {
@@ -779,7 +786,8 @@ GameModeProject.prototype.createWall = function () {
 };
     
 GameModeProject.prototype.addWall = function () {
-    console.log('asdf');
+    //console.log('asdf');
+    this.createWall();
 };
 
 GameModeProject.prototype.deleteSelectedWall = function () {
