@@ -617,7 +617,7 @@ GameModeProject.prototype.createGUI = function () {
     {
         var cntr = null;
         cntr = this.gui.add(this.sod, "AddWall");
-        cntr = this.gui.add(this.sod, "DeleteSelectedWall");
+        cntr = this.gui.add(this.sod, "RemoveSelectedWall");
         cntr = this.gui.add(this.sod, "DuplicateSelectedWall");
     }
 };
@@ -741,25 +741,30 @@ GameModeProject.prototype.createWall = function () {
 };
     
 GameModeProject.prototype.addWall = function () {
-    //console.log('asdf');
+    
     var newWall = this.createWall();
+    this.setHighlighted(newWall);
     this.setSelected(newWall);
+    
+    console.log(this.walls);
 };
 
-GameModeProject.prototype.deleteSelectedWall = function () {
+GameModeProject.prototype.removeSelectedWall = function () {
     if(!this.selectedWall) {
-        alert("Select wall");
+        alert("Select wall to remove");
         return;
     }
-    this.scene.remove(this.selectedWall);
+    var wallToRemove = this.selectedWall;
+    var removedIndex = this.walls.indexOf(wallToRemove);
+    this.walls.splice(removedIndex,1);        
+
+    this.scene.remove(wallToRemove);    
     this.setSelected(null);  
-    var removedIndex = this.walls.indexOf(this.selectedWall);
-    this.walls.splice(removedIndex,1);    
-};
+};    
 
 GameModeProject.prototype.duplicateSelectedWall = function () {
     if(!this.selectedWall) {
-        alert("Select wall");
+        alert("Select wall to duplicate");
         return;
     }
 };

@@ -27,17 +27,14 @@ var SOD = function () {
     this.Texture = this.Textures[0];
     
     this.AddWall = function(){
-        //console.log("AddWall");
         gameModeProject.addWall();        
     };
     
-    this.DeleteSelectedWall = function(){
-        //console.log("DeleteSelectedWall");
-        gameModeProject.deleteSelectedWall();
+    this.RemoveSelectedWall = function(){
+        gameModeProject.removeSelectedWall();
     };
     
     this.DuplicateSelectedWall = function(){
-        //console.log("DuplicateSelectedWall");
         gameModeProject.duplicateSelectedWall();
     };
     
