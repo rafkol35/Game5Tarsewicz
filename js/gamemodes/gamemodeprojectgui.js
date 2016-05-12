@@ -16,26 +16,36 @@ var SOScale = function () {
     this.Z = 0.0;    
 };
 
-var SOD = function () {
+var SOTexture = function(){
+    this.File = '';
+    this.repeatX = 1;
+    this.repeatY = 2;
+};
+
+var SOD = function (game) {
+    this.game = game;
+    
     this.pos = new SOPos();
     this.rot = new SORot();
     this.scale = new SOScale();
     
     this.Color = "#000000";
     
-    this.Textures = ['','',"rbn_0","rbn_1","rbn_2"];
-    this.Texture = this.Textures[0];
+    //this.Files = ['',"rbn_0","rbn_1","rbn_2"];
+    //this.Texture = this.Textures[0];
+    this.Texture = new SOTexture();
+    this.Texture.File = game.Files[0];
     
     this.AddWall = function(){
-        gameModeProject.addWall();        
+        game.addWall();        
     };
     
     this.RemoveSelectedWall = function(){
-        gameModeProject.removeSelectedWall();
+        game.removeSelectedWall();
     };
     
     this.DuplicateSelectedWall = function(){
-        gameModeProject.duplicateSelectedWall();
+        game.duplicateSelectedWall();
     };
     
     //this.AddWall = GameModeProject.addWall;                

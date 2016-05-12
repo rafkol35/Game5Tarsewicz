@@ -25,7 +25,8 @@ function GameModeProject(name) {
     this.gridSize = this.stageSize * this.gridStep;
     this.halfGridStep = this.gridStep * 0.5;
 
-    this.sod = new SOD();
+    this.Files = ['',"rbn_0","rbn_1","rbn_2"];
+    this.sod = new SOD(this);
     this.createGUI();
     this.prepareTextures();
     this.createDraggedFloor();
@@ -602,7 +603,7 @@ GameModeProject.prototype.createGUI = function () {
 
     {
         var cntr = null;
-        cntr = this.gui.add(this.sod, 'Texture', this.sod.Textures).listen();
+        cntr = this.gui.add(this.sod.Texture, 'File', this.Files).listen();
         //cntr.onChange(selObjTextureChanged);
         cntr.onFinishChange(selObjTextureChanged);
     }
@@ -618,13 +619,13 @@ GameModeProject.prototype.createGUI = function () {
 GameModeProject.prototype.prepareTextures = function () {
     this.textures = [];
     this.textures[""] = null;
-    for (var i = 0; i < this.sod.Textures.length; ++i) {
-        if (this.sod.Textures[i]) {
-            var _tex = new THREE.TextureLoader().load('textures/' + this.sod.Textures[i] + '.png');
+    for (var i = 0; i < this.Files.length; ++i) {
+        if (this.Files[i]) {
+            var _tex = new THREE.TextureLoader().load('textures/' + this.Files[i] + '.png');
             _tex.wrapS = THREE.RepeatWrapping;
             _tex.wrapT = THREE.RepeatWrapping;
             //_tex.repeat = new THREE.Vector2(2,2);
-            this.textures[ this.sod.Textures[i] ] = _tex;
+            this.textures[ this.Files[i] ] = _tex;
         }
     }
 };
