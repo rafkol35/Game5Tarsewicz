@@ -10,14 +10,6 @@ var GameMode = function (name) {
     this.camera = null;
 };
 
-GameMode.prototype.f1 = function () {
-    console.log("GameMode::f1 " + this.name);
-};
-
-GameMode.prototype.f2 = function () {
-    console.log("GameMode::f2 " + this.name);
-};
-
 GameMode.prototype.getClearColor = function () {
     return 0xffffff;
 };

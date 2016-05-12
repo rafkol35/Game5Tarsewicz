@@ -13,6 +13,7 @@
         <script src="js/three.min.js"></script>
         <!--<script src="js/controls/PointerLockControls.js"></script>-->
         <script type="text/javascript" src="js/dat.gui.min.js"></script>
+        <script type="text/javascript" src="js/gamemodes/gamemodeprojectgui.js"></script>
         <script src="js/gamemodes/gamemode.js"></script>
         <script src="js/gamemodes/gamemodeproject.js"></script>
         <script src="js/gamemodes/gamemodevisit.js"></script>
@@ -33,7 +34,7 @@
             var gameModeVisit = new GameModeVisit('visit');
             var currentGameMode = null; //gameModeVisit; //gameModeProject;
             var startedGameMode = gameModeProject;
-            //setMode(gameModeProject); // bo w egde sie nie pokaza kontrolki
+            setMode(gameModeProject); // bo w egde sie nie pokaza kontrolki
             setMode(startedGameMode === gameModeProject ? gameModeVisit : gameModeProject );
             
             function setMode(newMode){

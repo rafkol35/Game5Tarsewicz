@@ -1,38 +1,3 @@
-/* 
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-
-var SOPos = function () {
-    this.X = 0.0;
-    this.Y = 0.0;
-    this.Z = 0.0;    
-};
-
-var SORot = function () {
-    this.X = 0;
-    this.Y = 0;
-    this.Z = 0;    
-};
-
-var SOScale = function () {
-    this.X = 0.0;
-    this.Y = 0.0;
-    this.Z = 0.0;    
-};
-
-var SOD = function () {
-    this.pos = new SOPos();
-    this.rot = new SORot();
-    this.scale = new SOScale();
-    
-    this.Color = "#000000";
-    
-    this.Textures = ["","rbn_0","rbn_1","rbn_2"];
-    this.Texture = this.Textures[0];
-};
-        
 function GameModeProject(name) {
     GameMode.call(this, name);
 
@@ -135,10 +100,16 @@ function GameModeProject(name) {
 
     {
         var cntr = null;
-        //cntr = this.gui.add(this.sod, 'Textures', ["asdf","qwer","zxcv"]); // { Stopped: 0, Slow: 0.1, Fast: 5 });
         cntr = this.gui.add(this.sod, 'Texture', this.sod.Textures).listen();
-        cntr.onChange(selObjTextureChanged);
+        //cntr.onChange(selObjTextureChanged);
         cntr.onFinishChange(selObjTextureChanged);
+    }
+    
+    {
+        var cntr = null;
+        cntr = this.gui.add(this.sod,"AddWall");
+        cntr = this.gui.add(this.sod,"DeleteSelectedWall");
+        cntr = this.gui.add(this.sod,"DuplicateSelectedWall");
     }
     
     //this.gui.domElement.id = 'guiProject';
@@ -146,13 +117,18 @@ function GameModeProject(name) {
         
     this.textures = [];
     this.textures[""] = null;
-    this.textures["rbn_0"] = ( THREE.ImageUtils.loadTexture('textures/rbn_0.png') );
-    this.textures["rbn_1"] = ( THREE.ImageUtils.loadTexture('textures/rbn_1.png') );
-    this.textures["rbn_2"] = ( THREE.ImageUtils.loadTexture('textures/rbn_2.png') );
+    for( var i = 0 ; i < this.sod.Textures.length ; ++i ){
+        if( this.sod.Textures[i] !== '')
+            this.textures[ this.sod.Textures[i] ] = new THREE.TextureLoader().load('textures/' + this.sod.Textures[i] + '.png');
+    }
+    //var texture = new THREE.TextureLoader().load( "textures/water.jpg" );
+    //this.textures["rbn_0"] = ( THREE.ImageUtils.loadTexture('textures/rbn_0.png') );
+    //this.textures["rbn_1"] = ( THREE.ImageUtils.loadTexture('textures/rbn_1.png') );
+    //this.textures["rbn_2"] = ( THREE.ImageUtils.loadTexture('textures/rbn_2.png') );
     
-    this.textures["rbn_0"].wrapS = THREE.RepeatWrapping;
-    this.textures["rbn_0"].wrapT = THREE.RepeatWrapping;
-    this.textures["rbn_0"].repeat = new THREE.Vector2(2,2);
+    //this.textures["rbn_0"].wrapS = THREE.RepeatWrapping;
+    //this.textures["rbn_0"].wrapT = THREE.RepeatWrapping;
+    //this.textures["rbn_0"].repeat = new THREE.Vector2(2,2);
     
     // Grid
 //    this.gridStep = 50;
@@ -254,6 +230,7 @@ function GameModeProject(name) {
     var material = new THREE.MeshBasicMaterial({color: 0xff8000, map: this.textures["rbn_0"]});
     //var material = new THREE.MeshLambertMaterial({ map: map1, color: 0xffffff, vertexColors: THREE.VertexColors });
     material.transparent = true;
+    //material.needsUpdate = true;
     var cube = new THREE.Mesh(geometry, material);
     cube.position.set(0, 0, 0);
     this.scene.add(cube);
@@ -263,6 +240,7 @@ function GameModeProject(name) {
     var material2 = new THREE.MeshBasicMaterial({color: 0xff8000, map: this.textures["rbn_1"]});
     material2.transparent = true;
     material2.map = null;
+    //material2.needsUpdate = true;
     var cube2 = new THREE.Mesh(geometry, material2);
     this.scene.add(cube2);
     cube2.position.set(-220, 150, -150);    
@@ -302,102 +280,6 @@ function GameModeProject(name) {
 
 GameModeProject.prototype = Object.create(GameMode.prototype);
 GameModeProject.prototype.constructor = GameModeProject;
-
-GameModeProject.prototype.f1 = function () {
-    console.log("GameModeProject::f1 " + this.name);
-};
-
-GameModeProject.prototype.f2 = function () {
-    console.log("GameModeProject::f2 " + this.name);
-};
-
-var selObjPosChanged = function (val) {
-    if( gameModeProject.selectedCube === null ) return;
-    switch(this.property){
-        case "X":
-            gameModeProject.selectedCube.position.x = val * gameModeProject.gridStep;
-            break;
-        case "Y":
-            gameModeProject.selectedCube.position.y = val * gameModeProject.gridStep;
-            break;
-        case "Z":
-            gameModeProject.selectedCube.position.z = val * gameModeProject.gridStep;
-            break;
-    }
-    gameModeProject.draggedIndicator.position.x = gameModeProject.selectedCube.position.x;
-    gameModeProject.draggedIndicator.position.z = gameModeProject.selectedCube.position.z;
-};
-
-var selObjRotChanged = function (val) {
-    if( gameModeProject.selectedCube === null ) return;
-    
-    var newRot = gameModeProject.selectedCube.rotation;
-    var rad = THREE.Math.degToRad(val);
-    
-    switch(this.property){
-        case "X":
-            newRot.x = rad;
-            break;
-        case "Y":
-            newRot.y = rad;
-            break;
-        case "Z":
-            newRot.z = rad;
-            break;
-    }
-    gameModeProject.selectedCube.rotation = newRot;
-    
-    var axesRot = gameModeProject.draggedIndicator.rotation;
-    //axesRot.x = 0;
-    //axesRot.z = 0;
-    //axesRot.y = newRot.y;
-    axesRot.z = newRot.y;
-    console.log(axesRot.y);
-    gameModeProject.draggedIndicator.rotation = axesRot.clone();
-};
-
-var selObjScaleChanged = function (val) {
-    if( gameModeProject.selectedCube === null ) return;
-    switch(this.property){
-        case "X":            
-            gameModeProject.selectedCube.scale.x = val;
-            break;
-        case "Y":
-            gameModeProject.selectedCube.scale.y = val;
-            break;
-        case "Z":
-            gameModeProject.selectedCube.scale.z = val;
-            break;
-    }
-};
-
-var selObjColorChanged = function(val){
-    if( gameModeProject.selectedCube === null ) return;
-    gameModeProject.selectedCube.material.color = new THREE.Color(val);
-}
-
-var selObjTextureChanged = function(val){
-    if( gameModeProject.selectedCube === null ) return;
-    
-    var currentMaterial = gameModeProject.selectedCube.material;
-    //console.log(currentMaterial);
-    var newMaterial = new THREE.MeshBasicMaterial({color: currentMaterial.color});
-    if( val !== null ){
-        newMaterial.map = gameModeProject.textures[val];
-    }
-    
-//    if( currentMaterial.map !== null ){
-//        //console.log("set: " + gameModeProject.textures[val]);
-//        var newMaterial = new THREE.MeshBasicMaterial({color: currentMaterial.color});
-//        newMaterial.map = 
-//        currentMaterial.map = gameModeProject.textures[val];
-//    }else{
-//        //console.log("set: " + gameModeProject.textures[val]);
-//        var newMaterial = new THREE.MeshBasicMaterial({color: currentMaterial.color});        
-//    }
-
-    gameModeProject.selectedCube.material = newMaterial;
-};
 
 GameModeProject.prototype.getClearColor = function () {
     return 0xffffff;

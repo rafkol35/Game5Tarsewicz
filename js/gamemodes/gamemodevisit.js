@@ -93,10 +93,6 @@ function GameModeVisit(name) {
 GameModeVisit.prototype = Object.create(GameMode.prototype);
 GameModeVisit.prototype.constructor = GameModeVisit;
 
-GameModeVisit.prototype.f1 = function () {
-    console.log("GameModeVisit::f1 " + this.name);
-};
-
 GameModeVisit.prototype.getClearColor = function () {
     return 0xffffff;
 };
