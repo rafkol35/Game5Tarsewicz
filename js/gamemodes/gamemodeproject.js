@@ -488,27 +488,10 @@ GameModeProject.prototype.setSelected = function (cube) {
     if (this.selectedWall !== null) {
         this.selectedWall.material.opacity = 0.5;
 
-        //this.sod.pos.X = this.selectedWall.position.x / this.gridStep;
-        //this.sod.pos.Y = this.selectedWall.position.y / this.gridStep;
-        //this.sod.pos.Z = this.selectedWall.position.z / this.gridStep;        
         this.udpateGUIPos(this.selectedWall);
-
-        //var sor = this.selectedWall.rotation;
-        //this.sod.rot.X = THREE.Math.radToDeg(sor.x);
-        //this.sod.rot.Y = THREE.Math.radToDeg(sor.y);
-        //this.sod.rot.Z = THREE.Math.radToDeg(sor.z);
         this.updateGUIRotation(this.selectedWall);
-
-        //this.sod.scale.X = this.selectedWall.scale.x;
-        //this.sod.scale.Y = this.selectedWall.scale.y;
-        //this.sod.scale.Z = this.selectedWall.scale.z;
         this.updateGUIScale(this.selectedWall);
-
-        //this.sod.Color = "#000000";
         this.sod.Color = "#" + this.selectedWall.material.color.getHexString();
-
-        //console.log(this.selectedWall.material.map);
-        //console.log(this.selectedWall.material.map.image.src);
 
         var curMap = this.selectedWall.material.map;
         if (curMap !== null) {
@@ -521,38 +504,12 @@ GameModeProject.prototype.setSelected = function (cube) {
         }
 
     } else {
-        //this.sod.pos.X = "Nan";
-        //this.sod.pos.Y = "Nan";
-        //this.sod.pos.Z = "Nan";
         this.udpateGUIPos(null);
-
-        //this.sod.rot.X = "Nan";
-        //this.sod.rot.Y = "Nan";
-        //this.sod.rot.Z = "Nan";
         this.updateGUIRotation(null);
-
-        //this.sod.scale.X = "Nan";
-        //this.sod.scale.Y = "Nan";
-        //this.sod.scale.Z = "Nan";
         this.updateGUIScale(null);
-
         this.sod.Color = "#000000";
-
         this.sod.Texture = "";
     }
-
-//    if( cube === null ){ //zerowanie
-//        if( this.selectedWall !== null ) {
-//            this.selectedWall.material.opacity = 1;
-//            this.selectedWall = null;
-//        }
-//    }else{ //ustawianie
-//        if( this.selectedWall !== cube ){
-//            if( this.selectedWall !== null ) this.selectedWall.material.opacity = 1;
-//            this.selectedWall = cube;
-//            this.selectedWall.material.opacity = 0.5;
-//        }        
-//    }
 };
 
 GameModeProject.prototype.highlightOn = function (cube) {
@@ -575,8 +532,6 @@ GameModeProject.prototype.highlightOff = function () {
 };
 
 GameModeProject.prototype.highlightOnOff = function (cube, hl) {
-    //this.highlightWall = cube;
-    //console.log("this.highlightOn");
     this.highlightWall.material.opacity = hl === true ? 0.5 : 1;
 };
 
@@ -792,10 +747,20 @@ GameModeProject.prototype.addWall = function () {
 };
 
 GameModeProject.prototype.deleteSelectedWall = function () {
-    //if(this.selectedWall)
+    if(!this.selectedWall) {
+        alert("Select wall");
+        return;
+    }
+    this.scene.remove(this.selectedWall);
+    this.setSelected(null);  
+    var removedIndex = this.walls.indexOf(this.selectedWall);
+    this.walls.splice(removedIndex,1);    
 };
 
 GameModeProject.prototype.duplicateSelectedWall = function () {
-    
+    if(!this.selectedWall) {
+        alert("Select wall");
+        return;
+    }
 };
   
