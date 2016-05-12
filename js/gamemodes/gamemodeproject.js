@@ -744,9 +744,7 @@ GameModeProject.prototype.addWall = function () {
     
     var newWall = this.createWall();
     this.setHighlighted(newWall);
-    this.setSelected(newWall);
-    
-    console.log(this.walls);
+    this.setSelected(newWall);    
 };
 
 GameModeProject.prototype.removeSelectedWall = function () {
@@ -758,7 +756,9 @@ GameModeProject.prototype.removeSelectedWall = function () {
     var removedIndex = this.walls.indexOf(wallToRemove);
     this.walls.splice(removedIndex,1);        
 
-    this.scene.remove(wallToRemove);    
+    this.scene.remove(wallToRemove);  
+    
+    this.setHighlighted(null);
     this.setSelected(null);  
 };    
 
