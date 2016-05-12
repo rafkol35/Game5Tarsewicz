@@ -878,7 +878,12 @@ GameModeProject.prototype.updatePlayer = function(playerData){
     this.playerPos.position.x = playerData.PosX;
     this.playerPos.position.z = playerData.PosZ;
     this.playerPos.rotation.y = playerData.Rot;
-    this.updatePlayerHeight(playerData.Height);    
+    this.updatePlayerHeight(playerData.Height);
+    
+    this.guiData.pd.PosX = playerData.PosX / this.gridStep;
+    this.guiData.pd.PosZ = playerData.PosZ / this.gridStep;
+    this.guiData.pd.Rot = THREE.Math.radToDeg(playerData.Rot);
+    this.guiData.pd.Height = playerData.Height;
 };
 
 GameModeProject.prototype.updateFloor = function(floorData){
@@ -886,14 +891,21 @@ GameModeProject.prototype.updateFloor = function(floorData){
     floorTextureChanged(floorData.File);
     floorTexRepeatXChanged(floorData.RepeatX);
     floorTexRepeatYChanged(floorData.RepeatY);
+    
+    this.guiData.fm.Color = floorData.Color;
+    this.guiData.fm.File = floorData.File;
+    this.guiData.fm.RepeatX = floorData.RepeatX;
+    this.guiData.fm.RepeatY = floorData.RepeatY;
 };
  
 GameModeProject.prototype.updateStage = function(stageData){
     this.updateStageSize(stageData.Size);
-    //this.ProjBackColor = "#" + game.projClearColor.getHexString();
-    //this.VisitBackColor = "#" + game.visitClearColor.getHexString();
     this.setProjClearColor(stageData.ProjBackColor);
     this.setVisitClearColor(stageData.VisitBackColor);
+    
+    this.guiData.sd.Size = stageData.Size;
+    this.guiData.sd.ProjBackColor = stageData.ProjBackColor;
+    this.guiData.sd.VisitBackColor = stageData.VisitBackColor;
 };
 
 GameModeProject.prototype.updateStageSize = function(newSize){
@@ -1079,7 +1091,7 @@ var SaveData = function(){
 };
 
 GameModeProject.prototype.saveFile = function(){
-    var fileName = "asdf";// prompt("File name", "scene");
+    var fileName = prompt("File name", "scene");
     if (fileName !== null) {
 
         //var output = gameModeProject.scene.toJSON();
@@ -1102,10 +1114,10 @@ GameModeProject.prototype.saveFile = function(){
             saveData = JSON.stringify(saveData);
         }
         
-        //saveString(saveData, fileName + '.game5scene');
+        saveString(saveData, fileName + '.game5scene');
         
-        var loadData = jQuery.parseJSON(saveData);
-        this.load(loadData);
+        //var loadData = jQuery.parseJSON(saveData);
+        //this.load(loadData);
     }
 };
 
@@ -1126,27 +1138,22 @@ GameModeProject.prototype.loadFile = function(file){
         
         //var saveData = new SaveData();
         var loadData = jQuery.parseJSON(contents);
-        
-        //this.StageData = new StageData(gameModeProject);
-        //this.WallDatas = [];    
-        //this.PlayerData = new PlayerData();
-        //this.FloorData = gameModeProject.guiData.fm;
-        
-        //gameModeProject.updateStageSize(loadData.StageData.Size);
-        gameModeProject.updateStage(loadData.StageData);
-        
-        for( var i = 0 ; i < loadData.WallDatas.length ; ++i ){
-            gameModeProject.createWall( loadData.WallDatas[i] );
-        }
-        
-        gameModeProject.updatePlayer(loadData.PlayerData);        
-        gameModeProject.updateFloor(loadData.FloorData);
+        gameModeProject.load(loadData);
     });    
     
     reader.readAsText( file );
 };
 
 GameModeProject.prototype.load = function(loadData){
+    
+    this.setSelected(null);
+    this.setHighlighted(null);
+    
+    for( var i = 0 ; i < this.walls.length ; ++i ){
+        this.scene.remove(this.walls[i]);
+    }
+    this.walls = [];
+    
     gameModeProject.updateStage(loadData.StageData);
         
     for( var i = 0 ; i < loadData.WallDatas.length ; ++i ){
@@ -1154,6 +1161,7 @@ GameModeProject.prototype.load = function(loadData){
     }
         
     gameModeProject.updatePlayer(loadData.PlayerData);        
+    //console.log(loadData.FloorData);
     gameModeProject.updateFloor(loadData.FloorData);    
 };
 
