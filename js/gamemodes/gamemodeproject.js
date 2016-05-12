@@ -685,15 +685,15 @@ GameModeProject.prototype.createGUI = function () {
         var folder = this.gui.addFolder('Player');
         var cntr = null;
         
-        var cntr = folder.add(this.guiData.pd, 'PosX', -this.stageSize, this.stageSize).listen();
-        cntr.step(0.1);
-        cntr.onChange(playerPosChanged);
-        cntr.onFinishChange(playerPosChanged);
+        this.cntrPlayerPosX = folder.add(this.guiData.pd, 'PosX', -this.stageSize, this.stageSize).listen();
+        this.cntrPlayerPosX.step(0.1);
+        this.cntrPlayerPosX.onChange(playerPosChanged);
+        this.cntrPlayerPosX.onFinishChange(playerPosChanged);
 
-        cntr = folder.add(this.guiData.pd, 'PosZ', -this.stageSize, this.stageSize).listen();
-        cntr.step(0.1); //.min(-this.stageSize).max(this.stageSize);
-        cntr.onChange(playerPosChanged);
-        cntr.onFinishChange(playerPosChanged);
+        this.cntrPlayerPosZ = folder.add(this.guiData.pd, 'PosZ', -this.stageSize, this.stageSize).listen();
+        this.cntrPlayerPosZ.step(0.1); //.min(-this.stageSize).max(this.stageSize);
+        this.cntrPlayerPosZ.onChange(playerPosChanged);
+        this.cntrPlayerPosZ.onFinishChange(playerPosChanged);
         
         cntr = folder.add(this.guiData.pd, 'Rot').listen();
         cntr.step(1); //.min(-this.stageSize).max(this.stageSize);
@@ -878,7 +878,14 @@ GameModeProject.prototype.updateStageSize = function(newSize){
     }
     this.gridLine.geometry = gridGeometry;
     
+    this.cntrPlayerPosX.min(-this.stageSize);
+    this.cntrPlayerPosX.max(this.stageSize);
+    this.cntrPlayerPosZ.min(-this.stageSize);
+    this.cntrPlayerPosZ.max(this.stageSize);
     
+    //if( this.selectedWall ){
+        //this.udpateGUIPos(this.selectedWall);
+    //}
 };
 
 GameModeProject.prototype.createWall = function (nwd/*NewWallData*/) {
