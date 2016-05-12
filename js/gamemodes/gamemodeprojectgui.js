@@ -120,9 +120,19 @@ var selObjTextureChanged = function(val){
     var currentMaterial = gameModeProject.selectedWall.material;
     
     if( val !== "" ){
-        var newTexture = gameModeProject.textures[val].clone();
-        newTexture.needsUpdate = true;        
-        currentMaterial.map = newTexture; //  new THREE.TextureLoader().load('textures/' + val + '.png');    
+        var befRepX = 1;
+        var befRepY = 1;
+        
+        if( currentMaterial.map ){
+            befRepX = currentMaterial.map.repeat.x;
+            befRepY = currentMaterial.map.repeat.y;            
+        }
+        
+        var newTexture = gameModeProject.textures[val].clone();        
+        newTexture.repeat.x = befRepX;
+        newTexture.repeat.y = befRepY;
+        newTexture.needsUpdate = true;
+        currentMaterial.map = newTexture; //  new THREE.TextureLoader().load('textures/' + val + '.png');            
         currentMaterial.needsUpdate = true;
         
         //newMaterial.map.wrapS = THREE.RepeatWrapping;
