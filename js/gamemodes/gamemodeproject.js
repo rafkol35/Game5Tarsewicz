@@ -20,8 +20,8 @@ function GameModeProject(name) {
 
     this.camera.lookAt(new THREE.Vector3(0, 0, 0));
 
-    this.gridStep = 50;
-    this.stageSize = 10;
+    this.gridStep = 50.0;
+    this.stageSize = 10.0;
     this.gridSize = this.stageSize * this.gridStep;
     this.halfGridStep = this.gridStep * 0.5;
 
@@ -74,7 +74,7 @@ GameModeProject.prototype = Object.create(GameMode.prototype);
 GameModeProject.prototype.constructor = GameModeProject;
 
 GameModeProject.prototype.getClearColor = function () {
-    return 0xffffff;
+    return 0xdddddd;
 };
 
 GameModeProject.prototype.activate = function () {
@@ -553,21 +553,26 @@ GameModeProject.prototype.createGUI = function () {
     
     {
         var folderPosition = wallFolder.addFolder('Position');
-
-        var cntr = folderPosition.add(this.guiData.wd.Pos, 'X', -this.stageSize, this.stageSize).listen();
-        cntr.step(0.1);
+        //var _t = this.stageSize;
+        //var cntr = folderPosition.add(this.guiData.wd.Pos, 'X', -this.stageSize, this.stageSize).listen();
+        var cntr = folderPosition.add(this.guiData.wd.Pos, 'X').listen();
+        cntr.step(0.05);
+        //cntr.min(-this.stageSize);
+        //cntr.max(this.stageSize);
         //cntr.min(-this.stageSize/2);
         //cntr.max(this.stageSize/2);
         cntr.onChange(selObjPosChanged);
         cntr.onFinishChange(selObjPosChanged);
 
-        cntr = folderPosition.add(this.guiData.wd.Pos, 'Y', 0, 10).listen();
-        cntr.step(0.1);//.min(0).max(30);
+        cntr = folderPosition.add(this.guiData.wd.Pos, 'Y').listen();
+        cntr.step(0.05);
+        cntr.min(0);//.max(30);
         cntr.onChange(selObjPosChanged);
         cntr.onFinishChange(selObjPosChanged);
 
-        cntr = folderPosition.add(this.guiData.wd.Pos, 'Z', -this.stageSize, this.stageSize).listen();
-        cntr.step(0.1).min(-this.stageSize).max(this.stageSize);
+        cntr = folderPosition.add(this.guiData.wd.Pos, 'Z').listen();
+        cntr.step(0.05);
+        //cntr.step(0.1).min(-this.stageSize).max(this.stageSize);
         cntr.onChange(selObjPosChanged);
         cntr.onFinishChange(selObjPosChanged);
     }

@@ -54,12 +54,12 @@ GameModeVisit.prototype.activate = function () {
     $(this.gui.domElement).attr("hidden", false);
     this.clear();
     
-    var geometry = new THREE.BoxGeometry(1, 1, 1);
-    var material = new THREE.MeshBasicMaterial({color: 0x00ff00});
-    var cube = new THREE.Mesh(geometry, material);
-    cube.position.set(0, 0, -1);
-    this.scene.add(cube);
-    this.walls.push(cube);
+//    var geometry = new THREE.BoxGeometry(1, 1, 1);
+//    var material = new THREE.MeshBasicMaterial({color: 0x00ff00});
+//    var cube = new THREE.Mesh(geometry, material);
+//    cube.position.set(0, 0, -1);
+//    this.scene.add(cube);
+//    this.walls.push(cube);
 //    
 //    cube = new THREE.Mesh(geometry, material);
 //    cube.position.set(0, 0, 5);

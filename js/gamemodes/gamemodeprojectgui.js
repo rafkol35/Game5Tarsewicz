@@ -72,19 +72,31 @@ var PGUIData = function (game) {
 
 var selObjPosChanged = function (val) {
     if( gameModeProject.selectedWall === null ) return;
+    var gmp = gameModeProject;
+    
+    if (this.property === "X" || this.property === "Z") {
+        if (val > gmp.stageSize) {
+            val = gmp.stageSize;
+            this.setValue(gmp.stageSize);
+        } else if (val < -gmp.stageSize) {
+            val = -gmp.stageSize;
+            this.setValue(-gmp.stageSize);
+        }
+    }
+    
     switch(this.property){
         case "X":
-            gameModeProject.selectedWall.position.x = val * gameModeProject.gridStep;
+            gmp.selectedWall.position.x = val * gmp.gridStep;
             break;
         case "Y":
-            gameModeProject.selectedWall.position.y = val * gameModeProject.gridStep;
+            gmp.selectedWall.position.y = val * gmp.gridStep;
             break;
         case "Z":
-            gameModeProject.selectedWall.position.z = val * gameModeProject.gridStep;
+            gmp.selectedWall.position.z = val * gmp.gridStep;
             break;
     }
-    gameModeProject.draggedIndicator.position.x = gameModeProject.selectedWall.position.x;
-    gameModeProject.draggedIndicator.position.z = gameModeProject.selectedWall.position.z;
+    gmp.draggedIndicator.position.x = gmp.selectedWall.position.x;
+    gmp.draggedIndicator.position.z = gmp.selectedWall.position.z;
 };
 
 var selObjRotChanged = function (val) {
