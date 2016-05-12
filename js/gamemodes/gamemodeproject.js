@@ -741,27 +741,58 @@ GameModeProject.prototype.createGrid = function () {
     this.scene.add(gridLine);
 };
     
-GameModeProject.prototype.createWall = function () {
+GameModeProject.prototype.createWall = function (nwd/*NewWallData*/) {
     var geometry = new THREE.BoxGeometry(this.gridStep, this.gridStep, this.gridStep);
-    //var material = new THREE.MeshBasicMaterial({color: 0xff8000, map: this.textures["rbn_0"]});
-    var material = new THREE.MeshBasicMaterial({color: 0xff8000, map: null});
+    var material = new THREE.MeshBasicMaterial({color: nwd.Color, map: null});
     material.transparent = true;
-    var _tex = this.textures["rbn_0"].clone();
-    _tex.needsUpdate = true;
-    //console.log(_tex);
-    material.map = _tex;
-    material.needsUpdate = true;
+    if( nwd.Texture.File ){
+        var _tex = this.textures[nwd.Texture.File].clone();
+        _tex.repeat.x = nwd.Texture.RepeatX;
+        _tex.repeat.y = nwd.Texture.RepeatY;
+        _tex.needsUpdate = true;
+        material.map = _tex;
+        material.needsUpdate = true;
+    }
     var newWall = new THREE.Mesh(geometry, material);
-    newWall.position.set(0, 0, 0);
+    
+    newWall.position.set(nwd.Pos.X * this.gridStep, nwd.Pos.Y * this.gridStep, nwd.Pos.Z * this.gridStep);
+    //newWall.position.set(0,0,0);
+    
+    var _rot = newWall.rotation;
+    _rot.x = THREE.Math.degToRad(nwd.Rot.X);
+    _rot.y = THREE.Math.degToRad(nwd.Rot.Y);
+    _rot.z = THREE.Math.degToRad(nwd.Rot.Z);
+    newWall.rotation = _rot;
+    
+    newWall.scale.set(nwd.Scale.X, nwd.Scale.Y, nwd.Scale.Z);
+    
     this.scene.add(newWall);
     this.walls.push(newWall);
-    //cube.castShadow = true;
     return newWall;
 };
     
-GameModeProject.prototype.addWall = function () {
+GameModeProject.prototype.addWall = function () {    
+    var newWallData = new WallData();
     
-    var newWall = this.createWall();
+    newWallData.Pos.X = 1;
+    newWallData.Pos.Y = 2;
+    newWallData.Pos.Z = 3;
+    
+    newWallData.Rot.X = 10;
+    newWallData.Rot.Y = 20;
+    newWallData.Rot.Z = 30;
+    
+    newWallData.Scale.X = 4;
+    newWallData.Scale.Y = 5;
+    newWallData.Scale.Z = 6;
+    
+    newWallData.Color = "#ff00ff";
+    
+    newWallData.Texture.File = this.Files[1];
+    newWallData.Texture.RepeatX = 2;
+    newWallData.Texture.RepeatY = 3;
+    
+    var newWall = this.createWall(newWallData);
     this.setHighlighted(newWall);
     this.setSelected(newWall);    
 };

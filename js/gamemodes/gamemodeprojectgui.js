@@ -11,9 +11,9 @@ var Rot = function () {
 };
 
 var Scale = function () {
-    this.X = 0.0;
-    this.Y = 0.0;
-    this.Z = 0.0;    
+    this.X = 1.0;
+    this.Y = 1.0;
+    this.Z = 1.0;    
 };
 
 var Texture = function(){
@@ -26,7 +26,7 @@ var WallData = function () {
     this.Pos = new Pos();
     this.Rot = new Rot();
     this.Scale = new Scale();
-    this.Color = "#000000";    
+    this.Color = "#ffffff";    
     this.Texture = new Texture();
     this.Texture.File = '';
 };
@@ -69,6 +69,7 @@ var selObjRotChanged = function (val) {
     if( gameModeProject.selectedWall === null ) return;
     
     var newRot = gameModeProject.selectedWall.rotation;
+    //console.log(newRot);
     var rad = THREE.Math.degToRad(val);
     
     switch(this.property){
