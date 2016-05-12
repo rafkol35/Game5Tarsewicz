@@ -47,26 +47,26 @@ var SOD = function () {
 };
       
 var selObjPosChanged = function (val) {
-    if( gameModeProject.selectedCube === null ) return;
+    if( gameModeProject.selectedWall === null ) return;
     switch(this.property){
         case "X":
-            gameModeProject.selectedCube.position.x = val * gameModeProject.gridStep;
+            gameModeProject.selectedWall.position.x = val * gameModeProject.gridStep;
             break;
         case "Y":
-            gameModeProject.selectedCube.position.y = val * gameModeProject.gridStep;
+            gameModeProject.selectedWall.position.y = val * gameModeProject.gridStep;
             break;
         case "Z":
-            gameModeProject.selectedCube.position.z = val * gameModeProject.gridStep;
+            gameModeProject.selectedWall.position.z = val * gameModeProject.gridStep;
             break;
     }
-    gameModeProject.draggedIndicator.position.x = gameModeProject.selectedCube.position.x;
-    gameModeProject.draggedIndicator.position.z = gameModeProject.selectedCube.position.z;
+    gameModeProject.draggedIndicator.position.x = gameModeProject.selectedWall.position.x;
+    gameModeProject.draggedIndicator.position.z = gameModeProject.selectedWall.position.z;
 };
 
 var selObjRotChanged = function (val) {
-    if( gameModeProject.selectedCube === null ) return;
+    if( gameModeProject.selectedWall === null ) return;
     
-    var newRot = gameModeProject.selectedCube.rotation;
+    var newRot = gameModeProject.selectedWall.rotation;
     var rad = THREE.Math.degToRad(val);
     
     switch(this.property){
@@ -80,7 +80,7 @@ var selObjRotChanged = function (val) {
             newRot.z = rad;
             break;
     }
-    gameModeProject.selectedCube.rotation = newRot;
+    gameModeProject.selectedWall.rotation = newRot;
     
     var axesRot = gameModeProject.draggedIndicator.rotation;
     //axesRot.x = 0;
@@ -92,29 +92,29 @@ var selObjRotChanged = function (val) {
 };
 
 var selObjScaleChanged = function (val) {
-    if( gameModeProject.selectedCube === null ) return;
+    if( gameModeProject.selectedWall === null ) return;
     switch(this.property){
         case "X":            
-            gameModeProject.selectedCube.scale.x = val;
+            gameModeProject.selectedWall.scale.x = val;
             break;
         case "Y":
-            gameModeProject.selectedCube.scale.y = val;
+            gameModeProject.selectedWall.scale.y = val;
             break;
         case "Z":
-            gameModeProject.selectedCube.scale.z = val;
+            gameModeProject.selectedWall.scale.z = val;
             break;
     }
 };
 
 var selObjColorChanged = function(val){
-    if( gameModeProject.selectedCube === null ) return;
-    gameModeProject.selectedCube.material.color = new THREE.Color(val);
+    if( gameModeProject.selectedWall === null ) return;
+    gameModeProject.selectedWall.material.color = new THREE.Color(val);
 }
 
 var selObjTextureChanged = function(val){
-    if( gameModeProject.selectedCube === null ) return;
+    if( gameModeProject.selectedWall === null ) return;
     
-    var currentMaterial = gameModeProject.selectedCube.material;
+    var currentMaterial = gameModeProject.selectedWall.material;
     
     if( val !== "" ){
         var newTexture = gameModeProject.textures[val].clone();

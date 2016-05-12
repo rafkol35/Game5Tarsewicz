@@ -34,10 +34,10 @@ function GameModeProject(name) {
     this.createGrid();
     
     this.walls = [];
-    this.selectedCube = null;
-    this.highlightCube = null;
-    this.draggedCube = null;
-    this.draggedCubeOffset = null;
+    this.selectedWall = null;
+    this.highlightWall = null;
+    this.draggedWall = null;
+    this.draggedWallOffset = null;
 
     this.moveUp = false;
     this.moveDown = false;
@@ -99,7 +99,7 @@ GameModeProject.prototype.clear = function () {
 
     this.setSelected(null);
     this.setHighlighted(null);
-    this.draggedCube = null;
+    this.draggedWall = null;
 };
 
 GameModeProject.prototype.keyDown = function (event) {
@@ -114,7 +114,7 @@ GameModeProject.prototype.keyDown = function (event) {
     switch (event.keyCode) {
 
         case 82:
-            if (this.draggedCube !== null) {
+            if (this.draggedWall !== null) {
                 this.rotateObject = true;
                 this.rotateOrigin = mouse;
             }
@@ -175,12 +175,12 @@ GameModeProject.prototype.keyUp = function (event) {
             {
                 this.scaleX = false;
                 this.scaleY = false;
-                if (this.draggedCube !== null) {
+                if (this.draggedWall !== null) {
                     this.raycaster.setFromCamera(mouse, this.camera);
                     var intersects = this.raycaster.intersectObject(this.draggedFloor);
                     if (intersects.length > 0) {
-                        this.draggedCubeOffset = intersects[0].point.clone().sub(this.draggedCube.position.clone());
-                        this.draggedCubeOffset.y = 0;
+                        this.draggedWallOffset = intersects[0].point.clone().sub(this.draggedWall.position.clone());
+                        this.draggedWallOffset.y = 0;
                     }
                 }
             }
@@ -188,13 +188,13 @@ GameModeProject.prototype.keyUp = function (event) {
 
         case 82:
             this.rotateObject = false;
-            if (this.draggedCube !== null) {
+            if (this.draggedWall !== null) {
                 this.raycaster.setFromCamera(mouse, this.camera);
                 var intersects = this.raycaster.intersectObject(this.draggedFloor);
                 if (intersects.length > 0) {
-                    //this.draggedCube = this.selectedCube;
-                    this.draggedCubeOffset = intersects[0].point.clone().sub(this.draggedCube.position.clone());
-                    this.draggedCubeOffset.y = 0;
+                    //this.draggedWall = this.selectedWall;
+                    this.draggedWallOffset = intersects[0].point.clone().sub(this.draggedWall.position.clone());
+                    this.draggedWallOffset.y = 0;
                 }
             }
             break;
@@ -251,14 +251,14 @@ GameModeProject.prototype.mouseDown = function (event) {
         var intersects = this.raycaster.intersectObject(this.draggedAxisX);
         if (intersects.length > 0) {
             this.scaleX = true;
-            this.draggedCube = this.selectedCube;
+            this.draggedWall = this.selectedWall;
             this.scaleOrigin = intersects[0].point.clone();
             return;
         }
         var intersects = this.raycaster.intersectObject(this.draggedAxisY);
         if (intersects.length > 0) {
             this.scaleY = true;
-            this.draggedCube = this.selectedCube;
+            this.draggedWall = this.selectedWall;
             this.scaleOrigin = intersects[0].point.clone();
             return;
         }
@@ -268,13 +268,13 @@ GameModeProject.prototype.mouseDown = function (event) {
             ) {
         this.setSelected(this.getFirstUnderMouse());
 
-        if (this.selectedCube) {
+        if (this.selectedWall) {
             this.raycaster.setFromCamera(mouse, this.camera);
             var intersects = this.raycaster.intersectObject(this.draggedFloor);
             if (intersects.length > 0) {
-                this.draggedCube = this.selectedCube;
-                this.draggedCubeOffset = intersects[0].point.clone().sub(this.draggedCube.position.clone());
-                this.draggedCubeOffset.y = 0;
+                this.draggedWall = this.selectedWall;
+                this.draggedWallOffset = intersects[0].point.clone().sub(this.draggedWall.position.clone());
+                this.draggedWallOffset.y = 0;
                 if (pressedKeys[82])
                     this.rotateObject = true;
             }
@@ -282,14 +282,14 @@ GameModeProject.prototype.mouseDown = function (event) {
     }
 };
 GameModeProject.prototype.mouseUp = function (event) {
-    this.draggedCube = null;
+    this.draggedWall = null;
     this.rotateObject = false;
     this.scaleX = false;
     this.scaleY = false;
 };
 
 GameModeProject.prototype.mouseMove = function (event) {
-    if (this.draggedCube) {
+    if (this.draggedWall) {
         //console.log("asdf");
         this.raycaster.setFromCamera(mouse, this.camera);
         var intersects = this.raycaster.intersectObject(this.draggedFloor);
@@ -298,23 +298,23 @@ GameModeProject.prototype.mouseMove = function (event) {
 //                var _diffPrev = this.scaleOrigin.clone().sub(this.draggedIndicator.position.clone());
 //                var _diffCurr = intersects[0].point.clone().sub(this.draggedIndicator.position.clone());
 //                
-//                var scl = this.draggedCube.scale.x;
+//                var scl = this.draggedWall.scale.x;
 //                scl += ( (_diffCurr.length()-_diffPrev.length()) / this.gridStep) * 2;
 //                console.log(scl);
 //                scl = Math.max(scl,0.1);
-//                this.draggedCube.scale.x = scl;
+//                this.draggedWall.scale.x = scl;
 //                
 //                this.scaleOrigin = intersects[0].point.clone();
-//                this.updateGUIScale(this.selectedCube);
+//                this.updateGUIScale(this.selectedWall);
 
                 var _diff = intersects[0].point.clone().sub(this.draggedIndicator.position.clone());
-                this.draggedCube.scale.x = (_diff.length() / this.gridStep) * 2;
-                this.updateGUIScale(this.selectedCube);
+                this.draggedWall.scale.x = (_diff.length() / this.gridStep) * 2;
+                this.updateGUIScale(this.selectedWall);
 
             } else if (this.scaleY) {
                 var _diff = intersects[0].point.clone().sub(this.draggedIndicator.position.clone());
-                this.draggedCube.scale.z = (_diff.length() / this.gridStep) * 2;
-                this.updateGUIScale(this.selectedCube);
+                this.draggedWall.scale.z = (_diff.length() / this.gridStep) * 2;
+                this.updateGUIScale(this.selectedWall);
             } else if (this.rotateObject) {
                 var _diff = intersects[0].point.clone().sub(this.draggedIndicator.position.clone());
                 var diff = new THREE.Vector2(_diff.z, _diff.x);
@@ -323,25 +323,25 @@ GameModeProject.prototype.mouseMove = function (event) {
                     //console.log( THREE.Math.radToDeg( Math.atan2(diff.y,diff.x)) );
                     var rad = Math.atan2(diff.y, diff.x);
 
-                    var newRot = this.selectedCube.rotation;
+                    var newRot = this.selectedWall.rotation;
                     //var rad = THREE.Math.degToRad(val);
                     newRot.y = rad;
-                    this.selectedCube.rotation = newRot;
+                    this.selectedWall.rotation = newRot;
 
                     var axesRot = this.draggedIndicator.rotation;
                     axesRot.z = newRot.y;
                     this.draggedIndicator.rotation = axesRot;
 
-                    this.updateGUIRotation(this.selectedCube);
+                    this.updateGUIRotation(this.selectedWall);
                 }
             } else {
-                var newPos = intersects[0].point.clone().sub(this.draggedCubeOffset.clone());
+                var newPos = intersects[0].point.clone().sub(this.draggedWallOffset.clone());
                 newPos.x = Math.min(Math.max(-this.gridSize, newPos.x), this.gridSize);
                 newPos.z = Math.min(Math.max(-this.gridSize, newPos.z), this.gridSize);
-                this.draggedCube.position.set(newPos.x, this.draggedCube.position.y, newPos.z);
-                this.draggedIndicator.position.x = this.draggedCube.position.x;
-                this.draggedIndicator.position.z = this.draggedCube.position.z;
-                this.udpateGUIPos(this.selectedCube);
+                this.draggedWall.position.set(newPos.x, this.draggedWall.position.y, newPos.z);
+                this.draggedIndicator.position.x = this.draggedWall.position.x;
+                this.draggedIndicator.position.z = this.draggedWall.position.z;
+                this.udpateGUIPos(this.selectedWall);
             }
         }
     } else {
@@ -390,7 +390,7 @@ GameModeProject.prototype.render = function (renderer) {
 //        this.camera.position.z = Math.cos(this.zrat) * this.cameraRestrict.z;
 //        this.camera.lookAt(this.scene.position);        
 //    }
-    //if (this.draggedCube === null) {
+    //if (this.draggedWall === null) {
     //    this.setHighlighted(this.getFirstUnderMouse());
     //}
 
@@ -417,20 +417,20 @@ GameModeProject.prototype.getFirstUnderMouse = function () {
 
 GameModeProject.prototype.setHighlighted = function (cube) {
     if (cube === null) { //zerowanie
-        if (this.highlightCube !== null && this.highlightCube !== this.selectedCube) {
-            this.highlightCube.material.opacity = 1;
-            this.highlightCube = null;
+        if (this.highlightWall !== null && this.highlightWall !== this.selectedWall) {
+            this.highlightWall.material.opacity = 1;
+            this.highlightWall = null;
             this.draggedIndicator.visible = false;
             this.draggedAxisX.visible = false;
             this.draggedAxisY.visible = false;
         }
     } else { //ustawianie
-        if (this.highlightCube !== cube) {
-            if (this.highlightCube !== null && this.highlightCube !== this.selectedCube) {
-                this.highlightCube.material.opacity = 1;
+        if (this.highlightWall !== cube) {
+            if (this.highlightWall !== null && this.highlightWall !== this.selectedWall) {
+                this.highlightWall.material.opacity = 1;
             }
-            this.highlightCube = cube;
-            this.highlightCube.material.opacity = 0.5;
+            this.highlightWall = cube;
+            this.highlightWall.material.opacity = 0.5;
             this.draggedIndicator.visible = true;
             this.draggedAxisX.visible = true;
             this.draggedAxisY.visible = true;
@@ -481,38 +481,38 @@ GameModeProject.prototype.updateGUIScale = function (cube) {
 };
 
 GameModeProject.prototype.setSelected = function (cube) {
-    if (this.selectedCube !== null)
-        this.selectedCube.material.opacity = 1;
-    this.selectedCube = cube;
+    if (this.selectedWall !== null)
+        this.selectedWall.material.opacity = 1;
+    this.selectedWall = cube;
 
-    if (this.selectedCube !== null) {
-        this.selectedCube.material.opacity = 0.5;
+    if (this.selectedWall !== null) {
+        this.selectedWall.material.opacity = 0.5;
 
-        //this.sod.pos.X = this.selectedCube.position.x / this.gridStep;
-        //this.sod.pos.Y = this.selectedCube.position.y / this.gridStep;
-        //this.sod.pos.Z = this.selectedCube.position.z / this.gridStep;        
-        this.udpateGUIPos(this.selectedCube);
+        //this.sod.pos.X = this.selectedWall.position.x / this.gridStep;
+        //this.sod.pos.Y = this.selectedWall.position.y / this.gridStep;
+        //this.sod.pos.Z = this.selectedWall.position.z / this.gridStep;        
+        this.udpateGUIPos(this.selectedWall);
 
-        //var sor = this.selectedCube.rotation;
+        //var sor = this.selectedWall.rotation;
         //this.sod.rot.X = THREE.Math.radToDeg(sor.x);
         //this.sod.rot.Y = THREE.Math.radToDeg(sor.y);
         //this.sod.rot.Z = THREE.Math.radToDeg(sor.z);
-        this.updateGUIRotation(this.selectedCube);
+        this.updateGUIRotation(this.selectedWall);
 
-        //this.sod.scale.X = this.selectedCube.scale.x;
-        //this.sod.scale.Y = this.selectedCube.scale.y;
-        //this.sod.scale.Z = this.selectedCube.scale.z;
-        this.updateGUIScale(this.selectedCube);
+        //this.sod.scale.X = this.selectedWall.scale.x;
+        //this.sod.scale.Y = this.selectedWall.scale.y;
+        //this.sod.scale.Z = this.selectedWall.scale.z;
+        this.updateGUIScale(this.selectedWall);
 
         //this.sod.Color = "#000000";
-        this.sod.Color = "#" + this.selectedCube.material.color.getHexString();
+        this.sod.Color = "#" + this.selectedWall.material.color.getHexString();
 
-        //console.log(this.selectedCube.material.map);
-        //console.log(this.selectedCube.material.map.image.src);
+        //console.log(this.selectedWall.material.map);
+        //console.log(this.selectedWall.material.map.image.src);
 
-        var curMap = this.selectedCube.material.map;
+        var curMap = this.selectedWall.material.map;
         if (curMap !== null) {
-            var texName = this.selectedCube.material.map.image.src;
+            var texName = this.selectedWall.material.map.image.src;
             var n1 = texName.lastIndexOf('/') + 1;
             var n2 = texName.lastIndexOf('.png');
             this.sod.Texture = texName.substr(n1, n2 - n1);
@@ -542,42 +542,42 @@ GameModeProject.prototype.setSelected = function (cube) {
     }
 
 //    if( cube === null ){ //zerowanie
-//        if( this.selectedCube !== null ) {
-//            this.selectedCube.material.opacity = 1;
-//            this.selectedCube = null;
+//        if( this.selectedWall !== null ) {
+//            this.selectedWall.material.opacity = 1;
+//            this.selectedWall = null;
 //        }
 //    }else{ //ustawianie
-//        if( this.selectedCube !== cube ){
-//            if( this.selectedCube !== null ) this.selectedCube.material.opacity = 1;
-//            this.selectedCube = cube;
-//            this.selectedCube.material.opacity = 0.5;
+//        if( this.selectedWall !== cube ){
+//            if( this.selectedWall !== null ) this.selectedWall.material.opacity = 1;
+//            this.selectedWall = cube;
+//            this.selectedWall.material.opacity = 0.5;
 //        }        
 //    }
 };
 
 GameModeProject.prototype.highlightOn = function (cube) {
-    this.highlightCube = cube;
+    this.highlightWall = cube;
     //console.log("this.highlightOn");
-    this.highlightCube.material.opacity = 0.5;
+    this.highlightWall.material.opacity = 0.5;
 };
 
 GameModeProject.prototype.highlightOff = function () {
-    //console.log(this.highlightCube);
-    if (this.highlightCube === null)
+    //console.log(this.highlightWall);
+    if (this.highlightWall === null)
         return;
-    if (this.highlightCube === this.selectedCube)
+    if (this.highlightWall === this.selectedWall)
         return;
 
-    this.highlightCube.material.opacity = 1.0;
+    this.highlightWall.material.opacity = 1.0;
     //console.log("this.highlightOff");
-    //console.log(this.highlightCube);
-    this.highlightCube = null;
+    //console.log(this.highlightWall);
+    this.highlightWall = null;
 };
 
 GameModeProject.prototype.highlightOnOff = function (cube, hl) {
-    //this.highlightCube = cube;
+    //this.highlightWall = cube;
     //console.log("this.highlightOn");
-    this.highlightCube.material.opacity = hl === true ? 0.5 : 1;
+    this.highlightWall.material.opacity = hl === true ? 0.5 : 1;
 };
 
 GameModeProject.prototype.createGUI = function () {
@@ -787,11 +787,12 @@ GameModeProject.prototype.createWall = function () {
     
 GameModeProject.prototype.addWall = function () {
     //console.log('asdf');
-    this.createWall();
+    var newWall = this.createWall();
+    this.setSelected(newWall);
 };
 
 GameModeProject.prototype.deleteSelectedWall = function () {
-    
+    //if(this.selectedWall)
 };
 
 GameModeProject.prototype.duplicateSelectedWall = function () {
