@@ -278,6 +278,8 @@ GameModeProject.prototype.mouseDown = function (event) {
                 if (pressedKeys[82])
                     this.rotateObject = true;
             }
+        }else{
+            this.setHighlighted(null);
         }
     }
 };
@@ -288,9 +290,8 @@ GameModeProject.prototype.mouseUp = function (event) {
     this.scaleY = false;
 };
 
-GameModeProject.prototype.mouseMove = function (event) {
-    if (this.draggedWall) {
-        //console.log("asdf");
+GameModeProject.prototype.mouseMove = function (event) {    
+    if (this.draggedWall) {        
         this.raycaster.setFromCamera(mouse, this.camera);
         var intersects = this.raycaster.intersectObject(this.draggedFloor);
         if (intersects.length > 0) {
@@ -345,6 +346,7 @@ GameModeProject.prototype.mouseMove = function (event) {
             }
         }
     } else {
+        //console.log("mousemove");
         this.setHighlighted(this.getFirstUnderMouse());
     }
 };
@@ -383,17 +385,7 @@ GameModeProject.prototype.render = function (renderer) {
             this.moveLeft || this.moveRight || this.moveUp || this.moveDown;
   
     if(cm) this.updateCamera();
-    
-//    if (cm) {
-//        this.camera.position.x = Math.sin(this.xrat) * this.cameraRestrict.x;
-//        this.camera.position.y = Math.sin(this.yrat) * this.cameraRestrict.y;
-//        this.camera.position.z = Math.cos(this.zrat) * this.cameraRestrict.z;
-//        this.camera.lookAt(this.scene.position);        
-//    }
-    //if (this.draggedWall === null) {
-    //    this.setHighlighted(this.getFirstUnderMouse());
-    //}
-
+  
     renderer.setClearColor(this.getClearColor());
     renderer.render(this.scene, this.camera);
 };
@@ -416,8 +408,9 @@ GameModeProject.prototype.getFirstUnderMouse = function () {
 };
 
 GameModeProject.prototype.setHighlighted = function (cube) {
-    if (cube === null) { //zerowanie
+    if (cube === null) { //zerowanie        
         if (this.highlightWall !== null && this.highlightWall !== this.selectedWall) {
+            //console.log("this.draggedIndicator.visible = false;");
             this.highlightWall.material.opacity = 1;
             this.highlightWall = null;
             this.draggedIndicator.visible = false;
@@ -758,8 +751,8 @@ GameModeProject.prototype.removeSelectedWall = function () {
 
     this.scene.remove(wallToRemove);  
     
-    this.setHighlighted(null);
     this.setSelected(null);  
+    this.setHighlighted(null);
 };    
 
 GameModeProject.prototype.duplicateSelectedWall = function () {
