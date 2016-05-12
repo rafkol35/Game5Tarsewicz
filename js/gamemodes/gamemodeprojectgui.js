@@ -37,6 +37,10 @@ var PlayerData = function(){
     this.Height = 2;
 };
 
+var StageData = function(game){
+    this.Size = game.stageSize;
+};
+
 var PGUIData = function (game) {
     this.game = game;
     
@@ -63,6 +67,8 @@ var PGUIData = function (game) {
     this.pd = new PlayerData();
     
     ////////////////////////////////////////////////////////
+    this.sd = new StageData(game);
+    
     this.GoToVisit = function(){
         setMode(gameModeVisit);
     };
@@ -289,6 +295,15 @@ var playerRotChanged = function (val) {
 var playerHeightChanged = function (val) {
     if( gameModeProject.playerPos === null ) return;
     gameModeProject.updatePlayerHeight(val);
+    
+    //var newRot = gameModeProject.playerPos.rotation;
+    //var rad = THREE.Math.degToRad(val);
+    //newRot.y = rad;
+    //gameModeProject.playerPos.rotation = newRot;    
+};
+
+var stageSizeChanged = function (val) {
+    gameModeProject.updateStageSize(val);
     
     //var newRot = gameModeProject.playerPos.rotation;
     //var rad = THREE.Math.degToRad(val);

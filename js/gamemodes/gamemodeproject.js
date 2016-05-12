@@ -549,6 +549,15 @@ GameModeProject.prototype.createGUI = function () {
 //        autoPlace: false
     });
 
+    var stageFolder = this.gui.addFolder('Stage');
+    
+    {
+        var cntr = stageFolder.add(this.guiData.sd,'Size',8,15).listen();
+        cntr.step(1);
+        cntr.onChange(stageSizeChanged);
+        cntr.onFinishChange(stageSizeChanged);
+    }
+    
     var wallFolder = this.gui.addFolder('Wall');
     
     {
@@ -802,8 +811,8 @@ GameModeProject.prototype.createGrid = function () {
         gridGeometry.vertices.push(new THREE.Vector3(i, -this.halfGridStep + ggoffset, this.gridSize));
     }
     var gridMaterial = new THREE.LineBasicMaterial({color: 0x000000, opacity: 1.0});
-    var gridLine = new THREE.LineSegments(gridGeometry, gridMaterial);
-    this.scene.add(gridLine);
+    this.gridLine = new THREE.LineSegments(gridGeometry, gridMaterial);
+    this.scene.add(this.gridLine);
 };
     
 GameModeProject.prototype.createPlayerPos = function (pos,rot,height) {
@@ -840,6 +849,36 @@ GameModeProject.prototype.updatePlayerHeight = function(newHeight){
     this.playerPos.position.y = this.gridStep*newHeight / 2 - this.halfGridStep; 
     this.playerPos2.position.y = ( (this.gridStep*newHeight / 2) - this.halfGridStep ) / newHeight;
     this.playerPos2.scale.y = 1/newHeight;
+};
+
+GameModeProject.prototype.updateStageSize = function(newSize){
+    this.stageSize = newSize;
+    this.gridSize = this.stageSize * this.gridStep;
+    this.halfGridStep = this.gridStep * 0.5;
+    
+    //draggedFloor
+    var draggedFloorGeometry = new THREE.BoxGeometry(this.gridStep * this.stageSize * 4, 10, this.gridStep * this.stageSize * 4);
+    this.draggedFloor.geometry = draggedFloorGeometry;
+    
+    //floor
+    var floorGeometry = new THREE.PlaneGeometry(
+            this.gridStep * this.stageSize * 2,
+            this.gridStep * this.stageSize * 2,
+            this.stageSize, this.stageSize);
+    this.floor.geometry = floorGeometry;
+    
+    //grid
+    var ggoffset = 0.5;
+    var gridGeometry = new THREE.Geometry();
+    for (var i = -this.gridSize; i <= this.gridSize; i += this.gridStep) {
+        gridGeometry.vertices.push(new THREE.Vector3(-this.gridSize, -this.halfGridStep + ggoffset, i));
+        gridGeometry.vertices.push(new THREE.Vector3(this.gridSize, -this.halfGridStep + ggoffset, i));
+        gridGeometry.vertices.push(new THREE.Vector3(i, -this.halfGridStep + ggoffset, -this.gridSize));
+        gridGeometry.vertices.push(new THREE.Vector3(i, -this.halfGridStep + ggoffset, this.gridSize));
+    }
+    this.gridLine.geometry = gridGeometry;
+    
+    
 };
 
 GameModeProject.prototype.createWall = function (nwd/*NewWallData*/) {
