@@ -16,24 +16,26 @@ var Scale = function () {
     this.Z = 1.0;    
 };
 
-var Texture = function(){
+var Material = function(){
     this.File = '';
     this.RepeatX = 1;
     this.RepeatY = 1;
+    this.Color = "#ffffff";    
 };
 
 var WallData = function () {
     this.Pos = new Pos();
     this.Rot = new Rot();
-    this.Scale = new Scale();
-    this.Color = "#ffffff";    
-    this.Texture = new Texture();
-    this.Texture.File = '';
+    this.Scale = new Scale();    
+    this.Material = new Material();    
 };
 
 var PGUIData = function (game) {
     this.game = game;
     this.wd = new WallData();
+    
+    //this.FloorColor = "#bbbbbb";
+    //this.FloorFile = '';
     
     this.AddWall = function(){
         game.addWall();        
@@ -166,4 +168,28 @@ var selObjTexRepeatYChanged = function(val){
     }
 };
 
+var floorTextureChanged = function(val){
+    
+//    var currentMaterial = gameModeProject.selectedWall.material;
+//    
+//    if( val !== "" ){
+//        var befRepX = 1;
+//        var befRepY = 1;
+//        
+//        if( currentMaterial.map ){
+//            befRepX = currentMaterial.map.repeat.x;
+//            befRepY = currentMaterial.map.repeat.y;            
+//        }
+//        
+//        var newTexture = gameModeProject.textures[val].clone();        
+//        newTexture.repeat.x = befRepX;
+//        newTexture.repeat.y = befRepY;
+//        newTexture.needsUpdate = true;
+//        currentMaterial.map = newTexture; 
+//        currentMaterial.needsUpdate = true;        
+//    }else{
+//        currentMaterial.map = null;
+//        currentMaterial.needsUpdate = true;
+//    }
+};
 

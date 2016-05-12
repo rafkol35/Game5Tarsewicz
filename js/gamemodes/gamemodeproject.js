@@ -476,24 +476,26 @@ GameModeProject.prototype.updateGUIScale = function (cube) {
 
 GameModeProject.prototype.updateGUITexture = function (cube) {
     if (cube !== null) {
+        this.guiData.wd.Material.Color = "#" + this.selectedWall.material.color.getHexString();
         var curMap = this.selectedWall.material.map;
         if (curMap !== null) {
             var texName = curMap.image.src;
             var n1 = texName.lastIndexOf('/') + 1;
             var n2 = texName.lastIndexOf('.png');
-            this.guiData.wd.Texture.File = texName.substr(n1, n2 - n1);            
-            this.guiData.wd.Texture.RepeatX = curMap.repeat.x;
-            this.guiData.wd.Texture.RepeatY = curMap.repeat.y;
+            this.guiData.wd.Material.File = texName.substr(n1, n2 - n1);            
+            this.guiData.wd.Material.RepeatX = curMap.repeat.x;
+            this.guiData.wd.Material.RepeatY = curMap.repeat.y;
             
         } else {
-            this.guiData.wd.Texture.File = "";
-            this.guiData.wd.Texture.RepeatX = 1;
-            this.guiData.wd.Texture.RepeatY = 1;
+            this.guiData.wd.Material.File = "";
+            this.guiData.wd.Material.RepeatX = 1;
+            this.guiData.wd.Material.RepeatY = 1;
         }
     } else {
-        this.guiData.wd.Texture.File = "";
-        this.guiData.wd.Texture.RepeatX = 1;
-        this.guiData.wd.Texture.RepeatY = 1;
+        this.guiData.wd.Material.Color = "#000000";            
+        this.guiData.wd.Material.File = "";
+        this.guiData.wd.Material.RepeatX = 1;
+        this.guiData.wd.Material.RepeatY = 1;
     }
 };
 
@@ -508,13 +510,11 @@ GameModeProject.prototype.setSelected = function (cube) {
         this.udpateGUIPos(this.selectedWall);
         this.updateGUIRotation(this.selectedWall);
         this.updateGUIScale(this.selectedWall);
-        this.guiData.wd.Color = "#" + this.selectedWall.material.color.getHexString();
         this.updateGUITexture(this.selectedWall);
     } else {
         this.udpateGUIPos(null);
         this.updateGUIRotation(null);
         this.updateGUIScale(null);
-        this.guiData.wd.Color = "#000000";
         this.updateGUITexture(null);        
     }
 };
@@ -608,26 +608,27 @@ GameModeProject.prototype.createGUI = function () {
     }
 
     {
-        var cntr = null;
-        cntr = this.gui.addColor(this.guiData.wd, 'Color').listen();
-        cntr.onChange(selObjColorChanged);
-        cntr.onFinishChange(selObjColorChanged);
+        
     }
 
-    {
-        var folder = this.gui.addFolder('Texture');
+    {        
+        var folder = this.gui.addFolder('Material');
         
         var cntr = null;
-        cntr = folder.add(this.guiData.wd.Texture, 'File', this.Files).listen();
+        cntr = folder.addColor(this.guiData.wd.Material, 'Color').listen();
+        cntr.onChange(selObjColorChanged);
+        cntr.onFinishChange(selObjColorChanged);
+        
+        cntr = folder.add(this.guiData.wd.Material, 'File', this.Files).listen();
         //cntr.onChange(selObjTextureChanged);
         cntr.onFinishChange(selObjTextureChanged);
         
-        cntr = folder.add(this.guiData.wd.Texture, 'RepeatX',0.1,5).listen();
+        cntr = folder.add(this.guiData.wd.Material, 'RepeatX',0.1,5).listen();
         cntr.step(0.1);//.min(0.1);
         cntr.onChange(selObjTexRepeatXChanged);
         cntr.onFinishChange(selObjTexRepeatXChanged);
         
-        cntr = folder.add(this.guiData.wd.Texture, 'RepeatY',0.1,5).listen();
+        cntr = folder.add(this.guiData.wd.Material, 'RepeatY',0.1,5).listen();
         cntr.step(0.1);//.min(0.1);
         cntr.onChange(selObjTexRepeatYChanged);
         cntr.onFinishChange(selObjTexRepeatYChanged);
@@ -638,6 +639,24 @@ GameModeProject.prototype.createGUI = function () {
         cntr = this.gui.add(this.guiData, "AddWall");
         cntr = this.gui.add(this.guiData, "RemoveSelectedWall");
         cntr = this.gui.add(this.guiData, "DuplicateSelectedWall");
+    }
+    
+    {
+//        var folder = this.gui.addFolder('Floor');
+//        
+//        var cntr = null;
+//        cntr = folder.add(this.guiData, 'FloorFile', this.Files).listen();
+//        cntr.onFinishChange(selObjTextureChanged);
+//        
+//        cntr = folder.add(this.guiData.wd.Texture, 'RepeatX',0.1,5).listen();
+//        cntr.step(0.1);//.min(0.1);
+//        cntr.onChange(selObjTexRepeatXChanged);
+//        cntr.onFinishChange(selObjTexRepeatXChanged);
+//        
+//        cntr = folder.add(this.guiData.wd.Texture, 'RepeatY',0.1,5).listen();
+//        cntr.step(0.1);//.min(0.1);
+//        cntr.onChange(selObjTexRepeatYChanged);
+//        cntr.onFinishChange(selObjTexRepeatYChanged);
     }
 };
 
@@ -673,7 +692,9 @@ GameModeProject.prototype.createFloor = function () {
 
     //var floorGeometry = new THREE.PlaneGeometry(100, 100);
 
-    var floorMaterial = new THREE.MeshBasicMaterial({color: 0xbbbbbb, map: this.textures["rbn_0"]});
+    //var floorMaterial = new THREE.MeshBasicMaterial({color: 0xbbbbbb, map: this.textures["rbn_0"]});
+    var floorMaterial = new THREE.MeshBasicMaterial({color: 0xbbbbbb});
+    
     //floorMaterial.transparent = false;
     this.floor = new THREE.Mesh(floorGeometry, floorMaterial);
     this.floor.position.set(0, -this.halfGridStep, 0);
@@ -743,12 +764,12 @@ GameModeProject.prototype.createGrid = function () {
     
 GameModeProject.prototype.createWall = function (nwd/*NewWallData*/) {
     var geometry = new THREE.BoxGeometry(this.gridStep, this.gridStep, this.gridStep);
-    var material = new THREE.MeshBasicMaterial({color: nwd.Color, map: null});
+    var material = new THREE.MeshBasicMaterial({color: nwd.Material.Color, map: null});
     material.transparent = true;
-    if( nwd.Texture.File ){
-        var _tex = this.textures[nwd.Texture.File].clone();
-        _tex.repeat.x = nwd.Texture.RepeatX;
-        _tex.repeat.y = nwd.Texture.RepeatY;
+    if( nwd.Material.File ){
+        var _tex = this.textures[nwd.Material.File].clone();
+        _tex.repeat.x = nwd.Material.RepeatX;
+        _tex.repeat.y = nwd.Material.RepeatY;
         _tex.needsUpdate = true;
         material.map = _tex;
         material.needsUpdate = true;
@@ -793,15 +814,15 @@ GameModeProject.prototype.createWallData = function (wall) {
     wallData.Scale.Z = _scl.z;
     
     var _mat = wall.material;
-    wallData.Color = "#" + _mat.color.getHexString();
+    wallData.Material.Color = "#" + _mat.color.getHexString();
     if( _mat.map ){
         var texName = _mat.map.image.src;
         var n1 = texName.lastIndexOf('/') + 1;
         var n2 = texName.lastIndexOf('.png');        
-        wallData.Texture.File = texName.substr(n1, n2 - n1);
+        wallData.Material.File = texName.substr(n1, n2 - n1);
         
-        wallData.Texture.RepeatX = _mat.map.repeat.x;
-        wallData.Texture.RepeatY = _mat.map.repeat.y;        
+        wallData.Material.RepeatX = _mat.map.repeat.x;
+        wallData.Material.RepeatY = _mat.map.repeat.y;        
     }
     
     return wallData;
@@ -810,23 +831,23 @@ GameModeProject.prototype.createWallData = function (wall) {
 GameModeProject.prototype.addWall = function () {    
     var newWallData = new WallData();
     
-    newWallData.Pos.X = 100;
-    newWallData.Pos.Y = 50;
-    newWallData.Pos.Z = 100;
-    
-    newWallData.Rot.X = THREE.Math.degToRad(0);
-    newWallData.Rot.Y = THREE.Math.degToRad(45);
-    newWallData.Rot.Z = THREE.Math.degToRad(0);
-    
-    newWallData.Scale.X = 4;
-    newWallData.Scale.Y = 5;
-    newWallData.Scale.Z = 6;
-    
-    newWallData.Color = "#ff00ff";
-    
-    newWallData.Texture.File = this.Files[1];
-    newWallData.Texture.RepeatX = 2;
-    newWallData.Texture.RepeatY = 3;
+//    newWallData.Pos.X = 100;
+//    newWallData.Pos.Y = 50;
+//    newWallData.Pos.Z = 100;
+//    
+//    newWallData.Rot.X = THREE.Math.degToRad(0);
+//    newWallData.Rot.Y = THREE.Math.degToRad(45);
+//    newWallData.Rot.Z = THREE.Math.degToRad(0);
+//    
+//    newWallData.Scale.X = 4;
+//    newWallData.Scale.Y = 5;
+//    newWallData.Scale.Z = 6;
+//    
+//    newWallData.Color = "#ff00ff";
+//    
+//    newWallData.Texture.File = this.Files[1];
+//    newWallData.Texture.RepeatX = 2;
+//    newWallData.Texture.RepeatY = 3;
     
     var newWall = this.createWall(newWallData);
     this.setHighlighted(newWall);
