@@ -4,6 +4,8 @@
 
  ) odtworzenie sceny w visit
  ) save i load projektu   
+ ) spolszczyc 
+ ) help
 
  ) obracanie sceny mysza
  ) wszystko na alfie a wybrany obiekt nie

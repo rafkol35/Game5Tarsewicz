@@ -686,6 +686,10 @@ GameModeProject.prototype.createGUI = function () {
         cntr.onChange(playerRotChanged);
         cntr.onFinishChange(playerRotChanged);
     }
+    
+    {
+        cntr = this.gui.add(this.guiData, "GoToVisit");        
+    }
 };
 
 GameModeProject.prototype.prepareTextures = function () {

@@ -1,14 +1,10 @@
-/* 
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-//var FizzyText = function() {
-//  this.message = 'pizza';
-//  this.speed = 0.8;
-//  this.displayOutline = false;  
-//};
-//var text = new FizzyText();
+var VGUIData = function (game) {
+    this.game = game;
+    
+    this.GoToProject = function(){
+        setMode(gameModeProject);
+    };
+};
 
 function GameModeVisit(name) {
     GameMode.call(this, name);
@@ -21,28 +17,8 @@ function GameModeVisit(name) {
 //        autoPlace: false
     });
     
-    var params3 = {
-        visit3: 'asdf',
-    };
-    //this.gui.add(params3, 'visit3', ['asdf','qwer','zxcv']);
-    //this.gui.add(text, 'message', [ 'pizza', 'chrome', 'hooray' ] );
-    //console.log(text.message);
-    
-    var params = {
-        visit: 5000
-    };
-    this.gui.add(params, 'visit');
-
-    var params2 = {
-        visit2: 500,
-    };
-    this.gui.add(params2, 'visit2');
-
-    
-
-    //this.gui.domElement.id = 'guiVisit';
-    //var customContainer = $('.moveGUI').append($(this.gui.domElement));
-    //$(this.gui.domElement).attr("hidden", true);
+    var guiData = new VGUIData(this);    
+    this.gui.add(guiData, 'GoToProject');
 
     var geometry = new THREE.BoxGeometry(1, 1, 1);
     var material = new THREE.MeshBasicMaterial({color: 0x00ff00});
@@ -50,9 +26,6 @@ function GameModeVisit(name) {
     cube.position.set(0, 0, -5);
     this.scene.add(cube);
     walls.push(cube);
-
-    //var geometry2 = new THREE.BoxGeometry(1, 1, 1);
-    //material.color = 0xffffff;
     
     cube = new THREE.Mesh(geometry, material);
     cube.position.set(0, 0, 5);
@@ -64,8 +37,6 @@ function GameModeVisit(name) {
     this.scene.add(cube);
     walls.push(cube);
     
-    //this.camera.position.z = 5;
-
     this.camera.rotation.set(0, 0, 0);
 
     this.pitchObject = new THREE.Object3D();
@@ -77,10 +48,6 @@ function GameModeVisit(name) {
     this.scene.add(this.yawObject);
 
     this.PI_2 = Math.PI / 2;
-    
-    //this.pressedKeys2 = []; //new Array();
-    //this.pressedKeys[69] = false;
-    //this.pressedKeys[81] = false;
     
     this.moveForward = false;
     this.moveLeft = false;
@@ -98,12 +65,9 @@ GameModeVisit.prototype.getClearColor = function () {
 };
 
 GameModeVisit.prototype.activate = function () {
-    console.log('activate visit');
+    //console.log('activate visit');
     $(this.gui.domElement).attr("hidden", false);
 
-    //document.addEventListener('keydown', this.onKeyDown, false);
-    //document.addEventListener('keyup', this.onKeyUp, false);
-    
     this.moveForward = false;
     this.moveLeft = false;
     this.moveBackward = false;
@@ -113,9 +77,6 @@ GameModeVisit.prototype.deactivate = function () {
     //console.log('deactivate visit');
     $(this.gui.domElement).attr("hidden", true);
 
-    //document.removeEventListener('keydown', this.onKeyDown, false);
-    //document.removeEventListener('keyup', this.onKeyUp, false);
-    
     this.moveForward = false;
     this.moveLeft = false;
     this.moveBackward = false;
