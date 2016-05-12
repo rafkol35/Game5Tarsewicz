@@ -33,6 +33,7 @@ function GameModeProject(name) {
     this.createFloor();
     this.createAxis();
     this.createGrid();
+    this.createPlayerPos(new THREE.Vector3(0,0,0), 0);
     
     this.walls = [];
     this.selectedWall = null;
@@ -548,8 +549,10 @@ GameModeProject.prototype.createGUI = function () {
 //        autoPlace: false
     });
 
+    var wallFolder = this.gui.addFolder('Wall');
+    
     {
-        var folderPosition = this.gui.addFolder('Position');
+        var folderPosition = wallFolder.addFolder('Position');
 
         var cntr = folderPosition.add(this.guiData.wd.Pos, 'X', -this.stageSize, this.stageSize).listen();
         cntr.step(0.1);
@@ -570,7 +573,7 @@ GameModeProject.prototype.createGUI = function () {
     }
 
     {
-        var folder = this.gui.addFolder('Rotation');
+        var folder = wallFolder.addFolder('Rotation');
 
         var cntr = folder.add(this.guiData.wd.Rot, 'X').listen();
         //cntr.step(0.1);
@@ -589,7 +592,7 @@ GameModeProject.prototype.createGUI = function () {
     }
 
     {
-        var folder = this.gui.addFolder('Scale');
+        var folder = wallFolder.addFolder('Scale');
 
         var cntr = folder.add(this.guiData.wd.Scale, 'X').listen();
         cntr.step(0.1).min(0.1);
@@ -612,7 +615,7 @@ GameModeProject.prototype.createGUI = function () {
     }
 
     {        
-        var folder = this.gui.addFolder('Material');
+        var folder = wallFolder.addFolder('Material');
         
         var cntr = null;
         cntr = folder.addColor(this.guiData.wd.Material, 'Color').listen();
@@ -636,9 +639,9 @@ GameModeProject.prototype.createGUI = function () {
 
     {
         var cntr = null;
-        cntr = this.gui.add(this.guiData, "AddWall");
-        cntr = this.gui.add(this.guiData, "RemoveSelectedWall");
-        cntr = this.gui.add(this.guiData, "DuplicateSelectedWall");
+        cntr = wallFolder.add(this.guiData, "AddWall");
+        cntr = wallFolder.add(this.guiData, "RemoveSelectedWall");
+        cntr = wallFolder.add(this.guiData, "DuplicateSelectedWall");
     }
     
     {
@@ -662,6 +665,26 @@ GameModeProject.prototype.createGUI = function () {
         cntr.step(1);//.min(0.1);
         cntr.onChange(floorTexRepeatYChanged);
         cntr.onFinishChange(floorTexRepeatYChanged);
+    }
+    
+    {
+        var folder = this.gui.addFolder('Player');
+        var cntr = null;
+        
+        var cntr = folder.add(this.guiData.pd, 'PosX', -this.stageSize, this.stageSize).listen();
+        cntr.step(0.1);
+        cntr.onChange(playerPosChanged);
+        cntr.onFinishChange(playerPosChanged);
+
+        cntr = folder.add(this.guiData.pd, 'PosZ', -this.stageSize, this.stageSize).listen();
+        cntr.step(0.1); //.min(-this.stageSize).max(this.stageSize);
+        cntr.onChange(playerPosChanged);
+        cntr.onFinishChange(playerPosChanged);
+        
+        cntr = folder.add(this.guiData.pd, 'Rot').listen();
+        cntr.step(1); //.min(-this.stageSize).max(this.stageSize);
+        cntr.onChange(playerRotChanged);
+        cntr.onFinishChange(playerRotChanged);
     }
 };
 
@@ -769,6 +792,28 @@ GameModeProject.prototype.createGrid = function () {
     this.scene.add(gridLine);
 };
     
+GameModeProject.prototype.createPlayerPos = function (pos,rot) {
+    //console.log(pos);
+    
+    var geometry = new THREE.BoxGeometry(this.gridStep*0.5, this.gridStep, this.gridStep*0.5);
+    var material = new THREE.MeshBasicMaterial({color: 0xff0000, map: null});
+    //material.transparent = true;
+    //material.opacity = 0.5;
+    this.playerPos = new THREE.Mesh(geometry, material);
+    this.playerPos.position = pos.clone(); 
+    this.playerPos.rotation.y = rot;
+    this.scene.add(this.playerPos); 
+    
+    var geometry2 = new THREE.BoxGeometry(this.gridStep*0.25, this.gridStep*0.5, this.gridStep*0.5);
+    var material2 = new THREE.MeshBasicMaterial({color: 0x00ff00, map: null});
+    //material.transparent = true;
+    //material.opacity = 0.5;
+    var playerPos2 = new THREE.Mesh(geometry2, material2);
+    playerPos2.position.x = (this.gridStep*0.5 / 2) + (this.gridStep*0.25 / 2); 
+    //playerPos.rotation.y = rot;
+    this.playerPos.add(playerPos2); 
+};
+
 GameModeProject.prototype.createWall = function (nwd/*NewWallData*/) {
     var geometry = new THREE.BoxGeometry(this.gridStep, this.gridStep, this.gridStep);
     var material = new THREE.MeshBasicMaterial({color: nwd.Material.Color, map: null});

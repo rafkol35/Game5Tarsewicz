@@ -30,13 +30,18 @@ var WallData = function () {
     this.Material = new Material();    
 };
 
+var PlayerData = function(){
+    this.PosX = 0;
+    this.PosZ = 0;
+    this.Rot = 0;
+};
+
 var PGUIData = function (game) {
     this.game = game;
+    
+    /////////////// wall ///////////////////////////////////
     this.wd = new WallData();
     
-    //floor
-    this.fm = new Material();
-    this.fm.Color = "#bbbbbb";
     this.AddWall = function(){
         game.addWall();        
     };
@@ -48,6 +53,13 @@ var PGUIData = function (game) {
     this.DuplicateSelectedWall = function(){
         game.duplicateSelectedWall();
     };
+    
+    /////////////// floor //////////////////////////////////
+    this.fm = new Material();
+    this.fm.Color = "#bbbbbb";
+    
+    /////////////// player /////////////////////////////////
+    this.pd = new PlayerData();
 };
 
 ////////////////////////////// wall ////////////////////////////////////////////////////////////////////////////////////////
@@ -227,4 +239,31 @@ var floorTexRepeatYChanged = function(val){
         curMap.needsUpdate = true;
         curMat.needsUpdate = true;
     }
+};
+
+////////////////////////////// player ////////////////////////////////////////////////////////////////////////////////////////
+
+var playerPosChanged = function (val) {
+    if( gameModeProject.playerPos === null ) return;
+    
+    switch(this.property){
+        case "PosX":
+            gameModeProject.playerPos.position.x = val * gameModeProject.gridStep;
+            break;
+        case "PosY":
+            gameModeProject.playerPos.position.y = val * gameModeProject.gridStep;
+            break;
+        case "PosZ":
+            gameModeProject.playerPos.position.z = val * gameModeProject.gridStep;
+            break;
+    }
+};
+
+var playerRotChanged = function (val) {
+    if( gameModeProject.playerPos === null ) return;
+    
+    var newRot = gameModeProject.playerPos.rotation;
+    var rad = THREE.Math.degToRad(val);
+    newRot.y = rad;
+    gameModeProject.playerPos.rotation = newRot;    
 };
