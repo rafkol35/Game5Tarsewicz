@@ -874,6 +874,28 @@ GameModeProject.prototype.updatePlayerHeight = function(newHeight){
     this.playerPos2.scale.y = 1/newHeight;
 };
 
+GameModeProject.prototype.updatePlayer = function(playerData){
+    this.playerPos.position.x = playerData.PosX;
+    this.playerPos.position.z = playerData.PosZ;
+    this.playerPos.rotation.y = playerData.Rot;
+    this.updatePlayerHeight(playerData.Height);    
+};
+
+GameModeProject.prototype.updateFloor = function(floorData){
+    floorColorChanged(floorData.Color);
+    floorTextureChanged(floorData.File);
+    floorTexRepeatXChanged(floorData.RepeatX);
+    floorTexRepeatYChanged(floorData.RepeatY);
+};
+ 
+GameModeProject.prototype.updateStage = function(stageData){
+    this.updateStageSize(stageData.Size);
+    //this.ProjBackColor = "#" + game.projClearColor.getHexString();
+    //this.VisitBackColor = "#" + game.visitClearColor.getHexString();
+    this.setProjClearColor(stageData.ProjBackColor);
+    this.setVisitClearColor(stageData.VisitBackColor);
+};
+
 GameModeProject.prototype.updateStageSize = function(newSize){
     this.stageSize = newSize;
     this.gridSize = this.stageSize * this.gridStep;
@@ -1053,10 +1075,11 @@ var SaveData = function(){
     this.StageData = new StageData(gameModeProject);
     this.WallDatas = [];    
     this.PlayerData = new PlayerData();
+    this.FloorData = gameModeProject.guiData.fm;
 };
 
 GameModeProject.prototype.saveFile = function(){
-    var fileName = "asdf"; // prompt("File name", "scene");
+    var fileName = "asdf";// prompt("File name", "scene");
     if (fileName !== null) {
 
         //var output = gameModeProject.scene.toJSON();
@@ -1077,22 +1100,19 @@ GameModeProject.prototype.saveFile = function(){
         } catch (e) {
 
             saveData = JSON.stringify(saveData);
-
         }
         
-        //console.log( saveData );
+        //saveString(saveData, fileName + '.game5scene');
         
-        var obj = jQuery.parseJSON(saveData);
-        console.log(obj);
-        
-        //saveString(output, fileName + '.sg5');
+        var loadData = jQuery.parseJSON(saveData);
+        this.load(loadData);
     }
 };
 
 GameModeProject.prototype.loadFile = function(file){
     
     var filename = file.name;
-    var extension = filename.split('.').pop().toLowerCase();
+    //var extension = filename.split('.').pop().toLowerCase();
 
     var reader = new FileReader();
 //    reader.addEventListener('progress', function (event) {
@@ -1104,9 +1124,36 @@ GameModeProject.prototype.loadFile = function(file){
     reader.addEventListener('load', function (event) {
         var contents = event.target.result;
         
-        var obj = jQuery.parseJSON(contents);
-        console.log(obj);
+        //var saveData = new SaveData();
+        var loadData = jQuery.parseJSON(contents);
+        
+        //this.StageData = new StageData(gameModeProject);
+        //this.WallDatas = [];    
+        //this.PlayerData = new PlayerData();
+        //this.FloorData = gameModeProject.guiData.fm;
+        
+        //gameModeProject.updateStageSize(loadData.StageData.Size);
+        gameModeProject.updateStage(loadData.StageData);
+        
+        for( var i = 0 ; i < loadData.WallDatas.length ; ++i ){
+            gameModeProject.createWall( loadData.WallDatas[i] );
+        }
+        
+        gameModeProject.updatePlayer(loadData.PlayerData);        
+        gameModeProject.updateFloor(loadData.FloorData);
     });    
     
     reader.readAsText( file );
 };
+
+GameModeProject.prototype.load = function(loadData){
+    gameModeProject.updateStage(loadData.StageData);
+        
+    for( var i = 0 ; i < loadData.WallDatas.length ; ++i ){
+        gameModeProject.createWall( loadData.WallDatas[i] );
+    }
+        
+    gameModeProject.updatePlayer(loadData.PlayerData);        
+    gameModeProject.updateFloor(loadData.FloorData);    
+};
+

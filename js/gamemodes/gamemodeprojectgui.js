@@ -81,13 +81,6 @@ var PGUIData = function (game) {
     
     this.Load = function(){
         fileInput.click();
-//        var fileInput = document.createElement( 'input' );
-//	fileInput.type = 'file';
-//        console.log( fileInput );
-//	fileInput.addEventListener( 'change', function ( event ) {
-//		//editor.loader.loadFile( fileInput.files[ 0 ] );
-//                //console.log( fileInput.files[ 0 ] );    
-//	} );
     };
       
 };
@@ -98,6 +91,7 @@ document.body.appendChild( link ); // Firefox workaround, see #6594
 
 var fileInput = document.createElement( 'input' );
 fileInput.type = 'file';
+fileInput.accept = 'game5scene'
 fileInput.addEventListener('change', function (event) {
     gameModeProject.loadFile( fileInput.files[ 0 ] ); 
 });
