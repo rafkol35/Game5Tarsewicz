@@ -4,7 +4,6 @@
 
  ) obracanie sceny mysza
  ) wszystko na alfie a wybrany obiekt nie
- ) dodwanie i usuwanie obiektów + kopiowanie 
  ) lista obiektow wszystkich i ich widoczosci wl/wyl
  ) pozycja gracza
  ) odtworzenie sceny w visit

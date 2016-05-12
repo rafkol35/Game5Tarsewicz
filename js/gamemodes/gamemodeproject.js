@@ -755,13 +755,16 @@ GameModeProject.prototype.createWall = function (nwd/*NewWallData*/) {
     }
     var newWall = new THREE.Mesh(geometry, material);
     
-    newWall.position.set(nwd.Pos.X * this.gridStep, nwd.Pos.Y * this.gridStep, nwd.Pos.Z * this.gridStep);
-    //newWall.position.set(0,0,0);
+    //newWall.position.set(nwd.Pos.X * this.gridStep, nwd.Pos.Y * this.gridStep, nwd.Pos.Z * this.gridStep);
+    newWall.position.set(nwd.Pos.X, nwd.Pos.Y, nwd.Pos.Z);
     
     var _rot = newWall.rotation;
-    _rot.x = THREE.Math.degToRad(nwd.Rot.X);
-    _rot.y = THREE.Math.degToRad(nwd.Rot.Y);
-    _rot.z = THREE.Math.degToRad(nwd.Rot.Z);
+    //_rot.x = THREE.Math.degToRad(nwd.Rot.X);
+    //_rot.y = THREE.Math.degToRad(nwd.Rot.Y);
+    //_rot.z = THREE.Math.degToRad(nwd.Rot.Z);
+    _rot.x = nwd.Rot.X;
+    _rot.y = nwd.Rot.Y;
+    _rot.z = nwd.Rot.Z;
     newWall.rotation = _rot;
     
     newWall.scale.set(nwd.Scale.X, nwd.Scale.Y, nwd.Scale.Z);
@@ -770,17 +773,50 @@ GameModeProject.prototype.createWall = function (nwd/*NewWallData*/) {
     this.walls.push(newWall);
     return newWall;
 };
+
+GameModeProject.prototype.createWallData = function (wall) {
+    var wallData = new WallData();
     
+    var _pos = wall.position;
+    wallData.Pos.X = _pos.x;
+    wallData.Pos.Y = _pos.y;
+    wallData.Pos.Z = _pos.z;
+    
+    var _rot = wall.rotation;
+    wallData.Rot.X = _rot.x;
+    wallData.Rot.Y = _rot.y;
+    wallData.Rot.Z = _rot.z;
+    
+    var _scl = wall.scale;
+    wallData.Scale.X = _scl.x;    
+    wallData.Scale.Y = _scl.y;
+    wallData.Scale.Z = _scl.z;
+    
+    var _mat = wall.material;
+    wallData.Color = "#" + _mat.color.getHexString();
+    if( _mat.map ){
+        var texName = _mat.map.image.src;
+        var n1 = texName.lastIndexOf('/') + 1;
+        var n2 = texName.lastIndexOf('.png');        
+        wallData.Texture.File = texName.substr(n1, n2 - n1);
+        
+        wallData.Texture.RepeatX = _mat.map.repeat.x;
+        wallData.Texture.RepeatY = _mat.map.repeat.y;        
+    }
+    
+    return wallData;
+};
+   
 GameModeProject.prototype.addWall = function () {    
     var newWallData = new WallData();
     
-    newWallData.Pos.X = 1;
-    newWallData.Pos.Y = 2;
-    newWallData.Pos.Z = 3;
+    newWallData.Pos.X = 100;
+    newWallData.Pos.Y = 50;
+    newWallData.Pos.Z = 100;
     
-    newWallData.Rot.X = 10;
-    newWallData.Rot.Y = 20;
-    newWallData.Rot.Z = 30;
+    newWallData.Rot.X = THREE.Math.degToRad(0);
+    newWallData.Rot.Y = THREE.Math.degToRad(45);
+    newWallData.Rot.Z = THREE.Math.degToRad(0);
     
     newWallData.Scale.X = 4;
     newWallData.Scale.Y = 5;
@@ -817,5 +853,19 @@ GameModeProject.prototype.duplicateSelectedWall = function () {
         alert("Select wall to duplicate");
         return;
     }
+    
+    var newWallData = this.createWallData(this.selectedWall);
+    
+    newWallData.Pos.X = 0;
+    newWallData.Pos.Z = 0;
+    
+    this.setSelected(null);  
+    this.setHighlighted(null);
+    
+    var newWall = this.createWall(newWallData);
+    
+    this.setHighlighted(newWall);
+    this.setSelected(newWall); 
 };
+
   

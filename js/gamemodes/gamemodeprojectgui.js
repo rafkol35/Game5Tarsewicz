@@ -132,15 +132,10 @@ var selObjTextureChanged = function(val){
         newTexture.repeat.x = befRepX;
         newTexture.repeat.y = befRepY;
         newTexture.needsUpdate = true;
-        currentMaterial.map = newTexture; //  new THREE.TextureLoader().load('textures/' + val + '.png');            
-        currentMaterial.needsUpdate = true;
-        
-        //newMaterial.map.wrapS = THREE.RepeatWrapping;
-        //newMaterial.map.wrapT = THREE.RepeatWrapping;
-        //newMaterial.map.repeat = new THREE.Vector2(5,5);
-        
+        currentMaterial.map = newTexture; 
+        currentMaterial.needsUpdate = true;        
     }else{
-        currentMaterial.map = null; //  new THREE.TextureLoader().load('textures/' + val + '.png');    
+        currentMaterial.map = null;
         currentMaterial.needsUpdate = true;
     }
 };
