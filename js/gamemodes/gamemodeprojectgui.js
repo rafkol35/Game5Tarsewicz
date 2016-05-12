@@ -27,17 +27,23 @@ var SOD = function () {
     this.Texture = this.Textures[0];
     
     this.AddWall = function(){
-        console.log("AddWall");
+        //console.log("AddWall");
+        gameModeProject.addWall();        
     };
     
     this.DeleteSelectedWall = function(){
-        console.log("DeleteSelectedWall");
+        //console.log("DeleteSelectedWall");
+        gameModeProject.deleteSelectedWall();
     };
     
     this.DuplicateSelectedWall = function(){
-        console.log("DuplicateSelectedWall");
+        //console.log("DuplicateSelectedWall");
+        gameModeProject.duplicateSelectedWall();
     };
     
+    //this.AddWall = GameModeProject.addWall;                
+    //this.DeleteSelectedWall = gameModeProject.deleteSelectedWall;        
+    //this.DuplicateSelectedWall = gameModeProject.duplicateSelectedWall;    
 };
       
 var selObjPosChanged = function (val) {

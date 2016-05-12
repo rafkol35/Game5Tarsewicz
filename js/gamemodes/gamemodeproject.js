@@ -31,9 +31,9 @@ function GameModeProject(name) {
     this.createDraggedFloor();
     this.createFloor();
     this.createAxis();
-    this.crateGrid();
+    this.createGrid();
     
-    this.cubes = [];
+    this.walls = [];
     this.selectedCube = null;
     this.highlightCube = null;
     this.draggedCube = null;
@@ -56,28 +56,19 @@ function GameModeProject(name) {
     this.raycaster = new THREE.Raycaster();
     this.setSelected(null);
     
-     var geometry = new THREE.BoxGeometry(this.gridStep, this.gridStep, this.gridStep);
-    var material = new THREE.MeshBasicMaterial({color: 0xff8000, map: this.textures["rbn_0"]});
-    //var material = new THREE.MeshLambertMaterial({ map: map1, color: 0xffffff, vertexColors: THREE.VertexColors });
-    material.transparent = true;
-    //material.needsUpdate = true;
-    var cube = new THREE.Mesh(geometry, material);
-    cube.position.set(0, 0, 0);
-    this.scene.add(cube);
-    this.cubes.push(cube);
-    //cube.castShadow = true;
-
-    var material2 = new THREE.MeshBasicMaterial({color: 0xff8000, map: this.textures["rbn_1"]});
-    material2.transparent = true;
-    material2.map = null;
-    //material2.needsUpdate = true;
-    var cube2 = new THREE.Mesh(geometry, material2);
-    this.scene.add(cube2);
-    cube2.position.set(-220, 150, -150);
-    //cube2.material.transparent = true;
-    //cube2.material.opacity = 0.5;
-    this.cubes.push(cube2);
-    //cube.castShadow = true;
+    //this.createWall();
+    
+//    var material2 = new THREE.MeshBasicMaterial({color: 0xff8000, map: this.textures["rbn_1"]});
+//    material2.transparent = true;
+//    material2.map = null;
+//    material2.needsUpdate = true;
+//    var cube2 = new THREE.Mesh(geometry, material2);
+//    this.scene.add(cube2);
+//    cube2.position.set(-220, 150, -150);
+//    //cube2.material.transparent = true;
+//    //cube2.material.opacity = 0.5;
+//    this.cubes.push(cube2);
+//    //cube.castShadow = true;
 
     //this.light = new THREE.PointLight( 0xffffff, 1, 1000 );
     //this.light.position.set( 0, 0, 0 );
@@ -755,7 +746,7 @@ GameModeProject.prototype.createAxis = function () {
     this.draggedIndicator.add(this.draggedAxisY);
 };
     
-GameModeProject.prototype.crateGrid = function () {
+GameModeProject.prototype.createGrid = function () {
     var ggoffset = 0.5;
     var gridGeometry = new THREE.Geometry();
     for (var i = -this.gridSize; i <= this.gridSize; i += this.gridStep) {
@@ -769,3 +760,33 @@ GameModeProject.prototype.crateGrid = function () {
     this.scene.add(gridLine);
 };
     
+GameModeProject.prototype.createWall = function () {
+    var geometry = new THREE.BoxGeometry(this.gridStep, this.gridStep, this.gridStep);
+    //var material = new THREE.MeshBasicMaterial({color: 0xff8000, map: this.textures["rbn_0"]});
+    var material = new THREE.MeshBasicMaterial({color: 0xff8000, map: null});
+    material.transparent = true;
+    var _tex = this.textures["rbn_0"].clone();
+    _tex.needsUpdate = true;
+    //console.log(_tex);
+    material.map = _tex;
+    material.needsUpdate = true;
+    var newWall = new THREE.Mesh(geometry, material);
+    newWall.position.set(0, 0, 0);
+    this.scene.add(newWall);
+    this.walls.push(newWall);
+    //cube.castShadow = true;
+    return newWall;
+};
+    
+GameModeProject.prototype.addWall = function () {
+    console.log('asdf');
+};
+
+GameModeProject.prototype.deleteSelectedWall = function () {
+    
+};
+
+GameModeProject.prototype.duplicateSelectedWall = function () {
+    
+};
+  
