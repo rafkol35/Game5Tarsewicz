@@ -39,6 +39,8 @@ var PlayerData = function(){
 
 var StageData = function(game){
     this.Size = game.stageSize;
+    this.ProjBackColor = "#" + game.projClearColor.getHexString();
+    this.VisitBackColor = "#" + game.visitClearColor.getHexString();    
 };
 
 var PGUIData = function (game) {
@@ -302,6 +304,8 @@ var playerHeightChanged = function (val) {
     //gameModeProject.playerPos.rotation = newRot;    
 };
 
+////////////////////////////// stage ////////////////////////////////////////////////////////////////////////////////////////
+
 var stageSizeChanged = function (val) {
     gameModeProject.updateStageSize(val);
     
@@ -309,4 +313,12 @@ var stageSizeChanged = function (val) {
     //var rad = THREE.Math.degToRad(val);
     //newRot.y = rad;
     //gameModeProject.playerPos.rotation = newRot;    
+};
+
+var stageProjColorChanged = function (val) {
+    gameModeProject.setProjClearColor(val);
+};
+
+var stageVisitColorChanged = function (val) {
+    gameModeProject.setVisitClearColor(val);
 };

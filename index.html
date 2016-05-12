@@ -30,6 +30,15 @@
             var controls;
             var firstMouseMove = true;
             
+            var renderer = new THREE.WebGLRenderer();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            //renderer.shadowMap.enabled = true;
+            document.body.appendChild(renderer.domElement);
+            document.addEventListener('mousemove', onDocumentMouseMove, false);
+            document.addEventListener('mousedown', onDocumentMouseDown, false);
+            document.addEventListener('mouseup', onDocumentMouseUp, false);            
+            window.addEventListener('resize', onWindowResize, false);
+            
             var gameModeProject = new GameModeProject('project');
             var gameModeVisit = new GameModeVisit('visit');
             var currentGameMode = null; //gameModeVisit; //gameModeProject;
@@ -87,16 +96,6 @@
             
             var clock = new THREE.Clock();
             var deltaTime = 0.0;
-             
-            var renderer = new THREE.WebGLRenderer();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-            renderer.shadowMap.enabled = true;
-            
-            document.body.appendChild(renderer.domElement);
-            document.addEventListener('mousemove', onDocumentMouseMove, false);
-            document.addEventListener('mousedown', onDocumentMouseDown, false);
-            document.addEventListener('mouseup', onDocumentMouseUp, false);            
-            window.addEventListener('resize', onWindowResize, false);
             
             var pressedKeys = []; //new Array();
             

@@ -10,6 +10,8 @@ function GameModeVisit(name) {
     GameMode.call(this, name);
 
     this.scene = new THREE.Scene();
+    this.clearColor = new THREE.Color(0xff0000);
+    
     this.camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
 
     this.gui = new dat.GUI({
@@ -46,11 +48,15 @@ GameModeVisit.prototype = Object.create(GameMode.prototype);
 GameModeVisit.prototype.constructor = GameModeVisit;
 
 GameModeVisit.prototype.getClearColor = function () {
-    return 0xffffff;
+    return this.clearColor;
 };
 
 GameModeVisit.prototype.activate = function () {
     //console.log('activate visit');
+    
+    this.clearColor = gameModeProject.visitClearColor;
+    renderer.setClearColor(this.clearColor);
+    
     $(this.gui.domElement).attr("hidden", false);
     this.clear();
     
@@ -243,7 +249,7 @@ GameModeVisit.prototype.render = function (renderer) {
     //    this.yawObject.position.copy(oldPos);
     //}  
     
-    renderer.setClearColor(this.getClearColor());
+    //renderer.setClearColor(this.getClearColor());
     renderer.render(this.scene, this.camera);
 
 };

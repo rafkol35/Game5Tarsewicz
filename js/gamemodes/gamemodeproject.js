@@ -2,7 +2,9 @@ function GameModeProject(name) {
     GameMode.call(this, name);
 
     this.scene = new THREE.Scene();
-
+    this.projClearColor = new THREE.Color(0xdddddd);
+    this.visitClearColor = new THREE.Color(0x00ff00);
+    
     this.cameraType = 1;
 
     if (this.cameraType === 1) {
@@ -74,11 +76,12 @@ GameModeProject.prototype = Object.create(GameMode.prototype);
 GameModeProject.prototype.constructor = GameModeProject;
 
 GameModeProject.prototype.getClearColor = function () {
-    return 0xdddddd;
+    return this.projClearColor;
 };
 
 GameModeProject.prototype.activate = function () {
     //console.log('activate project');
+    renderer.setClearColor(this.projClearColor);
     $(this.gui.domElement).attr("hidden", false);
     this.clear();
 };
@@ -388,9 +391,18 @@ GameModeProject.prototype.render = function (renderer) {
   
     if(cm) this.updateCamera();
   
-    renderer.setClearColor(this.getClearColor());
+    //renderer.setClearColor(this.getClearColor());
     renderer.render(this.scene, this.camera);
 };
+
+GameModeProject.prototype.setProjClearColor = function(val){
+    this.projClearColor = new THREE.Color(val);
+    renderer.setClearColor(this.projClearColor);
+}
+GameModeProject.prototype.setVisitClearColor = function(val){
+    this.visitClearColor = new THREE.Color(val);
+    //this.renderer.setClearColor(this.projClearColor);
+}
 
 GameModeProject.prototype.updateCamera = function () {
     this.camera.position.x = Math.sin(this.xrat) * this.cameraRestrict.x;
@@ -556,6 +568,14 @@ GameModeProject.prototype.createGUI = function () {
         cntr.step(1);
         cntr.onChange(stageSizeChanged);
         cntr.onFinishChange(stageSizeChanged);
+        
+        cntr = stageFolder.addColor(this.guiData.sd, 'ProjBackColor').listen();
+        cntr.onChange(stageProjColorChanged);
+        cntr.onFinishChange(stageProjColorChanged);
+        
+        cntr = stageFolder.addColor(this.guiData.sd, 'VisitBackColor').listen();
+        cntr.onChange(stageVisitColorChanged);
+        cntr.onFinishChange(stageVisitColorChanged);
     }
     
     var wallFolder = this.gui.addFolder('Wall');
