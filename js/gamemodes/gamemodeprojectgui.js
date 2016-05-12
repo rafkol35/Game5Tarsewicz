@@ -110,25 +110,8 @@ var selObjTextureChanged = function(val){
     
     var currentMaterial = gameModeProject.selectedCube.material;
     
-//    currentMaterial.map.wrapS = THREE.RepeatWrapping;
-//    currentMaterial.map.wrapT = THREE.RepeatWrapping;
-//    currentMaterial.map.repeat = new THREE.Vector2(5,5);
-//    gameModeProject.selectedCube.material = currentMaterial;
-    
-    //var newMaterial = new THREE.MeshBasicMaterial({color: currentMaterial.color});
-    //newMaterial.transparent = true;
-    //newMaterial.needsUpdate = true;
-    
     if( val !== "" ){
-//        console.log( currentMaterial.map );
-//        console.log( gameModeProject.textures[val] );
-        
         var newTexture = gameModeProject.textures[val].clone();
-//        console.log( newTexture );
-        
-//        console.log('===========================================');
-        
-        //var newTexture = gameModeProject.textures[val].clone();
         newTexture.needsUpdate = true;        
         currentMaterial.map = newTexture; //  new THREE.TextureLoader().load('textures/' + val + '.png');    
         currentMaterial.needsUpdate = true;
@@ -136,22 +119,11 @@ var selObjTextureChanged = function(val){
         //newMaterial.map.wrapS = THREE.RepeatWrapping;
         //newMaterial.map.wrapT = THREE.RepeatWrapping;
         //newMaterial.map.repeat = new THREE.Vector2(5,5);
+        
     }else{
         currentMaterial.map = null; //  new THREE.TextureLoader().load('textures/' + val + '.png');    
         currentMaterial.needsUpdate = true;
     }
-    
-    //gameModeProject.selectedCube.material = newMaterial;
-    
-    
-    
-    //    
-    //console.log(val);
-//    if(val !== ""){
-//        gameModeProject.selectedCube.map = null;
-//    }else{
-//        gameModeProject.selectedCube.map = new THREE.TextureLoader().load('textures/' + gameModeProject.sod.Textures[i] + '.png');
-//    }
-        
 };
+
 

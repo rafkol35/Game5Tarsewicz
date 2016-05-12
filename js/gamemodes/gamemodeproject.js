@@ -30,87 +30,8 @@ function GameModeProject(name) {
 //        autoPlace: false
     });
     
-    this.sod = new SOD();
-
-    {
-        var folderPosition = this.gui.addFolder('Position');
-
-        var cntr = folderPosition.add(this.sod.pos, 'X',-this.stageSize,this.stageSize).listen();
-        cntr.step(0.1);
-        //cntr.min(-this.stageSize/2);
-        //cntr.max(this.stageSize/2);
-        cntr.onChange(selObjPosChanged);
-        cntr.onFinishChange(selObjPosChanged);
-
-        cntr = folderPosition.add(this.sod.pos, 'Y',0,10).listen();
-        cntr.step(0.1);//.min(0).max(30);
-        cntr.onChange(selObjPosChanged);
-        cntr.onFinishChange(selObjPosChanged);
-
-        cntr = folderPosition.add(this.sod.pos, 'Z',-this.stageSize,this.stageSize).listen();
-        cntr.step(0.1).min(-this.stageSize).max(this.stageSize);
-        cntr.onChange(selObjPosChanged);
-        cntr.onFinishChange(selObjPosChanged);
-    }
-
-    {
-        var folder = this.gui.addFolder('Rotation');
-
-        var cntr = folder.add(this.sod.rot, 'X').listen();
-        //cntr.step(0.1);
-        cntr.onChange(selObjRotChanged);
-        cntr.onFinishChange(selObjRotChanged);
-
-        cntr = folder.add(this.sod.rot, 'Y').listen();
-        //cntr.step(0.1);
-        cntr.onChange(selObjRotChanged);
-        cntr.onFinishChange(selObjRotChanged);
-
-        cntr = folder.add(this.sod.rot, 'Z').listen();
-        //cntr.step(0.1);
-        cntr.onChange(selObjRotChanged);
-        cntr.onFinishChange(selObjRotChanged);
-    }
-    
-    {
-        var folder = this.gui.addFolder('Scale');
-
-        var cntr = folder.add(this.sod.scale, 'X').listen();
-        cntr.step(0.1).min(0.1);
-        cntr.onChange(selObjScaleChanged);
-        cntr.onFinishChange(selObjScaleChanged);
-
-        cntr = folder.add(this.sod.scale, 'Y').listen();
-        cntr.step(0.1).min(0.1);
-        cntr.onChange(selObjScaleChanged);
-        cntr.onFinishChange(selObjScaleChanged);
-
-        cntr = folder.add(this.sod.scale, 'Z').listen();
-        cntr.step(0.1).min(0.1);
-        cntr.onChange(selObjScaleChanged);
-        cntr.onFinishChange(selObjScaleChanged);
-    }
-    
-    {
-        var cntr = null;
-        cntr = this.gui.addColor(this.sod, 'Color').listen();
-        cntr.onChange(selObjColorChanged);
-        cntr.onFinishChange(selObjColorChanged);
-    }
-
-    {
-        var cntr = null;
-        cntr = this.gui.add(this.sod, 'Texture', this.sod.Textures).listen();
-        //cntr.onChange(selObjTextureChanged);
-        cntr.onFinishChange(selObjTextureChanged);
-    }
-    
-    {
-        var cntr = null;
-        cntr = this.gui.add(this.sod,"AddWall");
-        cntr = this.gui.add(this.sod,"DeleteSelectedWall");
-        cntr = this.gui.add(this.sod,"DuplicateSelectedWall");
-    }
+    this.sod = new SOD();    
+    this.createGUI();
     
     //this.gui.domElement.id = 'guiProject';
     //var customContainer = $('.moveGUI').append($(this.gui.domElement));
@@ -287,22 +208,17 @@ GameModeProject.prototype.getClearColor = function () {
 
 GameModeProject.prototype.activate = function(){
     //console.log('activate project');
-    $(this.gui.domElement).attr("hidden", false);
-    
-    this.moveUp = false;
-    this.moveDown = false;  
-    this.moveLeft = false;
-    this.moveRight = false;
-    this.rotateObject = false;
-    this.scaleX = false;
-    this.scaleY = false;
-    
-    this.setSelected(null);
-    this.setHighlighted(null);
-    this.draggedCube = null;
+    $(this.gui.domElement).attr("hidden", false);    
+    this.clear();
 };
 
 GameModeProject.prototype.deactivate = function(){
+    //console.log('deactivate project');
+    $(this.gui.domElement).attr("hidden", true);    
+    this.clear();
+};
+
+GameModeProject.prototype.clear = function(){
     //console.log('deactivate project');
     $(this.gui.domElement).attr("hidden", true);
     
@@ -776,14 +692,85 @@ GameModeProject.prototype.highlightOnOff = function (cube,hl) {
     //console.log("this.highlightOn");
     this.highlightCube.material.opacity = hl === true ? 0.5 : 1;
 };
-//
-//GameModeProject.prototype.highlightOff = function () {
-//    //console.log(this.highlightCube);
-//    if(this.highlightCube === null) return;
-//    if(this.highlightCube === this.selectedCube) return;
-//    
-//    this.highlightCube.material.opacity = 1.0;
-//    //console.log("this.highlightOff");
-//    //console.log(this.highlightCube);
-//    this.highlightCube = null;
-//};
+
+GameModeProject.prototype.createGUI = function () {
+    {
+        var folderPosition = this.gui.addFolder('Position');
+
+        var cntr = folderPosition.add(this.sod.pos, 'X', -this.stageSize, this.stageSize).listen();
+        cntr.step(0.1);
+        //cntr.min(-this.stageSize/2);
+        //cntr.max(this.stageSize/2);
+        cntr.onChange(selObjPosChanged);
+        cntr.onFinishChange(selObjPosChanged);
+
+        cntr = folderPosition.add(this.sod.pos, 'Y', 0, 10).listen();
+        cntr.step(0.1);//.min(0).max(30);
+        cntr.onChange(selObjPosChanged);
+        cntr.onFinishChange(selObjPosChanged);
+
+        cntr = folderPosition.add(this.sod.pos, 'Z', -this.stageSize, this.stageSize).listen();
+        cntr.step(0.1).min(-this.stageSize).max(this.stageSize);
+        cntr.onChange(selObjPosChanged);
+        cntr.onFinishChange(selObjPosChanged);
+    }
+
+    {
+        var folder = this.gui.addFolder('Rotation');
+
+        var cntr = folder.add(this.sod.rot, 'X').listen();
+        //cntr.step(0.1);
+        cntr.onChange(selObjRotChanged);
+        cntr.onFinishChange(selObjRotChanged);
+
+        cntr = folder.add(this.sod.rot, 'Y').listen();
+        //cntr.step(0.1);
+        cntr.onChange(selObjRotChanged);
+        cntr.onFinishChange(selObjRotChanged);
+
+        cntr = folder.add(this.sod.rot, 'Z').listen();
+        //cntr.step(0.1);
+        cntr.onChange(selObjRotChanged);
+        cntr.onFinishChange(selObjRotChanged);
+    }
+
+    {
+        var folder = this.gui.addFolder('Scale');
+
+        var cntr = folder.add(this.sod.scale, 'X').listen();
+        cntr.step(0.1).min(0.1);
+        cntr.onChange(selObjScaleChanged);
+        cntr.onFinishChange(selObjScaleChanged);
+
+        cntr = folder.add(this.sod.scale, 'Y').listen();
+        cntr.step(0.1).min(0.1);
+        cntr.onChange(selObjScaleChanged);
+        cntr.onFinishChange(selObjScaleChanged);
+
+        cntr = folder.add(this.sod.scale, 'Z').listen();
+        cntr.step(0.1).min(0.1);
+        cntr.onChange(selObjScaleChanged);
+        cntr.onFinishChange(selObjScaleChanged);
+    }
+
+    {
+        var cntr = null;
+        cntr = this.gui.addColor(this.sod, 'Color').listen();
+        cntr.onChange(selObjColorChanged);
+        cntr.onFinishChange(selObjColorChanged);
+    }
+
+    {
+        var cntr = null;
+        cntr = this.gui.add(this.sod, 'Texture', this.sod.Textures).listen();
+        //cntr.onChange(selObjTextureChanged);
+        cntr.onFinishChange(selObjTextureChanged);
+    }
+
+    {
+        var cntr = null;
+        cntr = this.gui.add(this.sod, "AddWall");
+        cntr = this.gui.add(this.sod, "DeleteSelectedWall");
+        cntr = this.gui.add(this.sod, "DuplicateSelectedWall");
+    }
+};
