@@ -813,7 +813,7 @@ GameModeProject.prototype.createPlayerPos = function (pos,rot) {
     //material.transparent = true;
     //material.opacity = 0.5;
     var playerPos2 = new THREE.Mesh(geometry2, material2);
-    playerPos2.position.x = (this.gridStep*0.5 / 2) + (this.gridStep*0.25 / 2); 
+    playerPos2.position.z = -(this.gridStep*0.5 / 2) + (this.gridStep*0.25 / 2); 
     //playerPos.rotation.y = rot;
     this.playerPos.add(playerPos2); 
 };

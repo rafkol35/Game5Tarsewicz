@@ -31,7 +31,7 @@ function GameModeVisit(name) {
     this.yawObject.position.y = 1;
     this.yawObject.add(this.pitchObject);
     this.scene.add(this.yawObject);
-
+    //yawObject.look
     this.PI_2 = Math.PI / 2;
     
     this.moveForward = false;
@@ -60,17 +60,18 @@ GameModeVisit.prototype.activate = function () {
     cube.position.set(0, 0, -5);
     this.scene.add(cube);
     this.walls.push(cube);
+//    
+//    cube = new THREE.Mesh(geometry, material);
+//    cube.position.set(0, 0, 5);
+//    this.scene.add(cube);
+//    this.walls.push(cube);
+//
+//    cube = new THREE.Mesh(geometry, material);
+//    cube.position.set(5, 0, 0);
+//    this.scene.add(cube);
+//    this.walls.push(cube);
     
-    cube = new THREE.Mesh(geometry, material);
-    cube.position.set(0, 0, 5);
-    this.scene.add(cube);
-    this.walls.push(cube);
-
-    cube = new THREE.Mesh(geometry, material);
-    cube.position.set(5, 0, 0);
-    this.scene.add(cube);
-    this.walls.push(cube);
-    
+    this.setPlayer(gameModeProject.playerPos);
     this.createFloor(gameModeProject.floor);    
     for(var i = 0 ; i < gameModeProject.walls.length ; ++i ){
        this.createWall( gameModeProject.walls[i] );
@@ -97,6 +98,12 @@ GameModeVisit.prototype.clear = function () {
     this.walls = [];
     
     //this.scene. = [];
+};
+
+GameModeVisit.prototype.setPlayer = function(projPlayer){
+    var gmp = gameModeProject;
+    this.yawObject.position.set( projPlayer.position.x / gmp.gridStep, 1, projPlayer.position.z / gmp.gridStep);    
+    this.yawObject.rotation.y = projPlayer.rotation.y;
 };
 
 GameModeVisit.prototype.createFloor = function(projFloor){
