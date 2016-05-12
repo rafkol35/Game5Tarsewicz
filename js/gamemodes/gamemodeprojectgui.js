@@ -1,40 +1,39 @@
-var SOPos = function () {
+var Pos = function () {
     this.X = 0.0;
     this.Y = 0.0;
     this.Z = 0.0;    
 };
 
-var SORot = function () {
+var Rot = function () {
     this.X = 0;
     this.Y = 0;
     this.Z = 0;    
 };
 
-var SOScale = function () {
+var Scale = function () {
     this.X = 0.0;
     this.Y = 0.0;
     this.Z = 0.0;    
 };
 
-var SOTexture = function(){
+var Texture = function(){
     this.File = '';
     this.RepeatX = 1;
     this.RepeatY = 1;
 };
 
-var SOD = function (game) {
+var WallData = function () {
+    this.Pos = new Pos();
+    this.Rot = new Rot();
+    this.Scale = new Scale();
+    this.Color = "#000000";    
+    this.Texture = new Texture();
+    this.Texture.File = '';
+};
+
+var PGUIData = function (game) {
     this.game = game;
-    
-    this.pos = new SOPos();
-    this.rot = new SORot();
-    this.scale = new SOScale();
-    
-    this.Color = "#000000";
-    
-    //this.Files = ['',"rbn_0","rbn_1","rbn_2"];
-    //this.Texture = this.Textures[0];
-    this.Texture = new SOTexture();
-    this.Texture.File = game.Files[0];
+    this.wd = new WallData();
     
     this.AddWall = function(){
         game.addWall();        
@@ -47,12 +46,8 @@ var SOD = function (game) {
     this.DuplicateSelectedWall = function(){
         game.duplicateSelectedWall();
     };
-    
-    //this.AddWall = GameModeProject.addWall;                
-    //this.DeleteSelectedWall = gameModeProject.deleteSelectedWall;        
-    //this.DuplicateSelectedWall = gameModeProject.duplicateSelectedWall;    
 };
-      
+
 var selObjPosChanged = function (val) {
     if( gameModeProject.selectedWall === null ) return;
     switch(this.property){

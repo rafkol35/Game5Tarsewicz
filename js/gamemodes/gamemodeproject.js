@@ -26,7 +26,7 @@ function GameModeProject(name) {
     this.halfGridStep = this.gridStep * 0.5;
 
     this.Files = ['',"rbn_0","rbn_1","rbn_2"];
-    this.sod = new SOD(this);
+    this.guiData = new PGUIData(this);
     this.createGUI();
     this.prepareTextures();
     this.createDraggedFloor();
@@ -439,38 +439,38 @@ GameModeProject.prototype.setHighlighted = function (cube) {
 };
 GameModeProject.prototype.udpateGUIPos = function (cube) {
     if (cube !== null) {
-        this.sod.pos.X = cube.position.x / this.gridStep;
-        this.sod.pos.Y = cube.position.y / this.gridStep;
-        this.sod.pos.Z = cube.position.z / this.gridStep;
+        this.guiData.wd.Pos.X = cube.position.x / this.gridStep;
+        this.guiData.wd.Pos.Y = cube.position.y / this.gridStep;
+        this.guiData.wd.Pos.Z = cube.position.z / this.gridStep;
     } else {
-        this.sod.pos.X = "Nan";
-        this.sod.pos.Y = "Nan";
-        this.sod.pos.Z = "Nan";
+        this.guiData.wd.Pos.X = "Nan";
+        this.guiData.wd.Pos.Y = "Nan";
+        this.guiData.wd.Pos.Z = "Nan";
     }
 };
 
 GameModeProject.prototype.updateGUIRotation = function (cube) {
     if (cube !== null) {
         var sor = cube.rotation;
-        this.sod.rot.X = THREE.Math.radToDeg(sor.x);
-        this.sod.rot.Y = THREE.Math.radToDeg(sor.y);
-        this.sod.rot.Z = THREE.Math.radToDeg(sor.z);
+        this.guiData.wd.Rot.X = THREE.Math.radToDeg(sor.x);
+        this.guiData.wd.Rot.Y = THREE.Math.radToDeg(sor.y);
+        this.guiData.wd.Rot.Z = THREE.Math.radToDeg(sor.z);
     } else {
-        this.sod.rot.X = "Nan";
-        this.sod.rot.Y = "Nan";
-        this.sod.rot.Z = "Nan";
+        this.guiData.wd.Rot.X = "Nan";
+        this.guiData.wd.Rot.Y = "Nan";
+        this.guiData.wd.Rot.Z = "Nan";
     }
 };
 
 GameModeProject.prototype.updateGUIScale = function (cube) {
     if (cube !== null) {
-        this.sod.scale.X = cube.scale.x;
-        this.sod.scale.Y = cube.scale.y;
-        this.sod.scale.Z = cube.scale.z;
+        this.guiData.wd.Scale.X = cube.scale.x;
+        this.guiData.wd.Scale.Y = cube.scale.y;
+        this.guiData.wd.Scale.Z = cube.scale.z;
     } else {
-        this.sod.scale.X = "Nan";
-        this.sod.scale.Y = "Nan";
-        this.sod.scale.Z = "Nan";
+        this.guiData.wd.Scale.X = "Nan";
+        this.guiData.wd.Scale.Y = "Nan";
+        this.guiData.wd.Scale.Z = "Nan";
     }
 };
 
@@ -481,20 +481,19 @@ GameModeProject.prototype.updateGUITexture = function (cube) {
             var texName = curMap.image.src;
             var n1 = texName.lastIndexOf('/') + 1;
             var n2 = texName.lastIndexOf('.png');
-            this.sod.Texture.File = texName.substr(n1, n2 - n1);
-            
-            this.sod.Texture.RepeatX = curMap.repeat.x;
-            this.sod.Texture.RepeatY = curMap.repeat.y;
+            this.guiData.wd.Texture.File = texName.substr(n1, n2 - n1);            
+            this.guiData.wd.Texture.RepeatX = curMap.repeat.x;
+            this.guiData.wd.Texture.RepeatY = curMap.repeat.y;
             
         } else {
-            this.sod.Texture.File = "";
-            this.sod.Texture.RepeatX = 1;
-            this.sod.Texture.RepeatY = 1;
+            this.guiData.wd.Texture.File = "";
+            this.guiData.wd.Texture.RepeatX = 1;
+            this.guiData.wd.Texture.RepeatY = 1;
         }
     } else {
-        this.sod.Texture.File = "";
-        this.sod.Texture.RepeatX = 1;
-        this.sod.Texture.RepeatY = 1;
+        this.guiData.wd.Texture.File = "";
+        this.guiData.wd.Texture.RepeatX = 1;
+        this.guiData.wd.Texture.RepeatY = 1;
     }
 };
 
@@ -509,13 +508,13 @@ GameModeProject.prototype.setSelected = function (cube) {
         this.udpateGUIPos(this.selectedWall);
         this.updateGUIRotation(this.selectedWall);
         this.updateGUIScale(this.selectedWall);
-        this.sod.Color = "#" + this.selectedWall.material.color.getHexString();
+        this.guiData.wd.Color = "#" + this.selectedWall.material.color.getHexString();
         this.updateGUITexture(this.selectedWall);
     } else {
         this.udpateGUIPos(null);
         this.updateGUIRotation(null);
         this.updateGUIScale(null);
-        this.sod.Color = "#000000";
+        this.guiData.wd.Color = "#000000";
         this.updateGUITexture(null);        
     }
 };
@@ -552,19 +551,19 @@ GameModeProject.prototype.createGUI = function () {
     {
         var folderPosition = this.gui.addFolder('Position');
 
-        var cntr = folderPosition.add(this.sod.pos, 'X', -this.stageSize, this.stageSize).listen();
+        var cntr = folderPosition.add(this.guiData.wd.Pos, 'X', -this.stageSize, this.stageSize).listen();
         cntr.step(0.1);
         //cntr.min(-this.stageSize/2);
         //cntr.max(this.stageSize/2);
         cntr.onChange(selObjPosChanged);
         cntr.onFinishChange(selObjPosChanged);
 
-        cntr = folderPosition.add(this.sod.pos, 'Y', 0, 10).listen();
+        cntr = folderPosition.add(this.guiData.wd.Pos, 'Y', 0, 10).listen();
         cntr.step(0.1);//.min(0).max(30);
         cntr.onChange(selObjPosChanged);
         cntr.onFinishChange(selObjPosChanged);
 
-        cntr = folderPosition.add(this.sod.pos, 'Z', -this.stageSize, this.stageSize).listen();
+        cntr = folderPosition.add(this.guiData.wd.Pos, 'Z', -this.stageSize, this.stageSize).listen();
         cntr.step(0.1).min(-this.stageSize).max(this.stageSize);
         cntr.onChange(selObjPosChanged);
         cntr.onFinishChange(selObjPosChanged);
@@ -573,17 +572,17 @@ GameModeProject.prototype.createGUI = function () {
     {
         var folder = this.gui.addFolder('Rotation');
 
-        var cntr = folder.add(this.sod.rot, 'X').listen();
+        var cntr = folder.add(this.guiData.wd.Rot, 'X').listen();
         //cntr.step(0.1);
         cntr.onChange(selObjRotChanged);
         cntr.onFinishChange(selObjRotChanged);
 
-        cntr = folder.add(this.sod.rot, 'Y').listen();
+        cntr = folder.add(this.guiData.wd.Rot, 'Y').listen();
         //cntr.step(0.1);
         cntr.onChange(selObjRotChanged);
         cntr.onFinishChange(selObjRotChanged);
 
-        cntr = folder.add(this.sod.rot, 'Z').listen();
+        cntr = folder.add(this.guiData.wd.Rot, 'Z').listen();
         //cntr.step(0.1);
         cntr.onChange(selObjRotChanged);
         cntr.onFinishChange(selObjRotChanged);
@@ -592,17 +591,17 @@ GameModeProject.prototype.createGUI = function () {
     {
         var folder = this.gui.addFolder('Scale');
 
-        var cntr = folder.add(this.sod.scale, 'X').listen();
+        var cntr = folder.add(this.guiData.wd.Scale, 'X').listen();
         cntr.step(0.1).min(0.1);
         cntr.onChange(selObjScaleChanged);
         cntr.onFinishChange(selObjScaleChanged);
 
-        cntr = folder.add(this.sod.scale, 'Y').listen();
+        cntr = folder.add(this.guiData.wd.Scale, 'Y').listen();
         cntr.step(0.1).min(0.1);
         cntr.onChange(selObjScaleChanged);
         cntr.onFinishChange(selObjScaleChanged);
 
-        cntr = folder.add(this.sod.scale, 'Z').listen();
+        cntr = folder.add(this.guiData.wd.Scale, 'Z').listen();
         cntr.step(0.1).min(0.1);
         cntr.onChange(selObjScaleChanged);
         cntr.onFinishChange(selObjScaleChanged);
@@ -610,7 +609,7 @@ GameModeProject.prototype.createGUI = function () {
 
     {
         var cntr = null;
-        cntr = this.gui.addColor(this.sod, 'Color').listen();
+        cntr = this.gui.addColor(this.guiData.wd, 'Color').listen();
         cntr.onChange(selObjColorChanged);
         cntr.onFinishChange(selObjColorChanged);
     }
@@ -619,16 +618,16 @@ GameModeProject.prototype.createGUI = function () {
         var folder = this.gui.addFolder('Texture');
         
         var cntr = null;
-        cntr = folder.add(this.sod.Texture, 'File', this.Files).listen();
+        cntr = folder.add(this.guiData.wd.Texture, 'File', this.Files).listen();
         //cntr.onChange(selObjTextureChanged);
         cntr.onFinishChange(selObjTextureChanged);
         
-        cntr = folder.add(this.sod.Texture, 'RepeatX',0.1,5).listen();
+        cntr = folder.add(this.guiData.wd.Texture, 'RepeatX',0.1,5).listen();
         cntr.step(0.1);//.min(0.1);
         cntr.onChange(selObjTexRepeatXChanged);
         cntr.onFinishChange(selObjTexRepeatXChanged);
         
-        cntr = folder.add(this.sod.Texture, 'RepeatY',0.1,5).listen();
+        cntr = folder.add(this.guiData.wd.Texture, 'RepeatY',0.1,5).listen();
         cntr.step(0.1);//.min(0.1);
         cntr.onChange(selObjTexRepeatYChanged);
         cntr.onFinishChange(selObjTexRepeatYChanged);
@@ -636,9 +635,9 @@ GameModeProject.prototype.createGUI = function () {
 
     {
         var cntr = null;
-        cntr = this.gui.add(this.sod, "AddWall");
-        cntr = this.gui.add(this.sod, "RemoveSelectedWall");
-        cntr = this.gui.add(this.sod, "DuplicateSelectedWall");
+        cntr = this.gui.add(this.guiData, "AddWall");
+        cntr = this.gui.add(this.guiData, "RemoveSelectedWall");
+        cntr = this.gui.add(this.guiData, "DuplicateSelectedWall");
     }
 };
 
