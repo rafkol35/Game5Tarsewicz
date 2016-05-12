@@ -623,13 +623,13 @@ GameModeProject.prototype.createGUI = function () {
         //cntr.onChange(selObjTextureChanged);
         cntr.onFinishChange(selObjTextureChanged);
         
-        cntr = folder.add(this.guiData.wd.Material, 'RepeatX',0.1,5).listen();
-        cntr.step(0.1);//.min(0.1);
+        cntr = folder.add(this.guiData.wd.Material, 'RepeatX',1,10).listen();
+        cntr.step(1);//.min(0.1);
         cntr.onChange(selObjTexRepeatXChanged);
         cntr.onFinishChange(selObjTexRepeatXChanged);
         
-        cntr = folder.add(this.guiData.wd.Material, 'RepeatY',0.1,5).listen();
-        cntr.step(0.1);//.min(0.1);
+        cntr = folder.add(this.guiData.wd.Material, 'RepeatY',1,10).listen();
+        cntr.step(1);//.min(0.1);
         cntr.onChange(selObjTexRepeatYChanged);
         cntr.onFinishChange(selObjTexRepeatYChanged);
     }
@@ -642,21 +642,26 @@ GameModeProject.prototype.createGUI = function () {
     }
     
     {
-//        var folder = this.gui.addFolder('Floor');
-//        
-//        var cntr = null;
-//        cntr = folder.add(this.guiData, 'FloorFile', this.Files).listen();
-//        cntr.onFinishChange(selObjTextureChanged);
-//        
-//        cntr = folder.add(this.guiData.wd.Texture, 'RepeatX',0.1,5).listen();
-//        cntr.step(0.1);//.min(0.1);
-//        cntr.onChange(selObjTexRepeatXChanged);
-//        cntr.onFinishChange(selObjTexRepeatXChanged);
-//        
-//        cntr = folder.add(this.guiData.wd.Texture, 'RepeatY',0.1,5).listen();
-//        cntr.step(0.1);//.min(0.1);
-//        cntr.onChange(selObjTexRepeatYChanged);
-//        cntr.onFinishChange(selObjTexRepeatYChanged);
+        var folder = this.gui.addFolder('Floor');
+        
+        var cntr = null;
+        
+        cntr = folder.addColor(this.guiData.fm, 'Color').listen();
+        cntr.onChange(floorColorChanged);
+        cntr.onFinishChange(floorColorChanged);
+        
+        cntr = folder.add(this.guiData.fm, 'File', this.Files).listen();
+        cntr.onFinishChange(floorTextureChanged);
+        
+        cntr = folder.add(this.guiData.fm, 'RepeatX',1,20).listen();
+        cntr.step(1);//.min(0.1);
+        cntr.onChange(floorTexRepeatXChanged);
+        cntr.onFinishChange(floorTexRepeatXChanged);
+        
+        cntr = folder.add(this.guiData.fm, 'RepeatY',1,20).listen();
+        cntr.step(1);//.min(0.1);
+        cntr.onChange(floorTexRepeatYChanged);
+        cntr.onFinishChange(floorTexRepeatYChanged);
     }
 };
 
@@ -677,11 +682,13 @@ GameModeProject.prototype.prepareTextures = function () {
 GameModeProject.prototype.createDraggedFloor = function () {
     var draggedFloorGeometry = new THREE.BoxGeometry(this.gridStep * this.stageSize * 4, 10, this.gridStep * this.stageSize * 4);
     var draggedFloorMaterial = new THREE.MeshBasicMaterial({color: 0x888888});
-    draggedFloorMaterial.transparent = true;
+    //draggedFloorMaterial.transparent = true;
+    //draggedFloorMaterial.opacity = 0.1;
     this.draggedFloor = new THREE.Mesh(draggedFloorGeometry, draggedFloorMaterial);
     this.draggedFloor.position.set(0, -this.halfGridStep - 5 - 0.5, 0);
-    this.draggedFloor.visible = true;
+    //this.draggedFloor.visible = true;
     this.scene.add(this.draggedFloor);
+    //draggedFloorMaterial.needsUpdate = true;    
 };
 
 GameModeProject.prototype.createFloor = function () {
@@ -695,7 +702,7 @@ GameModeProject.prototype.createFloor = function () {
     //var floorMaterial = new THREE.MeshBasicMaterial({color: 0xbbbbbb, map: this.textures["rbn_0"]});
     var floorMaterial = new THREE.MeshBasicMaterial({color: 0xbbbbbb});
     
-    //floorMaterial.transparent = false;
+    //floorMaterial.transparent = true;
     this.floor = new THREE.Mesh(floorGeometry, floorMaterial);
     this.floor.position.set(0, -this.halfGridStep, 0);
     var newRot = this.floor.rotation;

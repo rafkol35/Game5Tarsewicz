@@ -34,9 +34,9 @@ var PGUIData = function (game) {
     this.game = game;
     this.wd = new WallData();
     
-    //this.FloorColor = "#bbbbbb";
-    //this.FloorFile = '';
-    
+    //floor
+    this.fm = new Material();
+    this.fm.Color = "#bbbbbb";
     this.AddWall = function(){
         game.addWall();        
     };
@@ -49,6 +49,8 @@ var PGUIData = function (game) {
         game.duplicateSelectedWall();
     };
 };
+
+////////////////////////////// wall ////////////////////////////////////////////////////////////////////////////////////////
 
 var selObjPosChanged = function (val) {
     if( gameModeProject.selectedWall === null ) return;
@@ -168,28 +170,61 @@ var selObjTexRepeatYChanged = function(val){
     }
 };
 
+////////////////////////////// floor ////////////////////////////////////////////////////////////////////////////////////////
+
+var floorColorChanged = function(val){
+    if( gameModeProject.floor === null ) return;
+    gameModeProject.floor.material.color = new THREE.Color(val);
+}
+
 var floorTextureChanged = function(val){
+    if( gameModeProject.floor === null ) return;
     
-//    var currentMaterial = gameModeProject.selectedWall.material;
-//    
-//    if( val !== "" ){
-//        var befRepX = 1;
-//        var befRepY = 1;
-//        
-//        if( currentMaterial.map ){
-//            befRepX = currentMaterial.map.repeat.x;
-//            befRepY = currentMaterial.map.repeat.y;            
-//        }
-//        
-//        var newTexture = gameModeProject.textures[val].clone();        
-//        newTexture.repeat.x = befRepX;
-//        newTexture.repeat.y = befRepY;
-//        newTexture.needsUpdate = true;
-//        currentMaterial.map = newTexture; 
-//        currentMaterial.needsUpdate = true;        
-//    }else{
-//        currentMaterial.map = null;
-//        currentMaterial.needsUpdate = true;
-//    }
+    var currentMaterial = gameModeProject.floor.material;
+    
+    if( val !== "" ){
+        var befRepX = 1;
+        var befRepY = 1;
+        
+        if( currentMaterial.map ){
+            befRepX = currentMaterial.map.repeat.x;
+            befRepY = currentMaterial.map.repeat.y;            
+        }
+        
+        var newTexture = gameModeProject.textures[val].clone();        
+        newTexture.repeat.x = befRepX;
+        newTexture.repeat.y = befRepY;
+        newTexture.needsUpdate = true;
+        currentMaterial.map = newTexture; 
+        currentMaterial.needsUpdate = true;        
+    }else{
+        currentMaterial.map = null;
+        currentMaterial.needsUpdate = true;
+    }
 };
 
+var floorTexRepeatXChanged = function(val){
+    if( gameModeProject.floor === null ) return;
+    
+    var curMat = gameModeProject.floor.material;
+    var curMap = curMat.map;
+    
+    if (curMap) {
+        curMap.repeat.x = val;
+        curMap.needsUpdate = true;
+        curMat.needsUpdate = true;
+    }
+};
+
+var floorTexRepeatYChanged = function(val){
+    if( gameModeProject.floor === null ) return;
+    
+    var curMat = gameModeProject.floor.material;
+    var curMap = curMat.map;
+    
+    if (curMap) {
+        curMap.repeat.y = val;
+        curMap.needsUpdate = true;
+        curMat.needsUpdate = true;
+    }
+};
