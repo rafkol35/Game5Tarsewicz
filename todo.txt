@@ -10,6 +10,4 @@
  ) odtworzenie sceny w visit
  ) save i load projektu   
  ) ustawienia podlogi
-4) flipy tekstur
-5) koorynaty tekstur - aby dało sie zapetlic
-6) swiatla ew.
+ ) swiatla ew.

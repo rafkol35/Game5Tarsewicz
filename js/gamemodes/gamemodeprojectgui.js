@@ -18,8 +18,8 @@ var SOScale = function () {
 
 var SOTexture = function(){
     this.File = '';
-    this.repeatX = 1;
-    this.repeatY = 2;
+    this.RepeatX = 1;
+    this.RepeatY = 1;
 };
 
 var SOD = function (game) {
@@ -136,6 +136,32 @@ var selObjTextureChanged = function(val){
     }else{
         currentMaterial.map = null; //  new THREE.TextureLoader().load('textures/' + val + '.png');    
         currentMaterial.needsUpdate = true;
+    }
+};
+
+var selObjTexRepeatXChanged = function(val){
+    if( gameModeProject.selectedWall === null ) return;
+    
+    var curMat = gameModeProject.selectedWall.material;
+    var curMap = curMat.map;
+    
+    if (curMap) {
+        curMap.repeat.x = val;
+        curMap.needsUpdate = true;
+        curMat.needsUpdate = true;
+    }
+};
+
+var selObjTexRepeatYChanged = function(val){
+    if( gameModeProject.selectedWall === null ) return;
+    
+    var curMat = gameModeProject.selectedWall.material;
+    var curMap = curMat.map;
+    
+    if (curMap) {
+        curMap.repeat.y = val;
+        curMap.needsUpdate = true;
+        curMat.needsUpdate = true;
     }
 };
 

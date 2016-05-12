@@ -474,6 +474,30 @@ GameModeProject.prototype.updateGUIScale = function (cube) {
     }
 };
 
+GameModeProject.prototype.updateGUITexture = function (cube) {
+    if (cube !== null) {
+        var curMap = this.selectedWall.material.map;
+        if (curMap !== null) {
+            var texName = curMap.image.src;
+            var n1 = texName.lastIndexOf('/') + 1;
+            var n2 = texName.lastIndexOf('.png');
+            this.sod.Texture.File = texName.substr(n1, n2 - n1);
+            
+            this.sod.Texture.RepeatX = curMap.repeat.x;
+            this.sod.Texture.RepeatY = curMap.repeat.y;
+            
+        } else {
+            this.sod.Texture.File = "";
+            this.sod.Texture.RepeatX = 1;
+            this.sod.Texture.RepeatY = 1;
+        }
+    } else {
+        this.sod.Texture.File = "";
+        this.sod.Texture.RepeatX = 1;
+        this.sod.Texture.RepeatY = 1;
+    }
+};
+
 GameModeProject.prototype.setSelected = function (cube) {
     if (this.selectedWall !== null)
         this.selectedWall.material.opacity = 1;
@@ -486,23 +510,13 @@ GameModeProject.prototype.setSelected = function (cube) {
         this.updateGUIRotation(this.selectedWall);
         this.updateGUIScale(this.selectedWall);
         this.sod.Color = "#" + this.selectedWall.material.color.getHexString();
-
-        var curMap = this.selectedWall.material.map;
-        if (curMap !== null) {
-            var texName = this.selectedWall.material.map.image.src;
-            var n1 = texName.lastIndexOf('/') + 1;
-            var n2 = texName.lastIndexOf('.png');
-            this.sod.Texture.File = texName.substr(n1, n2 - n1);
-        } else {
-            this.sod.Texture.File = "";
-        }
-
+        this.updateGUITexture(this.selectedWall);
     } else {
         this.udpateGUIPos(null);
         this.updateGUIRotation(null);
         this.updateGUIScale(null);
         this.sod.Color = "#000000";
-        this.sod.Texture.File = "";
+        this.updateGUITexture(null);        
     }
 };
 
@@ -608,6 +622,16 @@ GameModeProject.prototype.createGUI = function () {
         cntr = folder.add(this.sod.Texture, 'File', this.Files).listen();
         //cntr.onChange(selObjTextureChanged);
         cntr.onFinishChange(selObjTextureChanged);
+        
+        cntr = folder.add(this.sod.Texture, 'RepeatX',0.1,5).listen();
+        cntr.step(0.1);//.min(0.1);
+        cntr.onChange(selObjTexRepeatXChanged);
+        cntr.onFinishChange(selObjTexRepeatXChanged);
+        
+        cntr = folder.add(this.sod.Texture, 'RepeatY',0.1,5).listen();
+        cntr.step(0.1);//.min(0.1);
+        cntr.onChange(selObjTexRepeatYChanged);
+        cntr.onFinishChange(selObjTexRepeatYChanged);
     }
 
     {
