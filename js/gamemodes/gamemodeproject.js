@@ -660,12 +660,12 @@ GameModeProject.prototype.createGUI = function () {
         //cntr.onChange(selObjTextureChanged);
         cntr.onFinishChange(selObjTextureChanged);
         
-        cntr = folder.add(this.guiData.wd.Material, 'RepeatX',1,10).listen();
+        cntr = folder.add(this.guiData.wd.Material, 'RepeatX',1,20).listen();
         cntr.step(1);//.min(0.1);
         cntr.onChange(selObjTexRepeatXChanged);
         cntr.onFinishChange(selObjTexRepeatXChanged);
         
-        cntr = folder.add(this.guiData.wd.Material, 'RepeatY',1,10).listen();
+        cntr = folder.add(this.guiData.wd.Material, 'RepeatY',1,20).listen();
         cntr.step(1);//.min(0.1);
         cntr.onChange(selObjTexRepeatYChanged);
         cntr.onFinishChange(selObjTexRepeatYChanged);
