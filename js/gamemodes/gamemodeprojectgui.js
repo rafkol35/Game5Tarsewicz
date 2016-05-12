@@ -71,11 +71,48 @@ var PGUIData = function (game) {
     ////////////////////////////////////////////////////////
     this.sd = new StageData(game);
     
-    this.GoToVisit = function(){
+    this.GoToVisit = function(){        
         setMode(gameModeVisit);
     };
+    
+    this.Save = function(){
+        gameModeProject.saveFile();
+    };
+    
+    this.Load = function(){
+        fileInput.click();
+//        var fileInput = document.createElement( 'input' );
+//	fileInput.type = 'file';
+//        console.log( fileInput );
+//	fileInput.addEventListener( 'change', function ( event ) {
+//		//editor.loader.loadFile( fileInput.files[ 0 ] );
+//                //console.log( fileInput.files[ 0 ] );    
+//	} );
+    };
+      
 };
 
+var link = document.createElement( 'a' );
+link.style.display = 'none';
+document.body.appendChild( link ); // Firefox workaround, see #6594
+
+var fileInput = document.createElement( 'input' );
+fileInput.type = 'file';
+fileInput.addEventListener('change', function (event) {
+    gameModeProject.loadFile( fileInput.files[ 0 ] ); 
+});
+
+function save(blob, filename) {
+    link.href = URL.createObjectURL(blob);
+    link.download = filename || 'data.json';
+    link.click();
+    // URL.revokeObjectURL( url ); breaks Firefox...
+}
+
+function saveString(text, filename) {
+    save(new Blob([text], {type: 'text/plain'}), filename);
+}
+        
 ////////////////////////////// wall ////////////////////////////////////////////////////////////////////////////////////////
 
 var selObjPosChanged = function (val) {

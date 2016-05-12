@@ -727,7 +727,10 @@ GameModeProject.prototype.createGUI = function () {
     }
     
     {
-        cntr = this.gui.add(this.guiData, "GoToVisit");        
+        cntr = this.gui.add(this.guiData, "GoToVisit");
+        
+        cntr = this.gui.add(this.guiData, "Save");
+        cntr = this.gui.add(this.guiData, "Load");
     }
 };
 
@@ -974,6 +977,17 @@ GameModeProject.prototype.createWallData = function (wall) {
     return wallData;
 };
    
+GameModeProject.prototype.createPlayerData = function(){
+    var playerData = new PlayerData();
+    
+    playerData.PosX = this.playerPos.position.x;
+    playerData.PosZ = this.playerPos.position.z;
+    playerData.Rot = this.playerPos.rotation.y;
+    playerData.Height = this.guiData.pd.Height;
+    
+    return playerData;
+}
+   
 GameModeProject.prototype.addWall = function () {    
     var newWallData = new WallData();
     
@@ -1035,4 +1049,64 @@ GameModeProject.prototype.duplicateSelectedWall = function () {
     this.setSelected(newWall); 
 };
 
-  
+var SaveData = function(){
+    this.StageData = new StageData(gameModeProject);
+    this.WallDatas = [];    
+    this.PlayerData = new PlayerData();
+};
+
+GameModeProject.prototype.saveFile = function(){
+    var fileName = "asdf"; // prompt("File name", "scene");
+    if (fileName !== null) {
+
+        //var output = gameModeProject.scene.toJSON();
+        var saveData = new SaveData();
+        
+        for( var i = 0 ; i < this.walls.length ; ++i ){
+            //var output = this.createWallData(this.selectedWall); //this.guiData.fm;// "{asdf}";
+            var wallData = this.createWallData(this.walls[i]);
+            saveData.WallDatas.push(wallData);
+        }
+        
+        saveData.PlayerData = this.createPlayerData();
+        
+        try {
+            saveData = JSON.stringify(saveData, null, '\t');
+            saveData = saveData.replace(/[\n\t]+([\d\.e\-\[\]]+)/g, '$1');
+
+        } catch (e) {
+
+            saveData = JSON.stringify(saveData);
+
+        }
+        
+        //console.log( saveData );
+        
+        var obj = jQuery.parseJSON(saveData);
+        console.log(obj);
+        
+        //saveString(output, fileName + '.sg5');
+    }
+};
+
+GameModeProject.prototype.loadFile = function(file){
+    
+    var filename = file.name;
+    var extension = filename.split('.').pop().toLowerCase();
+
+    var reader = new FileReader();
+//    reader.addEventListener('progress', function (event) {
+//        var size = '(' + Math.floor(event.total / 1000).format() + ' KB)';
+//        var progress = Math.floor((event.loaded / event.total) * 100) + '%';
+//        console.log('Loading', filename, size, progress);
+//    });
+    
+    reader.addEventListener('load', function (event) {
+        var contents = event.target.result;
+        
+        var obj = jQuery.parseJSON(contents);
+        console.log(obj);
+    });    
+    
+    reader.readAsText( file );
+};
