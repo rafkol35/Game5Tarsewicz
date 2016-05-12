@@ -152,8 +152,16 @@ GameModeVisit.prototype.createWall = function(projWall){
     
     //newWall.position.set(nwd.Pos.X * this.gridStep, nwd.Pos.Y * this.gridStep, nwd.Pos.Z * this.gridStep);
     newWall.position.set( projWall.position.x / gmp.gridStep, projWall.position.y / gmp.gridStep , projWall.position.z / gmp.gridStep);    
-    newWall.rotation = projWall.rotation.clone();
-    newWall.scale = projWall.scale.clone();
+    //console.log(projWall.rotation.clone());
+    //newWall.rotation = projWall.rotation.clone();
+    newWall.rotation.x = projWall.rotation.x;
+    newWall.rotation.y = projWall.rotation.y;
+    newWall.rotation.z = projWall.rotation.z;
+    
+    //console.log(projWall.scale.clone());
+    newWall.scale.x = projWall.scale.x;
+    newWall.scale.y = projWall.scale.y;
+    newWall.scale.z = projWall.scale.z;
     
     this.scene.add(newWall);
     this.walls.push(newWall);
