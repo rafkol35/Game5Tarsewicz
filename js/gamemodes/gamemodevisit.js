@@ -42,6 +42,15 @@ function GameModeVisit(name) {
     this.moveRight = false;
     
     this.raycaster = new THREE.Raycaster();
+    
+//    this.scene.add( makeSkybox( [
+//        'textures/skybox/px.jpg', // right
+//        'textures/skybox/nx.jpg', // left
+//        'textures/skybox/py.jpg', // top
+//        'textures/skybox/ny.jpg', // bottom
+//        'textures/skybox/pz.jpg', // back
+//        'textures/skybox/nz.jpg'  // front
+//    ], 8000));
 }
 
 GameModeVisit.prototype = Object.create(GameMode.prototype);

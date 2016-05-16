@@ -27,7 +27,7 @@ function GameModeProject(name) {
     this.gridSize = this.stageSize * this.gridStep;
     this.halfGridStep = this.gridStep * 0.5;
 
-    this.Files = ['',"rbn_0","rbn_1","rbn_2"];
+    this.Files = ['',"all",'rbn','rbn_0','rbn_1','rbn_2','sprite','sprite0','sprite1','t1'];
     this.guiData = new PGUIData(this);
     this.createGUI();
     this.prepareTextures();
@@ -62,7 +62,58 @@ function GameModeProject(name) {
     this.setSelected(null);
     
     //this.createWall();
+    var newWall = this.addWall();
 
+    //var newTexture = THREE.DataTexture();
+    //var newTexture = new THREE.DataTexture( data.pixels, data.width, data.height, THREE.RGBFormat );
+    var pixels = [
+        255,255,0,
+        255,255,0,
+        255,255,0,
+        255,255,0,
+        
+        255,255,255,
+        255,255,255,
+        255,255,255,
+        255,255,255,
+        
+        255,255,0,
+        255,255,0,
+        255,255,0,
+        255,255,0,
+        
+        255,255,255,
+        255,255,255,
+        255,255,255,
+        255,255,255,
+    ];
+    var md = new Uint8Array(pixels);
+    //console.log(md);
+    
+    var noiseSize = 4;
+    var size = noiseSize * noiseSize;
+//    var data = new Uint8Array(3 * size);
+//    for (var i = 0; i < size * 3; i++) {
+//        data[ i ] = Math.random() * 255 | 0;
+//    }
+    var data = new Uint8Array(size * 3);
+    //for( var i = 0 ; i < 3 ; ++i) data[i] = 123;
+    //var dt = new THREE.DataTexture(data, noiseSize, noiseSize, THREE.RGBFormat);
+    var dt = new THREE.DataTexture(md, noiseSize, noiseSize, THREE.RGBFormat);
+    dt.wrapS = THREE.RepeatWrapping;
+    dt.wrapT = THREE.RepeatWrapping;
+    dt.repeat = new THREE.Vector2(2,2);
+    dt.needsUpdate = true;
+
+    //var newTexture = new THREE.DataTexture( new Uint8Array(pixels), 2, 2, THREE.RGBFormat );
+    //var newTexture = this.textures[1].clone();// new THREE.DataTexture( pixels, 2, 2, THREE.RGBFormat );
+    
+    //console.log(this.textures);
+    //console.log(newTexture.image);
+    //newTexture.needsUpdate = true;
+    newWall.material.map = dt;
+    newWall.material.needsUpdate = true;
+    
     //this.light = new THREE.PointLight( 0xffffff, 1, 1000 );
     //this.light.position.set( 0, 0, 0 );
     //this.light.castShadow = true;
@@ -1045,7 +1096,9 @@ GameModeProject.prototype.addWall = function () {
     
     var newWall = this.createWall(newWallData);
     this.setHighlighted(newWall);
-    this.setSelected(newWall);    
+    this.setSelected(newWall);
+    
+    return newWall;
 };
 
 GameModeProject.prototype.removeSelectedWall = function () {
