@@ -28,7 +28,7 @@ function GameModeProject(name) {
     this.halfGridStep = this.gridStep * 0.5;
 
     this.Files = ['',"all",'rbn','rbn_0','rbn_1','rbn_2','sprite','sprite0','sprite1','t1'];
-    this.guiData = new PGUIData(this);
+    this.guiData = new PGUIData(this);    
     this.createGUI();
     this.prepareTextures();
     this.createDraggedFloor();
@@ -36,6 +36,11 @@ function GameModeProject(name) {
     this.createAxis();
     this.createGrid();
     this.createPlayerPos(new THREE.Vector2(0,0), 0, 2);
+    
+    this.gui2 = new dat.GUI({
+//        height: 5 * 32 - 1
+//        autoPlace: false
+    });
     
     this.walls = [];
     this.selectedWall = null;
@@ -102,7 +107,7 @@ function GameModeProject(name) {
     var dt = new THREE.DataTexture(md, noiseSize, noiseSize, THREE.RGBFormat);
     dt.wrapS = THREE.RepeatWrapping;
     dt.wrapT = THREE.RepeatWrapping;
-    dt.repeat = new THREE.Vector2(2,2);
+    dt.repeat = new THREE.Vector2(0.5,0.5);
     dt.needsUpdate = true;
 
     //var newTexture = new THREE.DataTexture( new Uint8Array(pixels), 2, 2, THREE.RGBFormat );
@@ -158,6 +163,17 @@ GameModeProject.prototype.clear = function () {
     this.draggedWall = null;
 };
 
+dat.GUI.prototype.removeFolder = function (name) {
+    var folder = this.__folders[name];
+    if (!folder) {
+        return;
+    }
+    folder.close();
+    this.__ul.removeChild(folder.domElement.parentNode);
+    delete this.__folders[name];
+    this.onResize();
+};
+
 GameModeProject.prototype.keyDown = function (event) {
 
     //console.log(event.keyCode);
@@ -167,6 +183,19 @@ GameModeProject.prototype.keyDown = function (event) {
 
     //console.log(this.gui);
 
+    this.Files.push('afafa');
+    //this.floorFileCntr.updateDisplay();
+    //this.floorFileCntr.remove();
+    //this.floorFileCntr = folder.add(this.guiData.fm, 'File', this.Files).listen();
+    //this.floorFileCntr.onFinishChange(floorTextureChanged);
+    
+    //this.floorFileCntr = this.guiFolder.add(this.guiData.fm, 'File', this.Files).listen();
+    //this.floorFileCntr.onFinishChange(floorTextureChanged);
+        
+    //this.guiFolder.close();
+    //this.guiFolder.close();
+    this.gui.removeFolder("Floor");
+        
     switch (event.keyCode) {
 
         case 82:
@@ -301,6 +330,12 @@ GameModeProject.prototype.onWindowResize = function () {
 };
 
 GameModeProject.prototype.mouseDown = function (event) {
+
+//    this.Files.push('afafa');
+//    this.floorFileCntr.updateDisplay();
+//    //this.floorFileCntr = folder.add(this.guiData.fm, 'File', this.Files).listen();
+//    //this.floorFileCntr.onFinishChange(floorTextureChanged);
+//    
 
     if (pressedKeys[84]) {
         this.raycaster.setFromCamera(mouse, this.camera);
@@ -730,26 +765,26 @@ GameModeProject.prototype.createGUI = function () {
     }
     
     {
-        var folder = this.gui.addFolder('Floor');
+        this.guiFolder = this.gui.addFolder('Floor');
         
         var cntr = null;
         
-        cntr = folder.addColor(this.guiData.fm, 'Color').listen();
+        cntr = this.guiFolder.addColor(this.guiData.fm, 'Color').listen();
         cntr.onChange(floorColorChanged);
         cntr.onFinishChange(floorColorChanged);
         
-        cntr = folder.add(this.guiData.fm, 'File', this.Files).listen();
-        cntr.onFinishChange(floorTextureChanged);
-        
-        cntr = folder.add(this.guiData.fm, 'RepeatX',1,20).listen();
+        cntr = this.guiFolder.add(this.guiData.fm, 'RepeatX',1,20).listen();
         cntr.step(1);//.min(0.1);
         cntr.onChange(floorTexRepeatXChanged);
         cntr.onFinishChange(floorTexRepeatXChanged);
         
-        cntr = folder.add(this.guiData.fm, 'RepeatY',1,20).listen();
+        cntr = this.guiFolder.add(this.guiData.fm, 'RepeatY',1,20).listen();
         cntr.step(1);//.min(0.1);
         cntr.onChange(floorTexRepeatYChanged);
         cntr.onFinishChange(floorTexRepeatYChanged);
+        
+        this.floorFileCntr = this.guiFolder.add(this.guiData.fm, 'File', this.Files).listen();
+        this.floorFileCntr.onFinishChange(floorTextureChanged);        
     }
     
     {
