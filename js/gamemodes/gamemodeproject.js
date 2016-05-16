@@ -66,58 +66,67 @@ function GameModeProject(name) {
     this.raycaster = new THREE.Raycaster();
     this.setSelected(null);
     
-    //this.createWall();
-    var newWall = this.addWall();
+//    var newWall = this.addWall();
+//
+//    //var newTexture = THREE.DataTexture();
+//    //var newTexture = new THREE.DataTexture( data.pixels, data.width, data.height, THREE.RGBFormat );
+//    var pixels = [
+//        255,255,0,
+//        255,255,0,
+//        255,255,0,
+//        255,255,0,
+//        
+//        255,255,255,
+//        255,255,255,
+//        255,255,255,
+//        255,255,255,
+//        
+//        255,255,0,
+//        255,255,0,
+//        255,255,0,
+//        255,255,0,
+//        
+//        255,255,255,
+//        255,255,255,
+//        255,255,255,
+//        255,255,255,
+//    ];
+//    var md = new Uint8Array(pixels);
+//    //console.log(md);
+//    
+//    var noiseSize = 4;
+//    var size = noiseSize * noiseSize;
+////    var data = new Uint8Array(3 * size);
+////    for (var i = 0; i < size * 3; i++) {
+////        data[ i ] = Math.random() * 255 | 0;
+////    }
+//    var data = new Uint8Array(size * 3);
+//    //for( var i = 0 ; i < 3 ; ++i) data[i] = 123;
+//    //var dt = new THREE.DataTexture(data, noiseSize, noiseSize, THREE.RGBFormat);
+//    var dt = new THREE.DataTexture(md, noiseSize, noiseSize, THREE.RGBFormat);
+//    dt.wrapS = THREE.RepeatWrapping;
+//    dt.wrapT = THREE.RepeatWrapping;
+//    dt.repeat = new THREE.Vector2(0.5,0.5);
+//    dt.needsUpdate = true;
 
-    //var newTexture = THREE.DataTexture();
-    //var newTexture = new THREE.DataTexture( data.pixels, data.width, data.height, THREE.RGBFormat );
-    var pixels = [
-        255,255,0,
-        255,255,0,
-        255,255,0,
-        255,255,0,
-        
-        255,255,255,
-        255,255,255,
-        255,255,255,
-        255,255,255,
-        
-        255,255,0,
-        255,255,0,
-        255,255,0,
-        255,255,0,
-        
-        255,255,255,
-        255,255,255,
-        255,255,255,
-        255,255,255,
-    ];
-    var md = new Uint8Array(pixels);
-    //console.log(md);
     
-    var noiseSize = 4;
-    var size = noiseSize * noiseSize;
-//    var data = new Uint8Array(3 * size);
-//    for (var i = 0; i < size * 3; i++) {
-//        data[ i ] = Math.random() * 255 | 0;
-//    }
-    var data = new Uint8Array(size * 3);
-    //for( var i = 0 ; i < 3 ; ++i) data[i] = 123;
-    //var dt = new THREE.DataTexture(data, noiseSize, noiseSize, THREE.RGBFormat);
-    var dt = new THREE.DataTexture(md, noiseSize, noiseSize, THREE.RGBFormat);
-    dt.wrapS = THREE.RepeatWrapping;
-    dt.wrapT = THREE.RepeatWrapping;
-    dt.repeat = new THREE.Vector2(0.5,0.5);
-    dt.needsUpdate = true;
 
+    
     //var newTexture = new THREE.DataTexture( new Uint8Array(pixels), 2, 2, THREE.RGBFormat );
     //var newTexture = this.textures[1].clone();// new THREE.DataTexture( pixels, 2, 2, THREE.RGBFormat );
     
     //console.log(this.textures);
     //console.log(newTexture.image);
     //newTexture.needsUpdate = true;
-    newWall.material.map = dt;
-    newWall.material.needsUpdate = true;
+    //console.log(this.textures[this.Files[1]]);
+    //var _nt = this.textures[this.Files[1]].clone();
+    //console.log(_nt);
+    //_nt.needsUpdate();
+    //newWall.material.map = _nt;
+    //newWall.material.map.needsUpdate = true;
+    //newWall.material.needsUpdate = true;
+    
+    //selObjTextureChanged(this.Files[1]);
     
     //this.light = new THREE.PointLight( 0xffffff, 1, 1000 );
     //this.light.position.set( 0, 0, 0 );
@@ -183,7 +192,7 @@ GameModeProject.prototype.keyDown = function (event) {
 
     //console.log(this.gui);
 
-    this.Files.push('afafa');
+    //this.Files.push('afafa');
     //this.floorFileCntr.updateDisplay();
     //this.floorFileCntr.remove();
     //this.floorFileCntr = folder.add(this.guiData.fm, 'File', this.Files).listen();
@@ -194,7 +203,7 @@ GameModeProject.prototype.keyDown = function (event) {
         
     //this.guiFolder.close();
     //this.guiFolder.close();
-    this.gui.removeFolder("Floor");
+    //this.gui.removeFolder("Floor");
         
     switch (event.keyCode) {
 
@@ -211,7 +220,55 @@ GameModeProject.prototype.keyDown = function (event) {
             //this.camera.zoom = Math.min(5,this.camera.zoom+0.1);
             //console.log( this.camera.zoom );
             //this.onWindowResize();
+            break;
+            
+        case 71: //g
+            var newWallData = new WallData();
+            newWallData.Pos.X = -100;
+            newWallData.Pos.Y = 50;
+            newWallData.Pos.Z = -100;
+//    
+//    newWallData.Rot.X = THREE.Math.degToRad(0);
+//    newWallData.Rot.Y = THREE.Math.degToRad(45);
+//    newWallData.Rot.Z = THREE.Math.degToRad(0);
+//    
+            //newWallData.Scale.X = 4;
+            newWallData.Scale.Y = 5;
+            //newWallData.Scale.Z = 6;
 
+            newWallData.Material.Color = "#ff00ff";
+            newWallData.Material.File = this.Files[1];
+            newWallData.Material.RepeatX = 1;
+            newWallData.Material.RepeatY = 1;
+
+            var newWall = this.createWall(newWallData);
+            this.setHighlighted(newWall);
+            this.setSelected(newWall);
+    
+            //console.log(newWall.geometry.faceVertexUvs);
+            
+            for( var i = 0 ; i < newWall.geometry.faceVertexUvs[0].length ; ++i ){
+                var _faceVertUV = newWall.geometry.faceVertexUvs[0][i];
+                
+                //console.log("_faceVertUV " + _faceVertUV);
+                
+                for( var j = 0 ; j < _faceVertUV.length ; ++j ){
+                    var _vertUV = _faceVertUV[j];
+                    
+                    //console.log("_vertUV " + _vertUV);
+                    
+                    if( _vertUV.x === 1 ) {                         
+                        _vertUV.x = 2;
+                        //console.log(_faceVertUV[j]);
+                    }
+                    
+                    if( _vertUV.y === 1 ) {                         
+                        _vertUV.y = 8;
+                        //console.log(_faceVertUV[j]);
+                    }
+                }
+            }
+    
             break;
 
         case 69: //e
