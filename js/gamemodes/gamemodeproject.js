@@ -247,27 +247,27 @@ GameModeProject.prototype.keyDown = function (event) {
     
             //console.log(newWall.geometry.faceVertexUvs);
             
-            for( var i = 0 ; i < newWall.geometry.faceVertexUvs[0].length ; ++i ){
-                var _faceVertUV = newWall.geometry.faceVertexUvs[0][i];
-                
-                //console.log("_faceVertUV " + _faceVertUV);
-                
-                for( var j = 0 ; j < _faceVertUV.length ; ++j ){
-                    var _vertUV = _faceVertUV[j];
-                    
-                    //console.log("_vertUV " + _vertUV);
-                    
-                    if( _vertUV.x === 1 ) {                         
-                        _vertUV.x = 2;
-                        //console.log(_faceVertUV[j]);
-                    }
-                    
-                    if( _vertUV.y === 1 ) {                         
-                        _vertUV.y = 8;
-                        //console.log(_faceVertUV[j]);
-                    }
-                }
-            }
+//            for( var i = 0 ; i < newWall.geometry.faceVertexUvs[0].length ; ++i ){
+//                var _faceVertUV = newWall.geometry.faceVertexUvs[0][i];
+//                
+//                //console.log("_faceVertUV " + _faceVertUV);
+//                
+//                for( var j = 0 ; j < _faceVertUV.length ; ++j ){
+//                    var _vertUV = _faceVertUV[j];
+//                    
+//                    //console.log("_vertUV " + _vertUV);
+//                    
+//                    if( _vertUV.x === 1 ) {                         
+//                        _vertUV.x = 2;
+//                        //console.log(_faceVertUV[j]);
+//                    }
+//                    
+//                    if( _vertUV.y === 1 ) {                         
+//                        _vertUV.y = 8;
+//                        //console.log(_faceVertUV[j]);
+//                    }
+//                }
+//            }
     
             break;
 
