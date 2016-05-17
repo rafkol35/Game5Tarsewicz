@@ -1,11 +1,19 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 THREE.Mesh.prototype._addMyParams = function(){
-    //this.a1b2 = 8;
-    //this.c3d4 = "asdf";
-    this._myUVX = 1; //new THREE.Vector2(1,1);
+    this._myUVX = 1;
     this._myUVY = 1;
     this._myTex = null;
+};
+
+THREE.Mesh.prototype.setMyTex = function(myTex){
+    this._myTex = myTex;
+    if( this._myTex ){
+        this.material.map = this._myTex.getTHREETexture();
+    }else{
+        this.material.map = null;
+    }        
+    this.material.needsUpdate = true;
 };
 
 THREE.Mesh.prototype._printMyParams = function(){

@@ -1,5 +1,3 @@
-
-
 function GameModeProject(name) {
     GameMode.call(this, name);
 
@@ -153,11 +151,6 @@ GameModeProject.prototype.keyDown = function (event) {
             break;
 
         case 81: //q
-            //this.pressedKeys[event.keyCode] = true;
-
-            //this.camera.zoom = Math.min(5,this.camera.zoom+0.1);
-            //console.log( this.camera.zoom );
-            //this.onWindowResize();
             break;
             
         case 71: //g
@@ -175,7 +168,7 @@ GameModeProject.prototype.keyDown = function (event) {
             //newWallData.Scale.Z = 6;
 
             newWallData.Material.Color = "#ff00ff";
-            newWallData.Material.File = this.Files[1];
+            newWallData.Material.TexName = this.Files[1];
             newWallData.Material.RepeatX = 2;
             newWallData.Material.RepeatY = 8;
 
@@ -214,12 +207,6 @@ GameModeProject.prototype.keyDown = function (event) {
             break;
 
         case 69: //e
-            //this.pressedKeys[event.keyCode] = true;
-
-            //this.camera.zoom = Math.max(0.1,this.camera.zoom-0.1);
-            //console.log( this.camera.zoom );
-            //this.onWindowResize();
-
             break;
 
         case 38: // up
@@ -243,9 +230,6 @@ GameModeProject.prototype.keyDown = function (event) {
             break;
 
         case 32: // space
-//            if (canJump === true)
-//                velocity.y += 350;
-//            canJump = false;
             break;
     }
 };
@@ -572,28 +556,20 @@ GameModeProject.prototype.updateGUIScale = function (cube) {
     }
 };
 
-GameModeProject.prototype.updateGUITexture = function (cube) {
+GameModeProject.prototype.updateGUIMaterial = function (cube) {
     if (cube !== null) {
         this.guiData.wd.Material.Color = "#" + this.selectedWall.material.color.getHexString();
         var curMap = this.selectedWall.material.map;
         if (curMap !== null) {
-            //var texName = curMap.image.src;
-            //var n1 = texName.lastIndexOf('/') + 1;
-            //var n2 = texName.lastIndexOf('.png');
-            //this.guiData.wd.Material.File = texName.substr(n1, n2 - n1);            
-            
-            this.guiData.wd.Material.File = cube._myTex.name; //texName.substr(n1, n2 - n1);            
-            
+            this.guiData.wd.Material.TexName = cube._myTex._name;                        
         } else {
-            this.guiData.wd.Material.File = "";
-            //this.guiData.wd.Material.RepeatX = 1;
-            //this.guiData.wd.Material.RepeatY = 1;
+            this.guiData.wd.Material.TexName = "";            
         }
         this.guiData.wd.Material.RepeatX = cube._myUVX;
         this.guiData.wd.Material.RepeatY = cube._myUVY;
     } else {
         this.guiData.wd.Material.Color = "#000000";            
-        this.guiData.wd.Material.File = "";
+        this.guiData.wd.Material.TexName = "";
         this.guiData.wd.Material.RepeatX = 1;
         this.guiData.wd.Material.RepeatY = 1;
     }
@@ -610,7 +586,7 @@ GameModeProject.prototype.setSelected = function (cube) {
         this.udpateGUIPos(this.selectedWall);
         this.updateGUIRotation(this.selectedWall);
         this.updateGUIScale(this.selectedWall);
-        this.updateGUITexture(this.selectedWall);
+        this.updateGUIMaterial(this.selectedWall);
         
         //this.selectedWall.ff11();
         //this.selectedWall._printMyParams();
@@ -618,7 +594,7 @@ GameModeProject.prototype.setSelected = function (cube) {
         this.udpateGUIPos(null);
         this.updateGUIRotation(null);
         this.updateGUIScale(null);
-        this.updateGUITexture(null);        
+        this.updateGUIMaterial(null);        
     }
 };
 
@@ -746,10 +722,6 @@ GameModeProject.prototype.createGUI = function () {
         cntr.onChange(selObjColorChanged);
         cntr.onFinishChange(selObjColorChanged);
         
-        cntr = folder.add(this.guiData.wd.Material, 'File', this.Files).listen();
-        //cntr.onChange(selObjTextureChanged);
-        cntr.onFinishChange(selObjTextureChanged);
-        
         cntr = folder.add(this.guiData.wd.Material, 'RepeatX',1,20).listen();
         cntr.step(1);//.min(0.1);
         cntr.onChange(selObjTexRepeatXChanged);
@@ -759,6 +731,10 @@ GameModeProject.prototype.createGUI = function () {
         cntr.step(1);//.min(0.1);
         cntr.onChange(selObjTexRepeatYChanged);
         cntr.onFinishChange(selObjTexRepeatYChanged);
+        
+        cntr = folder.add(this.guiData.wd.Material, 'TexName', this.Files).listen();
+        //cntr.onChange(selObjTextureChanged);
+        cntr.onFinishChange(selObjTextureChanged);
     }
 
     {
@@ -787,7 +763,7 @@ GameModeProject.prototype.createGUI = function () {
         cntr.onChange(floorTexRepeatYChanged);
         cntr.onFinishChange(floorTexRepeatYChanged);
         
-        this.floorFileCntr = this.guiFolder.add(this.guiData.fm, 'File', this.Files).listen();
+        this.floorFileCntr = this.guiFolder.add(this.guiData.fm, 'TexName', this.Files).listen();
         this.floorFileCntr.onFinishChange(floorTextureChanged);        
     }
     
@@ -845,6 +821,8 @@ GameModeProject.prototype.prepareTextures = function () {
             this.textures[ this.Files[i] ] = _tex;
         }
     }
+    
+    //console.log(this.textures);
 };
 
 GameModeProject.prototype.createDraggedFloor = function () {
@@ -1055,10 +1033,11 @@ GameModeProject.prototype.createWall = function (nwd/*NewWallData*/) {
     //var material = new THREE.MeshBasicMaterial({color: nwd.Material.Color, map: this.textures[nwd.Material.File]});
     var material = null;
     
-    if(this.textures[nwd.Material.File])
-        material = new THREE.MeshBasicMaterial({color: nwd.Material.Color, map: this.textures[nwd.Material.File].getTHREETexture()});
-    else
-        material = new THREE.MeshBasicMaterial({color: nwd.Material.Color, map: null});
+    //if(this.textures[nwd.Material.TexName])
+    //    material = new THREE.MeshBasicMaterial({color: nwd.Material.Color, map: this.textures[nwd.Material.File].getTHREETexture()});
+    //else
+      
+    material = new THREE.MeshBasicMaterial({color: nwd.Material.Color, map: null});
 
     material.transparent = true;
 //    if( nwd.Material.File ){
@@ -1072,6 +1051,7 @@ GameModeProject.prototype.createWall = function (nwd/*NewWallData*/) {
     var newWall = new THREE.Mesh(geometry, material);
     //var newWall = new Wall(geometry, material);
     newWall._addMyParams();    
+    newWall.setMyTex(this.textures[nwd.Material.TexName])
     newWall._setMyUV(nwd.Material.RepeatX,nwd.Material.RepeatY);
     
     //newWall.position.set(nwd.Pos.X * this.gridStep, nwd.Pos.Y * this.gridStep, nwd.Pos.Z * this.gridStep);

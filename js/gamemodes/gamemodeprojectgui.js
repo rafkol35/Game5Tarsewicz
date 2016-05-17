@@ -17,7 +17,7 @@ var Scale = function () {
 };
 
 var Material = function () {
-    this.File = '';
+    this.TexName = '';
     this.RepeatX = 1;
     this.RepeatY = 1;
     this.Color = "#ffffff";
@@ -193,9 +193,7 @@ var selObjColorChanged = function (val) {
 
 var selObjTextureChanged = function (val) {
     if (gameModeProject.selectedWall === null) return;
-    var currentMaterial = gameModeProject.selectedWall.material;
-    currentMaterial.map = gameModeProject.textures[val];
-    currentMaterial.needsUpdate = true;
+    gameModeProject.selectedWall.setMyTex(gameModeProject.textures[val]);    
 };
 
 var selObjTexRepeatXChanged = function (val) {
@@ -218,7 +216,7 @@ var floorColorChanged = function (val) {
 var floorTextureChanged = function (val) {
     if (gameModeProject.floor === null) return;
     var currentMaterial = gameModeProject.floor.material;
-    currentMaterial.map = gameModeProject.textures[val];
+    currentMaterial.map = gameModeProject.textures[val].getTHREETexture();
     currentMaterial.needsUpdate = true;
 };
 
