@@ -157,7 +157,10 @@ GameModeVisit.prototype.createWall = function(projWall){
 //        material.map = _tex;
 //        material.needsUpdate = true;
 //    }
+
     var newWall = new THREE.Mesh(geometry, material);
+    newWall._addMyParams();
+    newWall._setMyUV(projWall._myUVX,projWall._myUVY);
     
     //newWall.position.set(nwd.Pos.X * this.gridStep, nwd.Pos.Y * this.gridStep, nwd.Pos.Z * this.gridStep);
     newWall.position.set( projWall.position.x / gmp.gridStep, projWall.position.y / gmp.gridStep , projWall.position.z / gmp.gridStep);    
