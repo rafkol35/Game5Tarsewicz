@@ -1076,7 +1076,8 @@ GameModeProject.prototype.updateStageSize = function(newSize){
             this.gridStep * this.stageSize * 2,
             1,1);
     this.floor.geometry = floorGeometry;
-    
+    this.floor._setMyUV(this.floor._myUVX,this.floor._myUVY);
+     
     //grid
     var ggoffset = 0.5;
     var gridGeometry = new THREE.Geometry();
