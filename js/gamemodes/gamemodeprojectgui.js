@@ -85,6 +85,12 @@ var PGUIData = function (game) {
 
 };
 
+var SelTexData = function(){
+    this.Color1 = "#000000";
+    this.Color2 = "#000000";
+    this.Vertical = false;
+};
+
 var link = document.createElement('a');
 link.style.display = 'none';
 document.body.appendChild(link); // Firefox workaround, see #6594
@@ -105,6 +111,19 @@ function save(blob, filename) {
 
 function saveString(text, filename) {
     save(new Blob([text], {type: 'text/plain'}), filename);
+}
+////////////////////////////// SelTex ////////////////////////////////////////////////////////////////////////////////////////
+
+function selTexColor1Changed(val){
+    
+};
+
+function selTexColor2Changed(val){
+    
+};
+
+function selTexOrientationChanged(val){
+    
 }
 
 ////////////////////////////// wall ////////////////////////////////////////////////////////////////////////////////////////
@@ -186,12 +205,13 @@ var selObjScaleChanged = function (val) {
 };
 
 var selObjColorChanged = function (val) {
-    if (gameModeProject.selectedWall === null)
-        return;
+    if (gameModeProject.selectedWall === null) return;
+    //console.log('selObjColorChanged');
     gameModeProject.selectedWall.material.color = new THREE.Color(val);
-}
+};
 
 var selObjTextureChanged = function (val) {
+    gameModeProject.selTexChanged(val);
     if (gameModeProject.selectedWall === null) return;
     gameModeProject.selectedWall._setMyTex(gameModeProject.textures[val]);    
 };

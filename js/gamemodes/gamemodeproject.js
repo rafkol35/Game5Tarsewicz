@@ -28,7 +28,11 @@ function GameModeProject(name) {
     this.halfGridStep = this.gridStep * 0.5;
 
     this.Files = ['',"all",'rbn','rbn_0','rbn_1','rbn_2','sprite','sprite0','sprite1','t1'];
+    this.TexNames = this.Files.slice();
+    
     this.guiData = new PGUIData(this);    
+    this.selTexData = new SelTexData();
+    
     this.createGUI();
     this.createGUITex();
     this.prepareTextures();
@@ -176,12 +180,9 @@ GameModeProject.prototype.keyDown = function (event) {
             this.setHighlighted(newWall);
             this.setSelected(newWall);
     
-            var mtsp = new MyTexStripParams();
-            //console.log(mtsp);
-            var ndt = new MyTexStrip("MyTex1",mtsp);
-            //newWall.material.map = ndt.getTHREETexture();
-            //newWall.material.needsUpdate = true;
-            newWall._setMyTex(ndt);
+//            var mtsp = new MyTexStripParams();
+//            var ndt = new MyTexStrip("MyTex1",mtsp);
+//            newWall._setMyTex(ndt);
             
             break;
 
@@ -221,6 +222,8 @@ GameModeProject.prototype.keyDown = function (event) {
                         this.selectedWall._updateTex();                        
                     }
                 }
+            }else{
+                this.createMyStripTexture();
             }
             break;
     }
@@ -613,6 +616,12 @@ GameModeProject.prototype.highlightOnOff = function (cube, hl) {
     this.highlightWall.material.opacity = hl === true ? 0.5 : 1;
 };
 
+GameModeProject.prototype.updateWallTexGUI = function () {
+    this.WallTexNameCntr.remove();
+    this.WallTexNameCntr = this.WallFolderGUI.add(this.guiData.wd.Material, 'TexName', this.TexNames).listen();
+    this.WallTexNameCntr.onFinishChange(selObjTextureChanged);
+};
+
 GameModeProject.prototype.createGUI = function () {
     this.gui = new dat.GUI({
 //        height: 5 * 32 - 1
@@ -708,6 +717,7 @@ GameModeProject.prototype.createGUI = function () {
 
     {        
         var folder = wallFolder.addFolder('Material');
+        this.WallFolderGUI = folder;
         
         var cntr = null;
         cntr = folder.addColor(this.guiData.wd.Material, 'Color').listen();
@@ -724,11 +734,28 @@ GameModeProject.prototype.createGUI = function () {
         cntr.onChange(selObjTexRepeatYChanged);
         cntr.onFinishChange(selObjTexRepeatYChanged);
         
-        cntr = folder.add(this.guiData.wd.Material, 'TexName', this.Files).listen();
+        this.WallTexNameCntr = folder.add(this.guiData.wd.Material, 'TexName', this.TexNames).listen();
         //cntr.onChange(selObjTextureChanged);
-        cntr.onFinishChange(selObjTextureChanged);
+        this.WallTexNameCntr.onFinishChange(selObjTextureChanged);
     }
-
+    
+    {
+        var folder = wallFolder.addFolder('Textures');
+        //this.WallFolderGUI = folder;
+        
+        var cntr = null;
+        cntr = folder.addColor(this.selTexData, 'Color1').listen();
+        cntr.onChange(selTexColor1Changed);
+        cntr.onFinishChange(selTexColor1Changed);
+        
+        cntr = folder.addColor(this.selTexData, 'Color2').listen();
+        cntr.onChange(selTexColor2Changed);
+        cntr.onFinishChange(selTexColor2Changed); 
+        
+        cntr = folder.add(this.selTexData, 'Vertical').listen();
+        cntr.onChange(selTexOrientationChanged);     
+    }
+    
     {
         var cntr = null;
         cntr = wallFolder.add(this.guiData, "AddWall");
@@ -804,17 +831,23 @@ GameModeProject.prototype.prepareTextures = function () {
     this.textures[""] = null;
     for (var i = 0; i < this.Files.length; ++i) {
         if (this.Files[i]) {
-            //var _tex = new THREE.TextureLoader().load('textures/' + this.Files[i] + '.png');
-            //_tex.wrapS = THREE.RepeatWrapping;
-            //_tex.wrapT = THREE.RepeatWrapping;
-            ////_tex.repeat = new THREE.Vector2(2,2);
-            
             var _tex = new MyTexGfx(this.Files[i]);            
             this.textures[ this.Files[i] ] = _tex;
         }
     }
     
-    //console.log(this.textures);
+    //var mtsp = new MyTexStripParams();
+    //var _newTex = new MyTexStrip("MyTex1",mtsp);
+    //this.textures[ _newTex._name ] = _newTex;            
+};
+
+GameModeProject.prototype.createMyStripTexture = function () {
+    var mtsp = new MyTexStripParams();
+    var _newTex = new MyTexStrip("MyTex1",mtsp);
+    this.textures[_newTex._name] = _newTex;
+    this.TexNames.push(_newTex._name);
+    
+    this.updateWallTexGUI();
 };
 
 GameModeProject.prototype.createDraggedFloor = function () {
