@@ -193,7 +193,7 @@ var selObjColorChanged = function (val) {
 
 var selObjTextureChanged = function (val) {
     if (gameModeProject.selectedWall === null) return;
-    gameModeProject.selectedWall.setMyTex(gameModeProject.textures[val]);    
+    gameModeProject.selectedWall._setMyTex(gameModeProject.textures[val]);    
 };
 
 var selObjTexRepeatXChanged = function (val) {

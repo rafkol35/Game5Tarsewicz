@@ -6,8 +6,12 @@ THREE.Mesh.prototype._addMyParams = function(){
     this._myTex = null;
 };
 
-THREE.Mesh.prototype.setMyTex = function(myTex){
+THREE.Mesh.prototype._setMyTex = function(myTex){
     this._myTex = myTex;
+    this._updateTex();
+};
+
+THREE.Mesh.prototype._updateTex = function(){
     if( this._myTex ){
         this.material.map = this._myTex.getTHREETexture();
     }else{
@@ -15,6 +19,7 @@ THREE.Mesh.prototype.setMyTex = function(myTex){
     }        
     this.material.needsUpdate = true;
 };
+
 
 THREE.Mesh.prototype._printMyParams = function(){
     console.log("THREE.Mesh : " + this._myUVX + " " + this._myUVY + " " + this._myTex);

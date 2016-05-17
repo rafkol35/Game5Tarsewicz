@@ -1,8 +1,8 @@
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-function MyTex(_name,type){
+function MyTex(_name,_type){
     this._name = _name;
-    this.type = type;
+    this._type = _type;
 };
 
 MyTex.prototype.getTHREETexture = function(){

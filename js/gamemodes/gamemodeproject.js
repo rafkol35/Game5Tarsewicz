@@ -156,7 +156,7 @@ GameModeProject.prototype.keyDown = function (event) {
         case 71: //g
             var newWallData = new WallData();
             newWallData.Pos.X = -100;
-            newWallData.Pos.Y = 50;
+            newWallData.Pos.Y = -this.halfGridStep + (5 * this.gridStep) * 0.5;
             newWallData.Pos.Z = -100;
 //    
 //    newWallData.Rot.X = THREE.Math.degToRad(0);
@@ -167,43 +167,20 @@ GameModeProject.prototype.keyDown = function (event) {
             newWallData.Scale.Y = 5;
             //newWallData.Scale.Z = 6;
 
-            newWallData.Material.Color = "#ff00ff";
+            newWallData.Material.Color = "#ffffff";
             newWallData.Material.TexName = this.Files[1];
-            newWallData.Material.RepeatX = 2;
-            newWallData.Material.RepeatY = 8;
+            newWallData.Material.RepeatX = 1;
+            newWallData.Material.RepeatY = 1;
 
             var newWall = this.createWall(newWallData);
             this.setHighlighted(newWall);
             this.setSelected(newWall);
     
             var ndt = new MyTexStrip("MyTex1");
-            newWall.material.map = ndt.getTHREETexture();
-            newWall.material.needsUpdate = true;
+            //newWall.material.map = ndt.getTHREETexture();
+            //newWall.material.needsUpdate = true;
+            newWall._setMyTex(ndt);
             
-            //console.log(newWall.geometry.faceVertexUvs);
-            
-//            for( var i = 0 ; i < newWall.geometry.faceVertexUvs[0].length ; ++i ){
-//                var _faceVertUV = newWall.geometry.faceVertexUvs[0][i];
-//                
-//                //console.log("_faceVertUV " + _faceVertUV);
-//                
-//                for( var j = 0 ; j < _faceVertUV.length ; ++j ){
-//                    var _vertUV = _faceVertUV[j];
-//                    
-//                    //console.log("_vertUV " + _vertUV);
-//                    
-//                    if( _vertUV.x === 1 ) {                         
-//                        _vertUV.x = 2;
-//                        //console.log(_faceVertUV[j]);
-//                    }
-//                    
-//                    if( _vertUV.y === 1 ) {                         
-//                        _vertUV.y = 8;
-//                        //console.log(_faceVertUV[j]);
-//                    }
-//                }
-//            }
-    
             break;
 
         case 69: //e
@@ -230,6 +207,20 @@ GameModeProject.prototype.keyDown = function (event) {
             break;
 
         case 32: // space
+            if( this.selectedWall ){
+                if(this.selectedWall._myTex) {
+                    //console.log("this.selectedWall._myTex : " + this.selectedWall._myTex._type);
+                    if (this.selectedWall._myTex._type === 2) {
+                        var curTexOrient = this.selectedWall._myTex.orientation;
+                        if( curTexOrient === Orientation.HORIZONTAL){
+                            this.selectedWall._myTex.setOrientation(Orientation.VERTICAL);
+                        }else{
+                            this.selectedWall._myTex.setOrientation(Orientation.HORIZONTAL);
+                        }
+                        this.selectedWall._updateTex();                        
+                    }
+                }
+            }
             break;
     }
 };
@@ -1053,7 +1044,7 @@ GameModeProject.prototype.createWall = function (nwd/*NewWallData*/) {
     var newWall = new THREE.Mesh(geometry, material);
     //var newWall = new Wall(geometry, material);
     newWall._addMyParams();    
-    newWall.setMyTex(this.textures[nwd.Material.TexName])
+    newWall._setMyTex(this.textures[nwd.Material.TexName])
     newWall._setMyUV(nwd.Material.RepeatX,nwd.Material.RepeatY);
     
     //newWall.position.set(nwd.Pos.X * this.gridStep, nwd.Pos.Y * this.gridStep, nwd.Pos.Z * this.gridStep);
