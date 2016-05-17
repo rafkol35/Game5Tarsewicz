@@ -1,3 +1,5 @@
+
+
 function GameModeProject(name) {
     GameMode.call(this, name);
 
@@ -238,8 +240,8 @@ GameModeProject.prototype.keyDown = function (event) {
 
             newWallData.Material.Color = "#ff00ff";
             newWallData.Material.File = this.Files[1];
-            newWallData.Material.RepeatX = 1;
-            newWallData.Material.RepeatY = 1;
+            newWallData.Material.RepeatX = 2;
+            newWallData.Material.RepeatY = 8;
 
             var newWall = this.createWall(newWallData);
             this.setHighlighted(newWall);
@@ -667,6 +669,9 @@ GameModeProject.prototype.setSelected = function (cube) {
         this.updateGUIRotation(this.selectedWall);
         this.updateGUIScale(this.selectedWall);
         this.updateGUITexture(this.selectedWall);
+        
+        //this.selectedWall.ff11();
+        //this.selectedWall._printMyParams();
     } else {
         this.udpateGUIPos(null);
         this.updateGUIRotation(null);
@@ -1090,17 +1095,20 @@ GameModeProject.prototype.updateStageSize = function(newSize){
 
 GameModeProject.prototype.createWall = function (nwd/*NewWallData*/) {
     var geometry = new THREE.BoxGeometry(this.gridStep, this.gridStep, this.gridStep);
-    var material = new THREE.MeshBasicMaterial({color: nwd.Material.Color, map: null});
+    var material = new THREE.MeshBasicMaterial({color: nwd.Material.Color, map: this.textures[nwd.Material.File]});
     material.transparent = true;
-    if( nwd.Material.File ){
-        var _tex = this.textures[nwd.Material.File].clone();
-        _tex.repeat.x = nwd.Material.RepeatX;
-        _tex.repeat.y = nwd.Material.RepeatY;
-        _tex.needsUpdate = true;
-        material.map = _tex;
-        material.needsUpdate = true;
-    }
+//    if( nwd.Material.File ){
+//        var _tex = this.textures[nwd.Material.File].clone();
+//        _tex.repeat.x = nwd.Material.RepeatX;
+//        _tex.repeat.y = nwd.Material.RepeatY;
+//        _tex.needsUpdate = true;
+//        material.map = _tex;
+//        material.needsUpdate = true;
+//    }
     var newWall = new THREE.Mesh(geometry, material);
+    //var newWall = new Wall(geometry, material);
+    newWall._addMyParams();    
+    newWall._setMyUV(nwd.Material.RepeatX,nwd.Material.RepeatY);
     
     //newWall.position.set(nwd.Pos.X * this.gridStep, nwd.Pos.Y * this.gridStep, nwd.Pos.Z * this.gridStep);
     newWall.position.set(nwd.Pos.X, nwd.Pos.Y, nwd.Pos.Z);

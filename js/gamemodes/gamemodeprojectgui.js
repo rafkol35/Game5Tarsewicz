@@ -219,69 +219,13 @@ var selObjTextureChanged = function (val) {
 };
 
 var selObjTexRepeatXChanged = function (val) {
-    if (gameModeProject.selectedWall === null)
-        return;
-
-    var selWall = gameModeProject.selectedWall;
-    
-//    var curMat = gameModeProject.selectedWall.material;
-//    var curMap = curMat.map;
-//
-//    if (curMap) {
-//        curMap.repeat.x = val;
-//        curMap.needsUpdate = true;
-//        curMat.needsUpdate = true;
-//    }
-
-    //console.log(selWall);
-    //console.log(val);
-    
-    for (var i = 0; i < selWall.geometry.faceVertexUvs[0].length; ++i) {
-        var _faceVertUV = selWall.geometry.faceVertexUvs[0][i];
-
-        for (var j = 0; j < _faceVertUV.length; ++j) {
-            var _vertUV = _faceVertUV[j];
-
-            if (_vertUV.x !== 0) {
-                //console.log(_vertUV.x);
-                _vertUV.x = val;
-            }
-       }
-    }
-    selWall.geometry.uvsNeedUpdate = true;
+    if (gameModeProject.selectedWall === null) return;
+    gameModeProject.selectedWall._setMyUVX(val);
 };
 
 var selObjTexRepeatYChanged = function (val) {
-    if (gameModeProject.selectedWall === null)
-        return;
-
-//    var curMat = gameModeProject.selectedWall.material;
-//    var curMap = curMat.map;
-//
-//    if (curMap) {
-//        curMap.repeat.y = val;
-//        curMap.needsUpdate = true;
-//        curMat.needsUpdate = true;
-//    }
-    
-    var selWall = gameModeProject.selectedWall;
-    
-    for (var i = 0; i < selWall.geometry.faceVertexUvs[0].length; ++i) {
-        var _faceVertUV = selWall.geometry.faceVertexUvs[0][i];
-
-        for (var j = 0; j < _faceVertUV.length; ++j) {
-            var _vertUV = _faceVertUV[j];
-
-//            if (_vertUV.x !== 0) {
-//                _vertUV.x = val;
-//            }
-
-            if (_vertUV.y !== 0) {
-                _vertUV.y = val;
-            }
-        }
-    }
-    selWall.geometry.uvsNeedUpdate = true;
+    if (gameModeProject.selectedWall === null) return;  
+    gameModeProject.selectedWall._setMyUVY(val);
 };
 
 ////////////////////////////// floor ////////////////////////////////////////////////////////////////////////////////////////
