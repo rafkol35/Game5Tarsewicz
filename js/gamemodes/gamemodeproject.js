@@ -1040,6 +1040,8 @@ GameModeProject.prototype.createWall = function (nwd/*NewWallData*/) {
     material = new THREE.MeshBasicMaterial({color: nwd.Material.Color, map: null});
 
     material.transparent = true;
+    //material.vertexColors = THREE.VertexColors;
+    
 //    if( nwd.Material.File ){
 //        var _tex = this.textures[nwd.Material.File].clone();
 //        _tex.repeat.x = nwd.Material.RepeatX;
