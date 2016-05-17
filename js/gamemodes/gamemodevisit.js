@@ -127,10 +127,14 @@ GameModeVisit.prototype.createFloor = function(projFloor){
     
     var floorGeometry = new THREE.PlaneGeometry(
             gmp.stageSize * 2, gmp.stageSize * 2,
-            gmp.stageSize, gmp.stageSize);
+            1, 1);
 
     //var floorMaterial = new THREE.MeshBasicMaterial({color: 0xbbbbbb});    
     this.floor = new THREE.Mesh(floorGeometry, gmp.floor.material);
+    
+    this.floor._addMyParams();
+    this.floor._setMyUV(projFloor._myUVX,projFloor._myUVY);
+    
     this.floor.position.set(0, -gmp.halfGridStep / gmp.gridStep, 0);
     //this.floor.position.set(0, -1, 0);
     var newRot = this.floor.rotation;

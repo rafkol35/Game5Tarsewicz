@@ -211,64 +211,25 @@ var selObjTexRepeatYChanged = function (val) {
 ////////////////////////////// floor ////////////////////////////////////////////////////////////////////////////////////////
 
 var floorColorChanged = function (val) {
-    if (gameModeProject.floor === null)
-        return;
+    if (gameModeProject.floor === null) return;
     gameModeProject.floor.material.color = new THREE.Color(val);
 }
 
 var floorTextureChanged = function (val) {
-    if (gameModeProject.floor === null)
-        return;
-
+    if (gameModeProject.floor === null) return;
     var currentMaterial = gameModeProject.floor.material;
-
-    if (val !== "") {
-        var befRepX = 1;
-        var befRepY = 1;
-
-        if (currentMaterial.map) {
-            befRepX = currentMaterial.map.repeat.x;
-            befRepY = currentMaterial.map.repeat.y;
-        }
-
-        var newTexture = gameModeProject.textures[val].clone();
-        newTexture.repeat.x = befRepX;
-        newTexture.repeat.y = befRepY;
-        newTexture.needsUpdate = true;
-        currentMaterial.map = newTexture;
-        currentMaterial.needsUpdate = true;
-    } else {
-        currentMaterial.map = null;
-        currentMaterial.needsUpdate = true;
-    }
+    currentMaterial.map = gameModeProject.textures[val];
+    currentMaterial.needsUpdate = true;
 };
 
 var floorTexRepeatXChanged = function (val) {
-    if (gameModeProject.floor === null)
-        return;
-
-    var curMat = gameModeProject.floor.material;
-    var curMap = curMat.map;
-
-    if (curMap) {
-        curMap.repeat.x = val;
-        curMap.needsUpdate = true;
-        curMat.needsUpdate = true;
-    }
+    if (gameModeProject.floor === null) return;
+    gameModeProject.floor._setMyUVX(val);
 };
 
 var floorTexRepeatYChanged = function (val) {
-    if (gameModeProject.floor === null)
-        return;
-
-    var curMat = gameModeProject.floor.material;
-    var curMap = curMat.map;
-
-    if (curMap) {
-        curMap.repeat.y = val;
-        curMap.needsUpdate = true;
-        curMat.needsUpdate = true;
-    }
+    if (gameModeProject.floor === null) return;
+    gameModeProject.floor._setMyUVY(val);
 };
 
 ////////////////////////////// player ////////////////////////////////////////////////////////////////////////////////////////

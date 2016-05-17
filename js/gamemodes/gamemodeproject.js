@@ -914,7 +914,8 @@ GameModeProject.prototype.createFloor = function () {
     var floorGeometry = new THREE.PlaneGeometry(
             this.gridStep * this.stageSize * 2,
             this.gridStep * this.stageSize * 2,
-            this.stageSize, this.stageSize);
+            //this.stageSize, this.stageSize);
+            1,1)
 
     //var floorGeometry = new THREE.PlaneGeometry(100, 100);
 
@@ -923,6 +924,8 @@ GameModeProject.prototype.createFloor = function () {
     
     //floorMaterial.transparent = true;
     this.floor = new THREE.Mesh(floorGeometry, floorMaterial);
+    this.floor._addMyParams();
+    
     this.floor.position.set(0, -this.halfGridStep, 0);
     var newRot = this.floor.rotation;
     var rad = THREE.Math.degToRad(-90);
@@ -1071,7 +1074,7 @@ GameModeProject.prototype.updateStageSize = function(newSize){
     var floorGeometry = new THREE.PlaneGeometry(
             this.gridStep * this.stageSize * 2,
             this.gridStep * this.stageSize * 2,
-            this.stageSize, this.stageSize);
+            1,1);
     this.floor.geometry = floorGeometry;
     
     //grid
@@ -1175,7 +1178,7 @@ GameModeProject.prototype.createPlayerData = function(){
     playerData.Height = this.guiData.pd.Height;
     
     return playerData;
-}
+};
    
 GameModeProject.prototype.addWall = function () {    
     var newWallData = new WallData();
