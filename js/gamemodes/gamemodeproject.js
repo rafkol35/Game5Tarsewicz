@@ -32,17 +32,13 @@ function GameModeProject(name) {
     this.Files = ['',"all",'rbn','rbn_0','rbn_1','rbn_2','sprite','sprite0','sprite1','t1'];
     this.guiData = new PGUIData(this);    
     this.createGUI();
+    this.createGUITex();
     this.prepareTextures();
     this.createDraggedFloor();
     this.createFloor();
     this.createAxis();
     this.createGrid();
     this.createPlayerPos(new THREE.Vector2(0,0), 0, 2);
-    
-    this.gui2 = new dat.GUI({
-//        height: 5 * 32 - 1
-//        autoPlace: false
-    });
     
     this.walls = [];
     this.selectedWall = null;
@@ -68,68 +64,6 @@ function GameModeProject(name) {
     this.raycaster = new THREE.Raycaster();
     this.setSelected(null);
     
-//    var newWall = this.addWall();
-//
-//    //var newTexture = THREE.DataTexture();
-//    //var newTexture = new THREE.DataTexture( data.pixels, data.width, data.height, THREE.RGBFormat );
-//    var pixels = [
-//        255,255,0,
-//        255,255,0,
-//        255,255,0,
-//        255,255,0,
-//        
-//        255,255,255,
-//        255,255,255,
-//        255,255,255,
-//        255,255,255,
-//        
-//        255,255,0,
-//        255,255,0,
-//        255,255,0,
-//        255,255,0,
-//        
-//        255,255,255,
-//        255,255,255,
-//        255,255,255,
-//        255,255,255,
-//    ];
-//    var md = new Uint8Array(pixels);
-//    //console.log(md);
-//    
-//    var noiseSize = 4;
-//    var size = noiseSize * noiseSize;
-////    var data = new Uint8Array(3 * size);
-////    for (var i = 0; i < size * 3; i++) {
-////        data[ i ] = Math.random() * 255 | 0;
-////    }
-//    var data = new Uint8Array(size * 3);
-//    //for( var i = 0 ; i < 3 ; ++i) data[i] = 123;
-//    //var dt = new THREE.DataTexture(data, noiseSize, noiseSize, THREE.RGBFormat);
-//    var dt = new THREE.DataTexture(md, noiseSize, noiseSize, THREE.RGBFormat);
-//    dt.wrapS = THREE.RepeatWrapping;
-//    dt.wrapT = THREE.RepeatWrapping;
-//    dt.repeat = new THREE.Vector2(0.5,0.5);
-//    dt.needsUpdate = true;
-
-    
-
-    
-    //var newTexture = new THREE.DataTexture( new Uint8Array(pixels), 2, 2, THREE.RGBFormat );
-    //var newTexture = this.textures[1].clone();// new THREE.DataTexture( pixels, 2, 2, THREE.RGBFormat );
-    
-    //console.log(this.textures);
-    //console.log(newTexture.image);
-    //newTexture.needsUpdate = true;
-    //console.log(this.textures[this.Files[1]]);
-    //var _nt = this.textures[this.Files[1]].clone();
-    //console.log(_nt);
-    //_nt.needsUpdate();
-    //newWall.material.map = _nt;
-    //newWall.material.map.needsUpdate = true;
-    //newWall.material.needsUpdate = true;
-    
-    //selObjTextureChanged(this.Files[1]);
-    
     //this.light = new THREE.PointLight( 0xffffff, 1, 1000 );
     //this.light.position.set( 0, 0, 0 );
     //this.light.castShadow = true;
@@ -150,12 +84,14 @@ GameModeProject.prototype.activate = function () {
     //console.log('activate project');
     renderer.setClearColor(this.projClearColor);
     $(this.gui.domElement).attr("hidden", false);
+    $(this.guiTex.domElement).attr("hidden", false);
     this.clear();
 };
 
 GameModeProject.prototype.deactivate = function () {
     //console.log('deactivate project');
     $(this.gui.domElement).attr("hidden", true);
+    $(this.guiTex.domElement).attr("hidden", true);
     this.clear();
 };
 
@@ -247,6 +183,10 @@ GameModeProject.prototype.keyDown = function (event) {
             this.setHighlighted(newWall);
             this.setSelected(newWall);
     
+            var ndt = new MyTexStrip("MyTex1");
+            newWall.material.map = ndt.getTHREETexture();
+            newWall.material.needsUpdate = true;
+            
             //console.log(newWall.geometry.faceVertexUvs);
             
 //            for( var i = 0 ; i < newWall.geometry.faceVertexUvs[0].length ; ++i ){
@@ -637,12 +577,12 @@ GameModeProject.prototype.updateGUITexture = function (cube) {
         this.guiData.wd.Material.Color = "#" + this.selectedWall.material.color.getHexString();
         var curMap = this.selectedWall.material.map;
         if (curMap !== null) {
-            var texName = curMap.image.src;
-            var n1 = texName.lastIndexOf('/') + 1;
-            var n2 = texName.lastIndexOf('.png');
-            this.guiData.wd.Material.File = texName.substr(n1, n2 - n1);            
-            //this.guiData.wd.Material.RepeatX = curMap.repeat.x;
-            //this.guiData.wd.Material.RepeatY = curMap.repeat.y;
+            //var texName = curMap.image.src;
+            //var n1 = texName.lastIndexOf('/') + 1;
+            //var n2 = texName.lastIndexOf('.png');
+            //this.guiData.wd.Material.File = texName.substr(n1, n2 - n1);            
+            
+            this.guiData.wd.Material.File = cube._myTex.name; //texName.substr(n1, n2 - n1);            
             
         } else {
             this.guiData.wd.Material.File = "";
@@ -884,15 +824,24 @@ GameModeProject.prototype.createGUI = function () {
     }
 };
 
+GameModeProject.prototype.createGUITex = function (){
+    this.guiTex = new dat.GUI({
+//        height: 5 * 32 - 1
+//        autoPlace: false
+    });
+};
+
 GameModeProject.prototype.prepareTextures = function () {
     this.textures = [];
     this.textures[""] = null;
     for (var i = 0; i < this.Files.length; ++i) {
         if (this.Files[i]) {
-            var _tex = new THREE.TextureLoader().load('textures/' + this.Files[i] + '.png');
-            _tex.wrapS = THREE.RepeatWrapping;
-            _tex.wrapT = THREE.RepeatWrapping;
-            //_tex.repeat = new THREE.Vector2(2,2);
+            //var _tex = new THREE.TextureLoader().load('textures/' + this.Files[i] + '.png');
+            //_tex.wrapS = THREE.RepeatWrapping;
+            //_tex.wrapT = THREE.RepeatWrapping;
+            ////_tex.repeat = new THREE.Vector2(2,2);
+            
+            var _tex = new MyTexGfx(this.Files[i]);            
             this.textures[ this.Files[i] ] = _tex;
         }
     }
@@ -1040,6 +989,8 @@ GameModeProject.prototype.updatePlayer = function(playerData){
 };
 
 GameModeProject.prototype.updateFloor = function(floorData){
+    //console.log(floorData);
+    
     floorColorChanged(floorData.Color);
     floorTextureChanged(floorData.File);
     floorTexRepeatXChanged(floorData.RepeatX);
@@ -1101,7 +1052,14 @@ GameModeProject.prototype.updateStageSize = function(newSize){
 
 GameModeProject.prototype.createWall = function (nwd/*NewWallData*/) {
     var geometry = new THREE.BoxGeometry(this.gridStep, this.gridStep, this.gridStep);
-    var material = new THREE.MeshBasicMaterial({color: nwd.Material.Color, map: this.textures[nwd.Material.File]});
+    //var material = new THREE.MeshBasicMaterial({color: nwd.Material.Color, map: this.textures[nwd.Material.File]});
+    var material = null;
+    
+    if(this.textures[nwd.Material.File])
+        material = new THREE.MeshBasicMaterial({color: nwd.Material.Color, map: this.textures[nwd.Material.File].getTHREETexture()});
+    else
+        material = new THREE.MeshBasicMaterial({color: nwd.Material.Color, map: null});
+
     material.transparent = true;
 //    if( nwd.Material.File ){
 //        var _tex = this.textures[nwd.Material.File].clone();
@@ -1298,6 +1256,8 @@ GameModeProject.prototype.loadFile = function(file){
         var contents = event.target.result;
         
         //var saveData = new SaveData();
+        //console.log(contents);
+        
         var loadData = jQuery.parseJSON(contents);
         gameModeProject.load(loadData);
     });    
@@ -1306,6 +1266,8 @@ GameModeProject.prototype.loadFile = function(file){
 };
 
 GameModeProject.prototype.load = function(loadData){
+    
+    //console.log("load");
     
     this.setSelected(null);
     this.setHighlighted(null);
