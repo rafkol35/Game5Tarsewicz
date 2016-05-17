@@ -176,7 +176,9 @@ GameModeProject.prototype.keyDown = function (event) {
             this.setHighlighted(newWall);
             this.setSelected(newWall);
     
-            var ndt = new MyTexStrip("MyTex1");
+            var mtsp = new MyTexStripParams();
+            //console.log(mtsp);
+            var ndt = new MyTexStrip("MyTex1",mtsp);
             //newWall.material.map = ndt.getTHREETexture();
             //newWall.material.needsUpdate = true;
             newWall._setMyTex(ndt);
@@ -209,13 +211,12 @@ GameModeProject.prototype.keyDown = function (event) {
         case 32: // space
             if( this.selectedWall ){
                 if(this.selectedWall._myTex) {
-                    //console.log("this.selectedWall._myTex : " + this.selectedWall._myTex._type);
                     if (this.selectedWall._myTex._type === 2) {
                         var curTexOrient = this.selectedWall._myTex.orientation;
-                        if( curTexOrient === Orientation.HORIZONTAL){
-                            this.selectedWall._myTex.setOrientation(Orientation.VERTICAL);
+                        if( curTexOrient === MTSOrientation.HORIZONTAL){
+                            this.selectedWall._myTex.setOrientation(MTSOrientation.VERTICAL);
                         }else{
-                            this.selectedWall._myTex.setOrientation(Orientation.HORIZONTAL);
+                            this.selectedWall._myTex.setOrientation(MTSOrientation.HORIZONTAL);
                         }
                         this.selectedWall._updateTex();                        
                     }

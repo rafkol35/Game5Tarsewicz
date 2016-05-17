@@ -1,6 +1,7 @@
 function MyTexGfx(_name){
     MyTex.call(this,_name,1);
     this.threeTex = new THREE.TextureLoader().load('textures/' + this._name + '.png');
+    //console.log(this.threeTex);
     this.threeTex.wrapS = THREE.RepeatWrapping;
     this.threeTex.wrapT = THREE.RepeatWrapping;            
 };
