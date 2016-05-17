@@ -641,14 +641,16 @@ GameModeProject.prototype.updateGUITexture = function (cube) {
             var n1 = texName.lastIndexOf('/') + 1;
             var n2 = texName.lastIndexOf('.png');
             this.guiData.wd.Material.File = texName.substr(n1, n2 - n1);            
-            this.guiData.wd.Material.RepeatX = curMap.repeat.x;
-            this.guiData.wd.Material.RepeatY = curMap.repeat.y;
+            //this.guiData.wd.Material.RepeatX = curMap.repeat.x;
+            //this.guiData.wd.Material.RepeatY = curMap.repeat.y;
             
         } else {
             this.guiData.wd.Material.File = "";
-            this.guiData.wd.Material.RepeatX = 1;
-            this.guiData.wd.Material.RepeatY = 1;
+            //this.guiData.wd.Material.RepeatX = 1;
+            //this.guiData.wd.Material.RepeatY = 1;
         }
+        this.guiData.wd.Material.RepeatX = cube._myUVX;
+        this.guiData.wd.Material.RepeatY = cube._myUVY;
     } else {
         this.guiData.wd.Material.Color = "#000000";            
         this.guiData.wd.Material.File = "";
@@ -1155,10 +1157,12 @@ GameModeProject.prototype.createWallData = function (wall) {
         var n2 = texName.lastIndexOf('.png');        
         wallData.Material.File = texName.substr(n1, n2 - n1);
         
-        wallData.Material.RepeatX = _mat.map.repeat.x;
-        wallData.Material.RepeatY = _mat.map.repeat.y;        
+        //wallData.Material.RepeatX = _mat.map.repeat.x;
+        //wallData.Material.RepeatY = _mat.map.repeat.y;        
     }
-    
+    wallData.Material.RepeatX = wall._myUVX;
+    wallData.Material.RepeatY = wall._myUVY; 
+        
     return wallData;
 };
    

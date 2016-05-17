@@ -192,30 +192,10 @@ var selObjColorChanged = function (val) {
 }
 
 var selObjTextureChanged = function (val) {
-    if (gameModeProject.selectedWall === null)
-        return;
-
+    if (gameModeProject.selectedWall === null) return;
     var currentMaterial = gameModeProject.selectedWall.material;
-
-    if (val !== "") {
-        var befRepX = 1;
-        var befRepY = 1;
-
-        if (currentMaterial.map) {
-            befRepX = currentMaterial.map.repeat.x;
-            befRepY = currentMaterial.map.repeat.y;
-        }
-
-        var newTexture = gameModeProject.textures[val].clone();
-        newTexture.repeat.x = befRepX;
-        newTexture.repeat.y = befRepY;
-        newTexture.needsUpdate = true;
-        currentMaterial.map = newTexture;
-        currentMaterial.needsUpdate = true;
-    } else {
-        currentMaterial.map = null;
-        currentMaterial.needsUpdate = true;
-    }
+    currentMaterial.map = gameModeProject.textures[val];
+    currentMaterial.needsUpdate = true;
 };
 
 var selObjTexRepeatXChanged = function (val) {
