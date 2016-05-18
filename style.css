@@ -22,3 +22,7 @@ and open the template in the editor.
 #guiProject{
     position: absolute; top: 0px; right: 0px;
 }
+
+#guiTex{
+    position: absolute; top: 0px; left: 10px;
+}

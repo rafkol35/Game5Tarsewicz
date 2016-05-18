@@ -651,6 +651,13 @@ GameModeProject.prototype.createGUI = function () {
 //        height: 5 * 32 - 1
 //        autoPlace: false
     });
+    this.gui.domElement.id = 'guiProject';
+    
+    this.guiTex = new dat.GUI({
+        //height: 5 * 32 - 1,
+        //autoPlace: false
+    });
+    this.guiTex.domElement.id = 'guiTex';
 
     var stageFolder = this.gui.addFolder('Stage');
     
@@ -764,8 +771,7 @@ GameModeProject.prototype.createGUI = function () {
     }
     
     {
-        this.guiSelTexFolder = wallFolder.addFolder('SelectedTexure');
-        //this.WallFolderGUI = folder;
+        this.guiSelTexFolder = this.guiTex.addFolder('StripTextures');
         
         var cntr = null;
         
@@ -774,23 +780,6 @@ GameModeProject.prototype.createGUI = function () {
         };
                 
         cntr = this.guiSelTexFolder.add(this.guiData, "AddNew");
-        
-        //cntr = folder.addColor(this.selTexData, 'Color1').listen();
-        //cntr.onChange(selTexColor1Changed);
-        //cntr.onFinishChange(selTexColor1Changed);
-        
-        //cntr = folder.addColor(this.selTexData, 'Color2').listen();
-        //cntr.onChange(selTexColor2Changed);
-        //cntr.onFinishChange(selTexColor2Changed); 
-        
-//        cntr = folder.add(this.selTexData, 'Vertical').listen();
-//        cntr.onChange(selTexOrientationChanged);
-//        
-//        for (var i = 0; i < this.selTexData.Colors.length; i++) {
-//            cntr = folder.addColor(this.selTexData.Colors, i, this.selTexData.Colors[i]);
-//            cntr.onChange(selTexColorChanged);
-//            cntr.onFinishChange(selTexColorChanged); 
-//        }        
     }
     
     {
@@ -961,10 +950,7 @@ GameModeProject.prototype.updateGUISelTexColors = function(){
 //};
 
 GameModeProject.prototype.createGUITex = function (){
-    this.guiTex = new dat.GUI({
-//        height: 5 * 32 - 1
-//        autoPlace: false
-    });
+
 };
 
 GameModeProject.prototype.prepareTextures = function () {
