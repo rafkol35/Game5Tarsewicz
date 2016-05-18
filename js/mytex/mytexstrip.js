@@ -7,6 +7,7 @@ MTSOrientation = {
 function MyTexStrip(_name, params){
     MyTex.call(this,_name,2);
     
+    this.numOfStrips = params.numOfStrips;
     this.orientation = params.orientation; // MTSOrientation.HORIZONTAL;
     this.colors = params.colors;
     
@@ -23,8 +24,12 @@ function MyTexStrip(_name, params){
 };
 
 var MyTexStripParams = function(){
+    this.numOfStrips = 2;
     this.orientation = MTSOrientation.HORIZONTAL;
-    this.colors = ['#ffffff','#000000'];
+    this.colors = [];
+    for(var i = 0 ; i < 10 ; ++i){
+        this.colors.push("#000000");
+    }
 };
 
 MyTexStrip.prototype = Object.create(MyTex);
@@ -38,6 +43,7 @@ MyTexStrip.prototype.getTHREETexture = function(){
 MyTexStrip.prototype.getSelTexData = function(){
     var selTexData = new SelTexData();
     
+    selTexData.NumOfStrips = this.numOfStrips;
     selTexData.Colors = this.colors;
     selTexData.Vertical = this.orientation === MTSOrientation.VERTICAL ? true : false;
             
@@ -53,6 +59,11 @@ MyTexStrip.prototype.setOrientation = function(newOrientation){
     this.orientation = newOrientation;
     this.rebuild();
 };
+
+MyTexStrip.prototype.setNumOfStrips = function(newNumOfStrips){
+    this.numOfStrips = newNumOfStrips;
+    this.rebuild();
+}
 
 MyTexStrip.prototype.rebuild = function(){
     var _c1 = new THREE.Color(this.colors[0]);

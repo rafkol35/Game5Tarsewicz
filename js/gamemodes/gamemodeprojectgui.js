@@ -88,7 +88,8 @@ var PGUIData = function (game) {
 var SelTexData = function(){
     //this.Color1 = "#000000";
     //this.Color2 = "#000000";
-    this.Colors = ["#000000","#ff0000","#00ff00","#0000ff","#ffffff"];    
+    this.NumOfStrips = 2;
+    this.Colors = ["#000000","#ffffff"];    
     this.Vertical = false;    
 };
 
@@ -140,6 +141,15 @@ function selTexColorChanged(val){
     //gameModeProject.selTex.setStripColor(1,val);
     
     //gameModeProject.selTexChanged2();
+}
+
+function selTexNumOfStripsChanged(val){
+    if (!gameModeProject.selTex) return;
+    
+    //console.log(this.property + " " + val);
+    gameModeProject.selTex.setNumOfStrips(val);
+    
+    gameModeProject.selTexChanged3();
 }
 
 function selTexOrientationChanged(val){

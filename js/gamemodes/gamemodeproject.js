@@ -36,6 +36,7 @@ function GameModeProject(name) {
     
     this.guiSelTexFolder = null;
     this.guiSelTexOrienCntr = null;
+    this.guiSelTexNumOfColorsCntr = null;
     this.guiSelTexColorsCntrs = [];
 
     this.createGUI();
@@ -46,6 +47,9 @@ function GameModeProject(name) {
     this.createAxis();
     this.createGrid();
     this.createPlayerPos(new THREE.Vector2(0,0), 0, 2);
+    
+    this.createMyStripTexture("MyTex1");
+    this.createMyStripTexture("MyTex2");
     
     this.walls = [];
     this.selectedWall = null;
@@ -870,6 +874,12 @@ GameModeProject.prototype.selTexChanged2 = function(){
     }
 };
 
+GameModeProject.prototype.selTexChanged3 = function(){
+    this.selTexData.NumOfStrips = this.selTex.numOfStrips;
+    
+    //this.selTexChanged2();
+};
+
 GameModeProject.prototype.selTexChanged = function(texName){
     if(!texName) {
         //this.resetGUISelTex();
@@ -904,20 +914,16 @@ GameModeProject.prototype.showGUISelTex = function(selTex){
     this.guiSelTexOrienCntr = this.guiSelTexFolder.add(this.selTexData, 'Vertical').listen();
     this.guiSelTexOrienCntr.onChange(selTexOrientationChanged);
 
-    //this.guiSelTexFolder = null;
-    //this.guiSelTexOrienCntr = null;
-    //this.guiSelTexColorsCntrs = [];
+    this.guiSelTexNumOfColorsCntr = this.guiSelTexFolder.add(this.selTexData, 'NumOfStrips', 2, 10).listen();
+    this.guiSelTexNumOfColorsCntr.step(1);
+    this.guiSelTexNumOfColorsCntr.onChange(selTexNumOfStripsChanged);
     
-    for (var i = 0; i < this.selTexData.Colors.length; i++) {
+    for (var i = 0; i < this.selTexData.NumOfStrips; i++) {
         var cntr = this.guiSelTexFolder.addColor(this.selTexData.Colors, i, this.selTexData.Colors[i]);
         cntr.onChange(selTexColorChanged);
         cntr.onFinishChange(selTexColorChanged);
         this.guiSelTexColorsCntrs.push(cntr);
     }
-        
-    //this.selTexData.Color1 = selTex.colors[0];
-    //this.selTexData.Color2 = selTex.colors[1];
-    //this.selTexData.Vertical = selTex.orientation === MTSOrientation.VERTICAL;
 };
 
 //GameModeProject.prototype.updateGUISelTex = function(selTex){
@@ -943,7 +949,12 @@ GameModeProject.prototype.hideGUISelTex = function(){
     //this.selTexData.Color2 = "#000000";
     //this.selTexData.Vertical = false;
     
+    this.guiSelTexNumOfColorsCntr.remove();
+    this.guiSelTexNumOfColorsCntr = null;
+    
     this.guiSelTexOrienCntr.remove();
+    this.guiSelTexOrienCntr = null;
+    
     for(var i = 0 ; i < this.guiSelTexColorsCntrs.length ; ++i){
         this.guiSelTexColorsCntrs[i].remove();
     }
