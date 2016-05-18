@@ -169,31 +169,27 @@ GameModeProject.prototype.keyDown = function (event) {
             break;
             
         case 71: //g
-            var newWallData = new WallData();
-            newWallData.Pos.X = -100;
-            newWallData.Pos.Y = -this.halfGridStep + (5 * this.gridStep) * 0.5;
-            newWallData.Pos.Z = -100;
+//            var newWallData = new WallData();
+//            newWallData.Pos.X = -100;
+//            newWallData.Pos.Y = -this.halfGridStep + (5 * this.gridStep) * 0.5;
+//            newWallData.Pos.Z = -100;
 //    
-//    newWallData.Rot.X = THREE.Math.degToRad(0);
-//    newWallData.Rot.Y = THREE.Math.degToRad(45);
-//    newWallData.Rot.Z = THREE.Math.degToRad(0);
+//            //newWallData.Scale.X = 4;
+//            newWallData.Scale.Y = 5;
+//            //newWallData.Scale.Z = 6;
+//
+//            newWallData.Material.Color = "#ffffff";
+//            newWallData.Material.TexName = this.Files[1];
+//            newWallData.Material.RepeatX = 1;
+//            newWallData.Material.RepeatY = 1;
+//
+//            var newWall = this.createWall(newWallData);
+//            this.setHighlighted(newWall);
+//            this.setSelected(newWall);
 //    
-            //newWallData.Scale.X = 4;
-            newWallData.Scale.Y = 5;
-            //newWallData.Scale.Z = 6;
-
-            newWallData.Material.Color = "#ffffff";
-            newWallData.Material.TexName = this.Files[1];
-            newWallData.Material.RepeatX = 1;
-            newWallData.Material.RepeatY = 1;
-
-            var newWall = this.createWall(newWallData);
-            this.setHighlighted(newWall);
-            this.setSelected(newWall);
-    
-//            var mtsp = new MyTexStripParams();
-//            var ndt = new MyTexStrip("MyTex1",mtsp);
-//            newWall._setMyTex(ndt);
+////            var mtsp = new MyTexStripParams();
+////            var ndt = new MyTexStrip("MyTex1",mtsp);
+////            newWall._setMyTex(ndt);
             
             break;
 
@@ -221,21 +217,21 @@ GameModeProject.prototype.keyDown = function (event) {
             break;
 
         case 32: // space
-            if( this.selectedWall ){
-                if(this.selectedWall._myTex) {
-                    if (this.selectedWall._myTex._type === 2) {
-                        var curTexOrient = this.selectedWall._myTex.orientation;
-                        if( curTexOrient === MTSOrientation.HORIZONTAL){
-                            this.selectedWall._myTex.setOrientation(MTSOrientation.VERTICAL);
-                        }else{
-                            this.selectedWall._myTex.setOrientation(MTSOrientation.HORIZONTAL);
-                        }
-                        this.selectedWall._updateTex();                        
-                    }
-                }
-            }else{
-                //this.createMyStripTexture();
-            }
+//            if( this.selectedWall ){
+//                if(this.selectedWall._myTex) {
+//                    if (this.selectedWall._myTex._type === 2) {
+//                        var curTexOrient = this.selectedWall._myTex.orientation;
+//                        if( curTexOrient === MTSOrientation.HORIZONTAL){
+//                            this.selectedWall._myTex.setOrientation(MTSOrientation.VERTICAL);
+//                        }else{
+//                            this.selectedWall._myTex.setOrientation(MTSOrientation.HORIZONTAL);
+//                        }
+//                        this.selectedWall._updateTex();                        
+//                    }
+//                }
+//            }else{
+//                //this.createMyStripTexture();
+//            }
             break;
     }
 };

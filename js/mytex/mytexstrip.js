@@ -61,11 +61,13 @@ MyTexStrip.prototype.setStripColor = function(ind,newColor){
 };
 
 MyTexStrip.prototype.setOrientation = function(newOrientation){
+    if(this.orientation === newOrientation) return;
     this.orientation = newOrientation;
     this.rebuild();
 };
 
 MyTexStrip.prototype.setNumOfStrips = function(newNumOfStrips){    
+    if(this.numOfStrips === newNumOfStrips) return;
     this.numOfStrips = newNumOfStrips;
     this.rebuild();
 };
