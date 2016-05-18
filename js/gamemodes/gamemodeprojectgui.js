@@ -86,8 +86,7 @@ var PGUIData = function (game) {
 };
 
 var SelTexData = function(){
-    //this.Color1 = "#000000";
-    //this.Color2 = "#000000";
+    this.Name = "";
     this.NumOfStrips = 2;
     this.Colors = ["#000000","#ffffff"];    
     this.Vertical = false;    
@@ -267,7 +266,9 @@ var floorColorChanged = function (val) {
 var floorTextureChanged = function (val) {
     if (gameModeProject.floor === null) return;
     var currentMaterial = gameModeProject.floor.material;
-    currentMaterial.map = gameModeProject.textures[val].getTHREETexture();
+    if(val){
+        currentMaterial.map = gameModeProject.textures[val].getTHREETexture();
+    }
     currentMaterial.needsUpdate = true;
 };
 

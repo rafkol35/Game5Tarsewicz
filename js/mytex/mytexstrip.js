@@ -48,6 +48,7 @@ MyTexStrip.prototype.getTHREETexture = function(){
 MyTexStrip.prototype.getSelTexData = function(){
     var selTexData = new SelTexData();
     
+    selTexData.Name = this._name;
     selTexData.NumOfStrips = this.numOfStrips;
     selTexData.Colors = this.colors;
     selTexData.Vertical = this.orientation === MTSOrientation.VERTICAL ? true : false;

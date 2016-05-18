@@ -976,6 +976,7 @@ GameModeProject.prototype.prepareTextures = function () {
             this.textures[ this.Files[i] ] = _tex;
         }
     }
+    //console.log(this.textures.length);
     
     //var mtsp = new MyTexStripParams();
     //var _newTex = new MyTexStrip("MyTex1",mtsp);
@@ -992,7 +993,7 @@ GameModeProject.prototype.createMyStripTexture = function (newTexName) {
 //    
 //    this.guiData.wd.Material.TexName = _newTex._name;
 //    this.selTexChanged(_newTex._name);
-    this.createMyStripTexture(newTexName);
+    this.createMyStripTexture(newTexName,mtsp);
 };
 
 GameModeProject.prototype.createMyStripTexture2 = function (newTexName, params) {
@@ -1277,15 +1278,19 @@ GameModeProject.prototype.createWallData = function (wall) {
     
     var _mat = wall.material;
     wallData.Material.Color = "#" + _mat.color.getHexString();
-    if( _mat.map ){
-        var texName = _mat.map.image.src;
-        var n1 = texName.lastIndexOf('/') + 1;
-        var n2 = texName.lastIndexOf('.png');        
-        wallData.Material.File = texName.substr(n1, n2 - n1);
-        
-        //wallData.Material.RepeatX = _mat.map.repeat.x;
-        //wallData.Material.RepeatY = _mat.map.repeat.y;        
+//    if( _mat.map ){
+//        var texName = _mat.map.image.src;
+//        var n1 = texName.lastIndexOf('/') + 1;
+//        var n2 = texName.lastIndexOf('.png');        
+//        wallData.Material.File = texName.substr(n1, n2 - n1);
+//        
+//        //wallData.Material.RepeatX = _mat.map.repeat.x;
+//        //wallData.Material.RepeatY = _mat.map.repeat.y;        
+//    }
+    if( wall._myTex ){
+        wallData.Material.TexName = wall._myTex._name;
     }
+    
     wallData.Material.RepeatX = wall._myUVX;
     wallData.Material.RepeatY = wall._myUVY; 
         
@@ -1368,22 +1373,41 @@ GameModeProject.prototype.duplicateSelectedWall = function () {
 
 var SaveData = function(){
     this.StageData = new StageData(gameModeProject);
+    this.TexturesDatas = [];
     this.WallDatas = [];    
     this.PlayerData = new PlayerData();
     this.FloorData = gameModeProject.guiData.fm;
 };
 
 GameModeProject.prototype.saveFile = function(){
-    var fileName = prompt("File name", "scene");
+    var fileName = "asdf"; //prompt("File name", "scene");
     if (fileName !== null) {
 
         //var output = gameModeProject.scene.toJSON();
         var saveData = new SaveData();
         
-        for( var i = 0 ; i < this.walls.length ; ++i ){
+         for( var i = 0 ; i < this.walls.length ; ++i ){
             //var output = this.createWallData(this.selectedWall); //this.guiData.fm;// "{asdf}";
             var wallData = this.createWallData(this.walls[i]);
             saveData.WallDatas.push(wallData);
+        }
+        
+//        //console.log(this.textures.length);
+//        for( var i = 0 ; i < this.textures.length ; ++i ){
+//            //console.log(this.textures[i]);
+//            if( this.textures[i]._type === 2 ){
+//                //console.log(this.textures[i].getSelTexData());
+//                saveData.TexuresDatas.push(this.textures[i].getSelTexData());
+//            }
+//        }
+        
+        for (var key in this.textures) {
+            //console.log(this.textures[key]);
+            if(this.textures[key]) {
+                if (this.textures[key]._type === 2) {
+                    saveData.TexturesDatas.push(this.textures[key].getSelTexData());
+                }
+            }
         }
         
         saveData.PlayerData = this.createPlayerData();
@@ -1397,10 +1421,11 @@ GameModeProject.prototype.saveFile = function(){
             saveData = JSON.stringify(saveData);
         }
         
-        saveString(saveData, fileName + '.game5scene');
+        //saveString(saveData, fileName + '.game5scene');
+        console.log(saveData);
         
-        //var loadData = jQuery.parseJSON(saveData);
-        //this.load(loadData);
+        var loadData = jQuery.parseJSON(saveData);
+        this.load(loadData);
     }
 };
 
@@ -1435,6 +1460,24 @@ GameModeProject.prototype.load = function(loadData){
     
     this.setSelected(null);
     this.setHighlighted(null);
+    
+    //this.textures = [];
+    this.prepareTextures();
+    for( var i = 0 ; i < loadData.TexturesDatas.length ; ++i ){
+        var td = loadData.TexturesDatas[i];
+//        var SelTexData = function () {
+//            this.Name = "";
+//            this.NumOfStrips = 2;
+//            this.Colors = ["#000000", "#ffffff"];
+//            this.Vertical = false;
+//        };
+        var mtsp = new MyTexStripParams();
+        mtsp.numOfStrips = td.NumOfStrips;
+        mtsp.colors = td.Colors;
+        mtsp.orientation = td.Vertical ? MTSOrientation.VERTICAL : MTSOrientation.HORIZONTAL;
+        gameModeProject.createMyStripTexture2( td.Name, mtsp );
+    }
+    console.log(this.textures);
     
     for( var i = 0 ; i < this.walls.length ; ++i ){
         this.scene.remove(this.walls[i]);
