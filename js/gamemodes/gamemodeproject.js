@@ -48,8 +48,10 @@ function GameModeProject(name) {
     this.createGrid();
     this.createPlayerPos(new THREE.Vector2(0,0), 0, 2);
     
-    this.createMyStripTexture("MyTex1");
-    this.createMyStripTexture("MyTex2");
+    var mtsp = new MyTexStripParams();
+    mtsp.numOfStrips = 3;
+    this.createMyStripTexture2("MyTex1",mtsp);
+    //this.createMyStripTexture("MyTex2");
     
     this.walls = [];
     this.selectedWall = null;
@@ -986,7 +988,20 @@ GameModeProject.prototype.prepareTextures = function () {
 
 GameModeProject.prototype.createMyStripTexture = function (newTexName) {
     var mtsp = new MyTexStripParams();
-    var _newTex = new MyTexStrip(newTexName,mtsp);
+//    var _newTex = new MyTexStrip(newTexName,mtsp);
+//    this.textures[_newTex._name] = _newTex;
+//    this.TexNames.push(_newTex._name);
+//    
+//    this.updateWallTexGUI();
+//    
+//    this.guiData.wd.Material.TexName = _newTex._name;
+//    this.selTexChanged(_newTex._name);
+    this.createMyStripTexture(newTexName);
+};
+
+GameModeProject.prototype.createMyStripTexture2 = function (newTexName, params) {
+   //var mtsp = new MyTexStripParams();
+    var _newTex = new MyTexStrip(newTexName,params);
     this.textures[_newTex._name] = _newTex;
     this.TexNames.push(_newTex._name);
     
