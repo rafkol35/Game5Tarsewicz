@@ -48,10 +48,10 @@ function GameModeProject(name) {
     this.createGrid();
     this.createPlayerPos(new THREE.Vector2(0,0), 0, 2);
     
-    var mtsp = new MyTexStripParams();
-    mtsp.numOfStrips = 3;
-    this.createMyStripTexture2("MyTex1",mtsp);
-    //this.createMyStripTexture("MyTex2");
+//    var mtsp = new MyTexStripParams();
+//    mtsp.numOfStrips = 3;
+//    this.createMyStripTexture2("MyTex1",mtsp);
+//    //this.createMyStripTexture("MyTex2");
     
     this.walls = [];
     this.selectedWall = null;
@@ -993,7 +993,7 @@ GameModeProject.prototype.createMyStripTexture = function (newTexName) {
 //    
 //    this.guiData.wd.Material.TexName = _newTex._name;
 //    this.selTexChanged(_newTex._name);
-    this.createMyStripTexture(newTexName,mtsp);
+    this.createMyStripTexture2(newTexName,mtsp);
 };
 
 GameModeProject.prototype.createMyStripTexture2 = function (newTexName, params) {
@@ -1380,7 +1380,7 @@ var SaveData = function(){
 };
 
 GameModeProject.prototype.saveFile = function(){
-    var fileName = "asdf"; //prompt("File name", "scene");
+    var fileName = prompt("File name", "scene");
     if (fileName !== null) {
 
         //var output = gameModeProject.scene.toJSON();
@@ -1421,11 +1421,11 @@ GameModeProject.prototype.saveFile = function(){
             saveData = JSON.stringify(saveData);
         }
         
-        //saveString(saveData, fileName + '.game5scene');
-        console.log(saveData);
+        saveString(saveData, fileName + '.game5scene');
         
-        var loadData = jQuery.parseJSON(saveData);
-        this.load(loadData);
+        //console.log(saveData);        
+        //var loadData = jQuery.parseJSON(saveData);
+        //this.load(loadData);
     }
 };
 
