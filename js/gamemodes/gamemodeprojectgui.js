@@ -92,6 +92,7 @@ var PGUIData = function (game) {
         fileInput.click();
     };
 
+    this.StripTexName = "";
 };
 
 var SelTexData = function(){

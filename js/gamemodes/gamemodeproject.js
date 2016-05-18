@@ -29,7 +29,8 @@ function GameModeProject(name) {
 
     this.Files = ['','rbn','rbn_0','rbn_1','rbn_2','sprite','sprite0','sprite1','t1'];
     this.TexNames = this.Files.slice();
-    
+    this.StripTexNames = ['','aaa'];
+            
     this.guiData = new PGUIData(this);    
     this.selTexData = null; //new SelTexData();    
     this.selTex = null;
@@ -780,6 +781,10 @@ GameModeProject.prototype.createGUI = function () {
         };
                 
         cntr = this.guiSelTexFolder.add(this.guiData, "AddNew");
+        
+        this.StripTexNamesCntr = this.guiSelTexFolder.add(this.guiData, 'StripTexName', this.StripTexNames).listen();
+        //cntr.onChange(selObjTextureChanged);
+        this.StripTexNamesCntr.onFinishChange(selObjTextureChanged);
     }
     
     {
@@ -956,6 +961,7 @@ GameModeProject.prototype.createGUITex = function (){
 GameModeProject.prototype.prepareTextures = function () {
     this.textures = [];
     this.textures[""] = null;
+    this.TexNames = this.Files.slice();
     for (var i = 0; i < this.Files.length; ++i) {
         if (this.Files[i]) {
             var _tex = new MyTexGfx(this.Files[i]);            
@@ -971,14 +977,6 @@ GameModeProject.prototype.prepareTextures = function () {
 
 GameModeProject.prototype.createMyStripTexture = function (newTexName) {
     var mtsp = new MyTexStripParams();
-//    var _newTex = new MyTexStrip(newTexName,mtsp);
-//    this.textures[_newTex._name] = _newTex;
-//    this.TexNames.push(_newTex._name);
-//    
-//    this.updateWallTexGUI();
-//    
-//    this.guiData.wd.Material.TexName = _newTex._name;
-//    this.selTexChanged(_newTex._name);
     this.createMyStripTexture2(newTexName,mtsp);
 };
 
@@ -1448,7 +1446,6 @@ GameModeProject.prototype.load = function(loadData){
     this.setSelected(null);
     this.setHighlighted(null);
     
-    //this.textures = [];
     this.prepareTextures();
     for( var i = 0 ; i < loadData.TexturesDatas.length ; ++i ){
         var td = loadData.TexturesDatas[i];
