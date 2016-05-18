@@ -29,13 +29,14 @@ function GameModeProject(name) {
 
     this.Files = ['','rbn','rbn_0','rbn_1','rbn_2','sprite','sprite0','sprite1','t1'];
     this.TexNames = this.Files.slice();
-    this.StripTexNames = ['','aaa'];
+    this.StripTexNames = [""];
             
     this.guiData = new PGUIData(this);    
     this.selTexData = null; //new SelTexData();    
     this.selTex = null;
     
     this.guiSelTexFolder = null;
+    this.guiSelTexParamsFolder = null;
     this.guiSelTexOrienCntr = null;
     this.guiSelTexNumOfColorsCntr = null;
     this.guiSelTexColorsCntrs = [];
@@ -652,13 +653,13 @@ GameModeProject.prototype.createGUI = function () {
 //        height: 5 * 32 - 1
 //        autoPlace: false
     });
-    this.gui.domElement.id = 'guiProject';
+    //this.gui.domElement.id = 'guiProject';
     
     this.guiTex = new dat.GUI({
         //height: 5 * 32 - 1,
         //autoPlace: false
     });
-    this.guiTex.domElement.id = 'guiTex';
+    //this.guiTex.domElement.id = 'guiTex';
 
     var stageFolder = this.gui.addFolder('Stage');
     
@@ -962,6 +963,7 @@ GameModeProject.prototype.prepareTextures = function () {
     this.textures = [];
     this.textures[""] = null;
     this.TexNames = this.Files.slice();
+    this.StripTexNames = [""];
     for (var i = 0; i < this.Files.length; ++i) {
         if (this.Files[i]) {
             var _tex = new MyTexGfx(this.Files[i]);            
@@ -985,6 +987,7 @@ GameModeProject.prototype.createMyStripTexture2 = function (newTexName, params) 
     var _newTex = new MyTexStrip(newTexName,params);
     this.textures[_newTex._name] = _newTex;
     this.TexNames.push(_newTex._name);
+    this.StripTexNames.push(_newTex._name);
     
     this.updateWallTexGUI();
     
