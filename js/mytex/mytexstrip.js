@@ -30,8 +30,18 @@ var MyTexStripParams = function(){
 MyTexStrip.prototype = Object.create(MyTex);
 MyTexStrip.prototype.constructor = MyTexStrip;
 
+//SelTexData
 MyTexStrip.prototype.getTHREETexture = function(){
     return this.threeTex;
+};
+
+MyTexStrip.prototype.getSelTexData = function(){
+    var selTexData = new SelTexData();
+    
+    selTexData.Colors = this.colors;
+    selTexData.Vertical = this.orientation === MTSOrientation.VERTICAL ? true : false;
+            
+    return selTexData;
 };
 
 MyTexStrip.prototype.setStripColor = function(ind,newColor){

@@ -764,7 +764,11 @@ GameModeProject.prototype.createGUI = function () {
         
         var cntr = null;
         
-        cntr = folder.add(this.selTexData, "AddNew");
+        this.guiData.AddNew = function () {
+            gameModeProject.addNewTexture();
+        };
+                
+        cntr = folder.add(this.guiData, "AddNew");
         
         cntr = folder.addColor(this.selTexData, 'Color1').listen();
         cntr.onChange(selTexColor1Changed);
@@ -775,7 +779,25 @@ GameModeProject.prototype.createGUI = function () {
         cntr.onFinishChange(selTexColor2Changed); 
         
         cntr = folder.add(this.selTexData, 'Vertical').listen();
-        cntr.onChange(selTexOrientationChanged);     
+        cntr.onChange(selTexOrientationChanged);
+        
+        //this.gui.SelColors = new Array();
+        //for (var i = 1 ; i < this.selTexData.Colors.lenth ; i++) {
+        //    this.gui.SelColors[i] = this.selTexData.Colors[i];
+        //}
+        //console.log(this.gui.SelColors);
+        //console.log(this.selTexData.Colors);
+        
+//        cntr = folder.addColor(this.selTexData, 'Colors').listen();
+//        //cntr.onChange(selTexColor2Changed);
+//        //cntr.onFinishChange(selTexColor2Changed); 
+        for (var i = 0; i < this.selTexData.Colors.length; i++) {
+            //console.log(this.selTexData.Colors[i]);
+            cntr = folder.addColor(this.selTexData.Colors, i, this.selTexData.Colors[i]);
+            cntr.onChange(selTexColorChanged);
+            cntr.onFinishChange(selTexColorChanged); 
+        }
+        //this.gui.remember(this.gui);
     }
     
     {
