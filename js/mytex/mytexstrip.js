@@ -71,36 +71,25 @@ MyTexStrip.prototype.setNumOfStrips = function(newNumOfStrips){
 };
 
 MyTexStrip.prototype.rebuild = function(){
-    //var _c1 = new THREE.Color(this.colors[0]);
-    //var _c2 = new THREE.Color(this.colors[1]);
-    //var c1 = [_c1.r*255.0, _c1.g*255.0, _c1.b*255.0];
-    //var c2 = [_c2.r*255.0, _c2.g*255.0, _c2.b*255.0];
-    
     var paintColors = [];
     for( var i = 0 ; i < this.numOfStrips ; ++i){
         var __c = new THREE.Color(this.colors[i]);
         paintColors.push([__c.r*255.0, __c.g*255.0, __c.b*255.0]);
     }
     
-    console.log(paintColors);
+    //console.log(this.numOfStrips);
     
     var lineWidth = Math.floor( _texStripSize / this.numOfStrips );
     var numOfExtraLines = _texStripSize % this.numOfStrips;
     var extraLinesGap = Math.floor(  _texStripSize / numOfExtraLines );
             
-    console.log(lineWidth);
-    console.log(numOfExtraLines);
-    console.log(extraLinesGap);
-    
     var ind = 0;    
     var ccInd = 0;
     var cc = paintColors[ccInd];
     var currentStripWidth = 0;
     
-    if (this.orientation === MTSOrientation.HORIZONTAL) {        
+    //if (this.orientation === MTSOrientation.HORIZONTAL) {        
         for (var y = 0; y < _texStripSize; ++y) {
-            //if( y < 2 ) cc = c1;
-            //else cc = c2;
             
             // ustalam kolor całego wiersza
             // sprawdzam czy to jest ekstra linia
@@ -118,7 +107,12 @@ MyTexStrip.prototype.rebuild = function(){
             
             // wypelniam wiersz kolorem
             for (var x = 0; x < _texStripSize; ++x) {
-                ind = (y * _texStripSize + x) * 3;                
+                
+                if( this.orientation === MTSOrientation.HORIZONTAL )
+                    ind = (y * _texStripSize + x) * 3;
+                else
+                    ind = (x * _texStripSize + y) * 3;
+                
                 this.pixels[ind] = cc[0];
                 this.pixels[ind + 1] = cc[1];
                 this.pixels[ind + 2] = cc[2];
@@ -127,18 +121,18 @@ MyTexStrip.prototype.rebuild = function(){
             // jesli to nie byla extralina to aktualizuje grubosc aktualnie rysowanej
             if( !extraLine ) currentStripWidth++;
         }
-    } else {
-        for (var y = 0; y < _texStripSize; ++y) {
-            for (var x = 0; x < _texStripSize; ++x) {
-                if( x < 2 ) cc = c1;
-                else cc = c2;
-                ind = (y * _texStripSize + x) * 3;                
-                this.pixels[ind] = cc[0];
-                this.pixels[ind + 1] = cc[1];
-                this.pixels[ind + 2] = cc[2];
-            }
-        }
-    }
+//    } else {
+//        for (var y = 0; y < _texStripSize; ++y) {
+//            for (var x = 0; x < _texStripSize; ++x) {
+//                if( x < 2 ) cc = c1;
+//                else cc = c2;
+//                ind = (y * _texStripSize + x) * 3;                
+//                this.pixels[ind] = cc[0];
+//                this.pixels[ind + 1] = cc[1];
+//                this.pixels[ind + 2] = cc[2];
+//            }
+//        }
+//    }
     
     this.createTHREETex();
 };
