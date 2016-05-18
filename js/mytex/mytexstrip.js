@@ -47,7 +47,7 @@ MyTexStrip.prototype.getSelTexData = function(){
 MyTexStrip.prototype.setStripColor = function(ind,newColor){
     this.colors[ind] = newColor;
     this.rebuild();
-}
+};
 
 MyTexStrip.prototype.setOrientation = function(newOrientation){
     this.orientation = newOrientation;

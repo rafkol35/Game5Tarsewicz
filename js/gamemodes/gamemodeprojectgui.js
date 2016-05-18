@@ -86,12 +86,10 @@ var PGUIData = function (game) {
 };
 
 var SelTexData = function(){
-    this.Color1 = "#000000";
-    this.Color2 = "#000000";
-    this.Colors = ["#000000","#ff0000","#00ff00","#0000ff","#ffffff"];
-    
-    this.Vertical = false;
-    
+    //this.Color1 = "#000000";
+    //this.Color2 = "#000000";
+    this.Colors = ["#000000","#ff0000","#00ff00","#0000ff","#ffffff"];    
+    this.Vertical = false;    
 };
 
 var link = document.createElement('a');

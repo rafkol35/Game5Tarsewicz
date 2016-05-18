@@ -31,10 +31,13 @@ function GameModeProject(name) {
     this.TexNames = this.Files.slice();
     
     this.guiData = new PGUIData(this);    
-    this.selTexData = new SelTexData();
-    
+    this.selTexData = null; //new SelTexData();    
     this.selTex = null;
     
+    this.guiSelTexFolder = null;
+    this.guiSelTexOrienCntr = null;
+    this.guiSelTexColorsCntrs = [];
+
     this.createGUI();
     this.createGUITex();
     this.prepareTextures();
@@ -759,7 +762,7 @@ GameModeProject.prototype.createGUI = function () {
     }
     
     {
-        var folder = wallFolder.addFolder('SelectedTexure');
+        this.guiSelTexFolder = wallFolder.addFolder('SelectedTexure');
         //this.WallFolderGUI = folder;
         
         var cntr = null;
@@ -768,36 +771,24 @@ GameModeProject.prototype.createGUI = function () {
             gameModeProject.addNewTexture();
         };
                 
-        cntr = folder.add(this.guiData, "AddNew");
+        cntr = this.guiSelTexFolder.add(this.guiData, "AddNew");
         
-        cntr = folder.addColor(this.selTexData, 'Color1').listen();
-        cntr.onChange(selTexColor1Changed);
-        cntr.onFinishChange(selTexColor1Changed);
+        //cntr = folder.addColor(this.selTexData, 'Color1').listen();
+        //cntr.onChange(selTexColor1Changed);
+        //cntr.onFinishChange(selTexColor1Changed);
         
-        cntr = folder.addColor(this.selTexData, 'Color2').listen();
-        cntr.onChange(selTexColor2Changed);
-        cntr.onFinishChange(selTexColor2Changed); 
+        //cntr = folder.addColor(this.selTexData, 'Color2').listen();
+        //cntr.onChange(selTexColor2Changed);
+        //cntr.onFinishChange(selTexColor2Changed); 
         
-        cntr = folder.add(this.selTexData, 'Vertical').listen();
-        cntr.onChange(selTexOrientationChanged);
-        
-        //this.gui.SelColors = new Array();
-        //for (var i = 1 ; i < this.selTexData.Colors.lenth ; i++) {
-        //    this.gui.SelColors[i] = this.selTexData.Colors[i];
-        //}
-        //console.log(this.gui.SelColors);
-        //console.log(this.selTexData.Colors);
-        
-//        cntr = folder.addColor(this.selTexData, 'Colors').listen();
-//        //cntr.onChange(selTexColor2Changed);
-//        //cntr.onFinishChange(selTexColor2Changed); 
-        for (var i = 0; i < this.selTexData.Colors.length; i++) {
-            //console.log(this.selTexData.Colors[i]);
-            cntr = folder.addColor(this.selTexData.Colors, i, this.selTexData.Colors[i]);
-            cntr.onChange(selTexColorChanged);
-            cntr.onFinishChange(selTexColorChanged); 
-        }
-        //this.gui.remember(this.gui);
+//        cntr = folder.add(this.selTexData, 'Vertical').listen();
+//        cntr.onChange(selTexOrientationChanged);
+//        
+//        for (var i = 0; i < this.selTexData.Colors.length; i++) {
+//            cntr = folder.addColor(this.selTexData.Colors, i, this.selTexData.Colors[i]);
+//            cntr.onChange(selTexColorChanged);
+//            cntr.onFinishChange(selTexColorChanged); 
+//        }        
     }
     
     {
@@ -863,6 +854,14 @@ GameModeProject.prototype.createGUI = function () {
     }
 };
 
+GameModeProject.prototype.createSelTexControls = function(){
+    //if(!this.selTex) return;
+    //var selTexName = this.selTex._name;
+    //for(var i = 0 ; i < this.walls.length ; ++i){
+    //    this.walls[i]._updateTex2(selTexName);
+    //}
+};
+
 GameModeProject.prototype.selTexChanged2 = function(){
     if(!this.selTex) return;
     var selTexName = this.selTex._name;
@@ -873,25 +872,83 @@ GameModeProject.prototype.selTexChanged2 = function(){
 
 GameModeProject.prototype.selTexChanged = function(texName){
     if(!texName) {
-        this.resetGUISelTex();
+        //this.resetGUISelTex();
+        this.hideGUISelTex();
         return;
     }
-    if(this.textures[texName]._type === 2) this.updateGUISelTex(this.textures[texName]);
-    else this.resetGUISelTex();
+    //if(this.textures[texName]._type === 2) this.updateGUISelTex(this.textures[texName]);
+    //else this.resetGUISelTex();
+    
+    //console.log(texName);
+    //console.log(this.textures);
+    //console.log(this.textures[texName]);
+    
+    if(this.textures[texName]._type === 2) {
+        this.hideGUISelTex();
+        this.showGUISelTex(this.textures[texName]);
+    }else {
+        this.hideGUISelTex();
+    }
 };
 
-GameModeProject.prototype.updateGUISelTex = function(selTex){
+GameModeProject.prototype.showGUISelTex = function(selTex){
+    //console.log(selTex);
+    if(selTex._type !== 2) {
+        //this.updateGUISelTex(this.textures[texName]);
+        console.log('createGUISelTex => selTex._type !== 2');
+        return;
+    }
     this.selTex = selTex;
-    this.selTexData.Color1 = selTex.colors[0];
-    this.selTexData.Color2 = selTex.colors[1];
-    this.selTexData.Vertical = selTex.orientation === MTSOrientation.VERTICAL;
+    this.selTexData = selTex.getSelTexData();
+    
+    this.guiSelTexOrienCntr = this.guiSelTexFolder.add(this.selTexData, 'Vertical').listen();
+    this.guiSelTexOrienCntr.onChange(selTexOrientationChanged);
+
+    //this.guiSelTexFolder = null;
+    //this.guiSelTexOrienCntr = null;
+    //this.guiSelTexColorsCntrs = [];
+    
+    for (var i = 0; i < this.selTexData.Colors.length; i++) {
+        var cntr = this.guiSelTexFolder.addColor(this.selTexData.Colors, i, this.selTexData.Colors[i]);
+        cntr.onChange(selTexColorChanged);
+        cntr.onFinishChange(selTexColorChanged);
+        this.guiSelTexColorsCntrs.push(cntr);
+    }
+        
+    //this.selTexData.Color1 = selTex.colors[0];
+    //this.selTexData.Color2 = selTex.colors[1];
+    //this.selTexData.Vertical = selTex.orientation === MTSOrientation.VERTICAL;
 };
 
-GameModeProject.prototype.resetGUISelTex = function(){
+//GameModeProject.prototype.updateGUISelTex = function(selTex){
+//    //this.selTex = selTex;
+//    //this.selTexData.Color1 = selTex.colors[0];
+//    //this.selTexData.Color2 = selTex.colors[1];
+//    //this.selTexData.Vertical = selTex.orientation === MTSOrientation.VERTICAL;
+//};
+
+//GameModeProject.prototype.resetGUISelTex = function(){
+//    this.selTex = null;
+//    this.selTexData.Color1 = "#000000";
+//    this.selTexData.Color2 = "#000000";
+//    this.selTexData.Vertical = false;
+//};
+
+GameModeProject.prototype.hideGUISelTex = function(){
+    if(!this.selTex) return;
+    
     this.selTex = null;
-    this.selTexData.Color1 = "#000000";
-    this.selTexData.Color2 = "#000000";
-    this.selTexData.Vertical = false;
+    this.setTexData = null;
+    //this.selTexData.Color1 = "#000000";
+    //this.selTexData.Color2 = "#000000";
+    //this.selTexData.Vertical = false;
+    
+    this.guiSelTexOrienCntr.remove();
+    for(var i = 0 ; i < this.guiSelTexColorsCntrs.length ; ++i){
+        this.guiSelTexColorsCntrs[i].remove();
+    }
+    
+    this.guiSelTexColorsCntrs = [];
 };
 
 GameModeProject.prototype.createGUITex = function (){
