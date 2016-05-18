@@ -1456,9 +1456,8 @@ GameModeProject.prototype.loadFile = function(file){
     reader.readAsText( file );
 };
 
-GameModeProject.prototype.load = function(loadData){
-    
-    console.log("load");
+GameModeProject.prototype.load = function(loadData){    
+    //console.log("load");
     
     this.setSelected(null);
     this.setHighlighted(null);

@@ -80,6 +80,15 @@ var PGUIData = function (game) {
     };
 
     this.Load = function () {
+        var fileInput = document.createElement('input');
+        fileInput.type = 'file';
+        fileInput.accept = 'game5scene'
+        fileInput.addEventListener('change', function (event) {
+            //console.log(fileInput.files);
+            //console.log(fileInput);
+            gameModeProject.loadFile(fileInput.files[ 0 ]);
+        });
+
         fileInput.click();
     };
 
@@ -96,12 +105,14 @@ var link = document.createElement('a');
 link.style.display = 'none';
 document.body.appendChild(link); // Firefox workaround, see #6594
 
-var fileInput = document.createElement('input');
-fileInput.type = 'file';
-fileInput.accept = 'game5scene'
-fileInput.addEventListener('change', function (event) {
-    gameModeProject.loadFile(fileInput.files[ 0 ]);
-});
+//var fileInput = document.createElement('input');
+//fileInput.type = 'file';
+//fileInput.accept = 'game5scene'
+//fileInput.addEventListener('change', function (event) {
+//    //console.log(fileInput.files);
+//    //console.log(fileInput);
+//    gameModeProject.loadFile(fileInput.files[ 0 ]);
+//});
 
 function save(blob, filename) {
     link.href = URL.createObjectURL(blob);
