@@ -279,6 +279,8 @@ var floorTextureChanged = function (val) {
     var currentMaterial = gameModeProject.floor.material;
     if(val){
         currentMaterial.map = gameModeProject.textures[val].getTHREETexture();
+    }else{
+        currentMaterial.map = null;
     }
     currentMaterial.needsUpdate = true;
 };
