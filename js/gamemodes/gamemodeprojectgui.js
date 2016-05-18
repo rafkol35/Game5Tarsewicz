@@ -89,6 +89,9 @@ var SelTexData = function(){
     this.Color1 = "#000000";
     this.Color2 = "#000000";
     this.Vertical = false;
+    this.AddNew = function () {
+        gameModeProject.addNewTexture();
+    };
 };
 
 var link = document.createElement('a');
@@ -114,17 +117,33 @@ function saveString(text, filename) {
 }
 ////////////////////////////// SelTex ////////////////////////////////////////////////////////////////////////////////////////
 
-function selTexColor1Changed(val){
+function selTexColor1Changed(val) {
+    if (!gameModeProject.selTex) return;
     
+    //console.log(val);
+    gameModeProject.selTex.setStripColor(0,val);
+    
+    gameModeProject.selTexChanged2();
 };
 
 function selTexColor2Changed(val){
+    if (!gameModeProject.selTex) return;
     
+    //console.log(val);
+    gameModeProject.selTex.setStripColor(1,val);
+    
+    gameModeProject.selTexChanged2();
 };
 
 function selTexOrientationChanged(val){
+    if (!gameModeProject.selTex) return;
     
-}
+    //console.log(val);
+    var newOrientation = val === true ? MTSOrientation.VERTICAL : MTSOrientation.HORIZONTAL;
+    gameModeProject.selTex.setOrientation(newOrientation);
+    
+    gameModeProject.selTexChanged2();
+};
 
 ////////////////////////////// wall ////////////////////////////////////////////////////////////////////////////////////////
 

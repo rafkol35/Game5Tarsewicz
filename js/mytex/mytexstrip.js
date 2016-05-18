@@ -34,6 +34,11 @@ MyTexStrip.prototype.getTHREETexture = function(){
     return this.threeTex;
 };
 
+MyTexStrip.prototype.setStripColor = function(ind,newColor){
+    this.colors[ind] = newColor;
+    this.rebuild();
+}
+
 MyTexStrip.prototype.setOrientation = function(newOrientation){
     this.orientation = newOrientation;
     this.rebuild();

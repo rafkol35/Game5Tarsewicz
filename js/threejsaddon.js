@@ -20,6 +20,14 @@ THREE.Mesh.prototype._updateTex = function(){
     this.material.needsUpdate = true;
 };
 
+THREE.Mesh.prototype._updateTex2 = function(texName){
+    if( this._myTex ){
+        if( this._myTex._name === texName){
+            this._updateTex();
+        }        
+    }
+};
+
 
 THREE.Mesh.prototype._printMyParams = function(){
     console.log("THREE.Mesh : " + this._myUVX + " " + this._myUVY + " " + this._myTex);
