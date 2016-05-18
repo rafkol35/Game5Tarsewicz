@@ -874,10 +874,12 @@ GameModeProject.prototype.selTexChanged2 = function(){
     }
 };
 
-GameModeProject.prototype.selTexChanged3 = function(){
+GameModeProject.prototype.selTexChanged3 = function(newNumOfStrips){
+    if (!this.selTex) return;
+    this.selTex.setNumOfStrips(newNumOfStrips);
     this.selTexData.NumOfStrips = this.selTex.numOfStrips;
-    
-    //this.selTexChanged2();
+    this.updateGUISelTexColors();
+    this.selTexChanged2();
 };
 
 GameModeProject.prototype.selTexChanged = function(texName){
@@ -886,12 +888,6 @@ GameModeProject.prototype.selTexChanged = function(texName){
         this.hideGUISelTex();
         return;
     }
-    //if(this.textures[texName]._type === 2) this.updateGUISelTex(this.textures[texName]);
-    //else this.resetGUISelTex();
-    
-    //console.log(texName);
-    //console.log(this.textures);
-    //console.log(this.textures[texName]);
     
     if(this.textures[texName]._type === 2) {
         this.hideGUISelTex();
@@ -926,28 +922,11 @@ GameModeProject.prototype.showGUISelTex = function(selTex){
     }
 };
 
-//GameModeProject.prototype.updateGUISelTex = function(selTex){
-//    //this.selTex = selTex;
-//    //this.selTexData.Color1 = selTex.colors[0];
-//    //this.selTexData.Color2 = selTex.colors[1];
-//    //this.selTexData.Vertical = selTex.orientation === MTSOrientation.VERTICAL;
-//};
-
-//GameModeProject.prototype.resetGUISelTex = function(){
-//    this.selTex = null;
-//    this.selTexData.Color1 = "#000000";
-//    this.selTexData.Color2 = "#000000";
-//    this.selTexData.Vertical = false;
-//};
-
 GameModeProject.prototype.hideGUISelTex = function(){
     if(!this.selTex) return;
     
     this.selTex = null;
     this.setTexData = null;
-    //this.selTexData.Color1 = "#000000";
-    //this.selTexData.Color2 = "#000000";
-    //this.selTexData.Vertical = false;
     
     this.guiSelTexNumOfColorsCntr.remove();
     this.guiSelTexNumOfColorsCntr = null;
@@ -958,9 +937,30 @@ GameModeProject.prototype.hideGUISelTex = function(){
     for(var i = 0 ; i < this.guiSelTexColorsCntrs.length ; ++i){
         this.guiSelTexColorsCntrs[i].remove();
     }
-    
     this.guiSelTexColorsCntrs = [];
 };
+
+
+GameModeProject.prototype.updateGUISelTexColors = function(){    
+    for(var i = 0 ; i < this.guiSelTexColorsCntrs.length ; ++i){
+        this.guiSelTexColorsCntrs[i].remove();
+    }
+    this.guiSelTexColorsCntrs = [];
+    
+    for (var i = 0; i < this.selTexData.NumOfStrips; i++) {
+        var cntr = this.guiSelTexFolder.addColor(this.selTexData.Colors, i, this.selTexData.Colors[i]);
+        cntr.onChange(selTexColorChanged);
+        cntr.onFinishChange(selTexColorChanged);
+        this.guiSelTexColorsCntrs.push(cntr);
+    }
+};
+
+//GameModeProject.prototype.hideGUISelTex = function(){
+//    for(var i = 0 ; i < this.guiSelTexColorsCntrs.length ; ++i){
+//        this.guiSelTexColorsCntrs[i].remove();
+//    }
+//    this.guiSelTexColorsCntrs = [];
+//};
 
 GameModeProject.prototype.createGUITex = function (){
     this.guiTex = new dat.GUI({

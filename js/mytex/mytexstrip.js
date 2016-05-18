@@ -60,10 +60,10 @@ MyTexStrip.prototype.setOrientation = function(newOrientation){
     this.rebuild();
 };
 
-MyTexStrip.prototype.setNumOfStrips = function(newNumOfStrips){
+MyTexStrip.prototype.setNumOfStrips = function(newNumOfStrips){    
     this.numOfStrips = newNumOfStrips;
     this.rebuild();
-}
+};
 
 MyTexStrip.prototype.rebuild = function(){
     var _c1 = new THREE.Color(this.colors[0]);

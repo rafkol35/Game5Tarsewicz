@@ -143,13 +143,8 @@ function selTexColorChanged(val){
     //gameModeProject.selTexChanged2();
 }
 
-function selTexNumOfStripsChanged(val){
-    if (!gameModeProject.selTex) return;
-    
-    //console.log(this.property + " " + val);
-    gameModeProject.selTex.setNumOfStrips(val);
-    
-    gameModeProject.selTexChanged3();
+function selTexNumOfStripsChanged(val){    
+    gameModeProject.selTexChanged3(val);
 }
 
 function selTexOrientationChanged(val){
