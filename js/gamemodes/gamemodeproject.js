@@ -1164,6 +1164,8 @@ GameModeProject.prototype.updateFloor = function(floorData){
 };
  
 GameModeProject.prototype.updateStage = function(stageData){
+    //console.log(stageData);
+    
     this.updateStageSize(stageData.Size);
     this.setProjClearColor(stageData.ProjBackColor);
     this.setVisitClearColor(stageData.VisitBackColor);
@@ -1456,7 +1458,7 @@ GameModeProject.prototype.loadFile = function(file){
 
 GameModeProject.prototype.load = function(loadData){
     
-    //console.log("load");
+    console.log("load");
     
     this.setSelected(null);
     this.setHighlighted(null);
@@ -1477,7 +1479,7 @@ GameModeProject.prototype.load = function(loadData){
         mtsp.orientation = td.Vertical ? MTSOrientation.VERTICAL : MTSOrientation.HORIZONTAL;
         gameModeProject.createMyStripTexture2( td.Name, mtsp );
     }
-    console.log(this.textures);
+    //console.log(this.textures);
     
     for( var i = 0 ; i < this.walls.length ; ++i ){
         this.scene.remove(this.walls[i]);
