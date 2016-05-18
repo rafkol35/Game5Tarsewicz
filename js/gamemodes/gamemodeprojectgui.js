@@ -116,31 +116,31 @@ function saveString(text, filename) {
 }
 ////////////////////////////// SelTex ////////////////////////////////////////////////////////////////////////////////////////
 
-function selTexColor1Changed(val) {
-    if (!gameModeProject.selTex) return;
-    
-    //console.log(val);
-    gameModeProject.selTex.setStripColor(0,val);
-    
-    gameModeProject.selTexChanged2();
-};
-
-function selTexColor2Changed(val){
-    if (!gameModeProject.selTex) return;
-    
-    //console.log(val);
-    gameModeProject.selTex.setStripColor(1,val);
-    
-    gameModeProject.selTexChanged2();
-};
+//function selTexColor1Changed(val) {
+//    if (!gameModeProject.selTex) return;
+//    
+//    //console.log(val);
+//    gameModeProject.selTex.setStripColor(0,val);
+//    
+//    gameModeProject.selTexChanged2();
+//};
+//
+//function selTexColor2Changed(val){
+//    if (!gameModeProject.selTex) return;
+//    
+//    //console.log(val);
+//    gameModeProject.selTex.setStripColor(1,val);
+//    
+//    gameModeProject.selTexChanged2();
+//};
 
 function selTexColorChanged(val){
-    //if (!gameModeProject.selTex) return;
+    if (!gameModeProject.selTex) return;
     
     //console.log(this.property + " " + val);
-    //gameModeProject.selTex.setStripColor(1,val);
+    gameModeProject.selTex.setStripColor(this.property,val);
     
-    //gameModeProject.selTexChanged2();
+    gameModeProject.selTexChanged2();
 }
 
 function selTexNumOfStripsChanged(val){    
