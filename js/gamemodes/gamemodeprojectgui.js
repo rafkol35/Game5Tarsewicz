@@ -127,24 +127,6 @@ function saveString(text, filename) {
 }
 ////////////////////////////// SelTex ////////////////////////////////////////////////////////////////////////////////////////
 
-//function selTexColor1Changed(val) {
-//    if (!gameModeProject.selTex) return;
-//    
-//    //console.log(val);
-//    gameModeProject.selTex.setStripColor(0,val);
-//    
-//    gameModeProject.selTexChanged2();
-//};
-//
-//function selTexColor2Changed(val){
-//    if (!gameModeProject.selTex) return;
-//    
-//    //console.log(val);
-//    gameModeProject.selTex.setStripColor(1,val);
-//    
-//    gameModeProject.selTexChanged2();
-//};
-
 function selTexColorChanged(val){
     if (!gameModeProject.selTex) return;
     
@@ -268,6 +250,9 @@ var selObjTexRepeatYChanged = function (val) {
     gameModeProject.selectedWall._setMyUVY(val);
 };
 
+var selStripTextureChanged = function (val) {
+    gameModeProject.selStripTextureChanged(val);    
+}
 ////////////////////////////// floor ////////////////////////////////////////////////////////////////////////////////////////
 
 var floorColorChanged = function (val) {

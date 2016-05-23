@@ -50,10 +50,9 @@ function GameModeProject(name) {
     this.createGrid();
     this.createPlayerPos(new THREE.Vector2(0,0), 0, 2);
     
-//    var mtsp = new MyTexStripParams();
-//    mtsp.numOfStrips = 3;
-//    this.createMyStripTexture2("MyTex1",mtsp);
-//    //this.createMyStripTexture("MyTex2");
+    //var mtsp = new MyTexStripParams();
+    //mtsp.numOfStrips = 3;
+    //this.createMyStripTexture2("MyTex1",mtsp);
     
     this.walls = [];
     this.selectedWall = null;
@@ -643,10 +642,57 @@ GameModeProject.prototype.highlightOnOff = function (cube, hl) {
 };
 
 GameModeProject.prototype.updateWallTexGUI = function () {
-    this.WallTexNameCntr.remove();
+    if (this.WallTexNameCntr) {
+        this.WallTexNameCntr.remove();
+        this.WallTexNameCntr = null;
+    }
+
+    //console.log(this.selectedWall === null);
+
+    if (this.selectedWall) {
+        //console.log(this.selectedWall._name);
+        this.guiData.wd.Material.TexName = this.selectedWall._name;
+    }
+    else
+        this.guiData.wd.Material.TexName = "";
+
     this.WallTexNameCntr = this.WallFolderGUI.add(this.guiData.wd.Material, 'TexName', this.TexNames).listen();
     this.WallTexNameCntr.onFinishChange(selObjTextureChanged);
 };
+
+GameModeProject.prototype.updateStripTexGUI = function () {
+
+    //this.StripTexNamesCntr = this.guiSelTexFolder.add(this.guiData, 'StripTexName', this.StripTexNames).listen();
+    //this.StripTexNamesCntr.onFinishChange(selObjTextureChanged);
+    //this.updateStripTexGUI();
+
+    if (this.StripTexNameCntr) {
+        this.StripTexNameCntr.remove();
+        this.StripTexNameCntr = null;
+    }
+
+    //console.log(this.guiData.StripTexName);
+    //this.guiData.StripTexName = "";
+    this.StripTexNameCntr = this.guiSelTexFolder.add(this.guiData, 'StripTexName', this.StripTexNames).listen();
+    this.StripTexNameCntr.onFinishChange(selStripTextureChanged);
+}
+
+GameModeProject.prototype.selStripTextureChanged = function (texName) {
+    if (!texName) {
+        //this.resetGUISelTex();
+        this.hideGUISelTex();
+        return;
+    }
+
+    if (this.textures[texName]._type === 2) {
+        this.guiData.StripTexName = texName;
+        this.hideGUISelTex();
+        this.showGUISelTex(this.textures[texName]);
+    } else {
+        this.guiData.StripTexName = "";
+        this.hideGUISelTex();
+    }
+}
 
 GameModeProject.prototype.createGUI = function () {
     this.gui = new dat.GUI({
@@ -767,9 +813,7 @@ GameModeProject.prototype.createGUI = function () {
         cntr.onChange(selObjTexRepeatYChanged);
         cntr.onFinishChange(selObjTexRepeatYChanged);
         
-        this.WallTexNameCntr = folder.add(this.guiData.wd.Material, 'TexName', this.TexNames).listen();
-        //cntr.onChange(selObjTextureChanged);
-        this.WallTexNameCntr.onFinishChange(selObjTextureChanged);
+        this.updateWallTexGUI();
     }
     
     {
@@ -783,9 +827,7 @@ GameModeProject.prototype.createGUI = function () {
                 
         cntr = this.guiSelTexFolder.add(this.guiData, "AddNew");
         
-        this.StripTexNamesCntr = this.guiSelTexFolder.add(this.guiData, 'StripTexName', this.StripTexNames).listen();
-        //cntr.onChange(selObjTextureChanged);
-        this.StripTexNamesCntr.onFinishChange(selObjTextureChanged);
+        this.updateStripTexGUI();
     }
     
     {
@@ -875,17 +917,22 @@ GameModeProject.prototype.selTexChanged3 = function(newNumOfStrips){
     this.selTexChanged2();
 };
 
-GameModeProject.prototype.selTexChanged = function(texName){
+GameModeProject.prototype.selTexChanged = function (texName) {
     if(!texName) {
         //this.resetGUISelTex();
         this.hideGUISelTex();
         return;
     }
-    
-    if(this.textures[texName]._type === 2) {
+
+    //
+
+    if (this.textures[texName]._type === 2) {
+        //console.log(this.textures[texName]._type);
+        this.guiData.StripTexName = texName;
         this.hideGUISelTex();
         this.showGUISelTex(this.textures[texName]);
-    }else {
+    } else {
+        this.guiData.StripTexName = "";
         this.hideGUISelTex();
     }
 };
@@ -897,6 +944,7 @@ GameModeProject.prototype.showGUISelTex = function(selTex){
         console.log('createGUISelTex => selTex._type !== 2');
         return;
     }
+
     this.selTex = selTex;
     this.selTexData = selTex.getSelTexData();
     
@@ -915,7 +963,7 @@ GameModeProject.prototype.showGUISelTex = function(selTex){
     }
 };
 
-GameModeProject.prototype.hideGUISelTex = function(){
+GameModeProject.prototype.hideGUISelTex = function () {
     if(!this.selTex) return;
     
     this.selTex = null;
@@ -989,10 +1037,12 @@ GameModeProject.prototype.createMyStripTexture2 = function (newTexName, params) 
     this.TexNames.push(_newTex._name);
     this.StripTexNames.push(_newTex._name);
     
+    this.guiData.StripTexName = _newTex._name;
+
     this.updateWallTexGUI();
-    
-    this.guiData.wd.Material.TexName = _newTex._name;
-    this.selTexChanged(_newTex._name);
+    this.updateStripTexGUI();
+    this.selStripTextureChanged(_newTex._name);
+    //this.selTexChanged(_newTex._name);
 };
 
 GameModeProject.prototype.createDraggedFloor = function () {
