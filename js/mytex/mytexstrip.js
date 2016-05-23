@@ -4,7 +4,8 @@ MTSOrientation = {
     VERTICAL: 2
 };
 
-var _texStripSize = 32;
+var _texStripSize = 128;
+var _maxNumStrips = 40;
 
 function MyTexStrip(_name, params){
     MyTex.call(this,_name,2);
@@ -31,7 +32,7 @@ var MyTexStripParams = function(){
     this.numOfStrips = 2;
     this.orientation = MTSOrientation.HORIZONTAL;
     this.colors = [];
-    for(var i = 0 ; i < 10 ; ++i){
+    for (var i = 0 ; i < _maxNumStrips ; ++i) {
         if( i%2 ) this.colors.push("#ffffff");
         else this.colors.push("#000000");
     }

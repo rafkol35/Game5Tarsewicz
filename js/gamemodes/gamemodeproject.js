@@ -40,6 +40,7 @@ function GameModeProject(name) {
     this.guiSelTexOrienCntr = null;
     this.guiSelTexNumOfColorsCntr = null;
     this.guiSelTexColorsCntrs = [];
+    this.guiSelTexColorsFolders = [];
 
     this.createGUI();
     this.createGUITex();
@@ -126,6 +127,8 @@ GameModeProject.prototype.clear = function () {
 
 dat.GUI.prototype.removeFolder = function (name) {
     var folder = this.__folders[name];
+    //console.log(name);
+    //console.log(this.__folders);
     if (!folder) {
         return;
     }
@@ -963,12 +966,17 @@ GameModeProject.prototype.showGUISelTex = function(selTex){
     this.guiSelTexOrienCntr = this.guiSelTexFolder.add(this.selTexData, 'Vertical').listen();
     this.guiSelTexOrienCntr.onChange(selTexOrientationChanged);
 
-    this.guiSelTexNumOfColorsCntr = this.guiSelTexFolder.add(this.selTexData, 'NumOfStrips', 2, 10).listen();
+    this.guiSelTexNumOfColorsCntr = this.guiSelTexFolder.add(this.selTexData, 'NumOfStrips', 2, _maxNumStrips).listen();
     this.guiSelTexNumOfColorsCntr.step(1);
     this.guiSelTexNumOfColorsCntr.onChange(selTexNumOfStripsChanged);
     
+    var curFolder = null;
     for (var i = 0; i < this.selTexData.NumOfStrips; i++) {
-        var cntr = this.guiSelTexFolder.addColor(this.selTexData.Colors, i, this.selTexData.Colors[i]);
+        if (i % 10 === 0) {
+            curFolder = this.guiSelTexFolder.addFolder("Colors " + i + " : " + (i + 9));
+            this.guiSelTexColorsFolders.push(curFolder);
+        }
+        var cntr = curFolder.addColor(this.selTexData.Colors, i, this.selTexData.Colors[i]);
         cntr.onChange(selTexColorChanged);
         cntr.onFinishChange(selTexColorChanged);
         this.guiSelTexColorsCntrs.push(cntr);
@@ -991,17 +999,45 @@ GameModeProject.prototype.hideGUISelTex = function () {
         this.guiSelTexColorsCntrs[i].remove();
     }
     this.guiSelTexColorsCntrs = [];
+    
+    for (var i = 0 ; i < this.guiSelTexColorsFolders.length ; ++i) {
+        this.guiSelTexFolder.removeFolder(this.guiSelTexColorsFolders[i].name);
+    }
+    this.guiSelTexColorsFolders = [];
 };
 
 
 GameModeProject.prototype.updateGUISelTexColors = function(){    
-    for(var i = 0 ; i < this.guiSelTexColorsCntrs.length ; ++i){
-        this.guiSelTexColorsCntrs[i].remove();
-    }
-    this.guiSelTexColorsCntrs = [];
+    //for(var i = 0 ; i < this.guiSelTexColorsCntrs.length ; ++i){
+    //    this.guiSelTexColorsCntrs[i].remove();
+    //}
+    //this.guiSelTexColorsCntrs = [];
     
+    //for (var i = 0; i < this.selTexData.NumOfStrips; i++) {
+    //    var cntr = this.guiSelTexFolder.addColor(this.selTexData.Colors, i, this.selTexData.Colors[i]);
+    //    cntr.onChange(selTexColorChanged);
+    //    cntr.onFinishChange(selTexColorChanged);
+    //    this.guiSelTexColorsCntrs.push(cntr);
+    //}
+
+    //for (var i = 0 ; i < this.guiSelTexColorsCntrs.length ; ++i) {
+    //    this.guiSelTexColorsCntrs[i].remove();
+    //}
+    //this.guiSelTexColorsCntrs = [];
+
+    for (var i = 0 ; i < this.guiSelTexColorsFolders.length ; ++i) {
+        //console.log('this.guiTex.removeFolder('+this.guiSelTexColorsFolders[i].name+');');
+        this.guiSelTexFolder.removeFolder(this.guiSelTexColorsFolders[i].name);
+    }
+    this.guiSelTexColorsFolders = [];
+
+    var curFolder = null;
     for (var i = 0; i < this.selTexData.NumOfStrips; i++) {
-        var cntr = this.guiSelTexFolder.addColor(this.selTexData.Colors, i, this.selTexData.Colors[i]);
+        if (i % 10 === 0) {
+            curFolder = this.guiSelTexFolder.addFolder("Colors " + i + " : " + (i + 9) );
+            this.guiSelTexColorsFolders.push(curFolder);
+        }
+        var cntr = curFolder.addColor(this.selTexData.Colors, i, this.selTexData.Colors[i]);
         cntr.onChange(selTexColorChanged);
         cntr.onFinishChange(selTexColorChanged);
         this.guiSelTexColorsCntrs.push(cntr);
@@ -1039,6 +1075,7 @@ GameModeProject.prototype.prepareTextures = function () {
 
 GameModeProject.prototype.createMyStripTexture = function (newTexName) {
     var mtsp = new MyTexStripParams();
+    mtsp.numOfStrips = 40;
     this.createMyStripTexture2(newTexName,mtsp);
 };
 
