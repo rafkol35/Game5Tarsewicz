@@ -1075,7 +1075,7 @@ GameModeProject.prototype.prepareTextures = function () {
 
 GameModeProject.prototype.createMyStripTexture = function (newTexName) {
     var mtsp = new MyTexStripParams();
-    mtsp.numOfStrips = 40;
+    mtsp.numOfStrips = 5;
     this.createMyStripTexture2(newTexName,mtsp);
 };
 

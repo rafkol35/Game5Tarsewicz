@@ -4,7 +4,7 @@ MTSOrientation = {
     VERTICAL: 2
 };
 
-var _texStripSize = 128;
+var _texStripSize = 256;
 var _maxNumStrips = 40;
 
 function MyTexStrip(_name, params){
