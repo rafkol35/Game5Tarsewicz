@@ -642,22 +642,34 @@ GameModeProject.prototype.highlightOnOff = function (cube, hl) {
 };
 
 GameModeProject.prototype.updateWallTexGUI = function () {
+
+    //console.log("updateWallTexGUI start");
+
     if (this.WallTexNameCntr) {
         this.WallTexNameCntr.remove();
         this.WallTexNameCntr = null;
+        //console.log("updateWallTexGUI remove");
     }
 
-    //console.log(this.selectedWall === null);
+    //console.log(this.selectedWall);
 
     if (this.selectedWall) {
-        //console.log(this.selectedWall._name);
-        this.guiData.wd.Material.TexName = this.selectedWall._name;
+        //console.log(this.selectedWall._myTex._name);
+        if (this.selectedWall._myTex)
+            this.guiData.wd.Material.TexName = this.selectedWall._myTex._name;
+        else
+            this.guiData.wd.Material.TexName = "";
     }
     else
         this.guiData.wd.Material.TexName = "";
 
-    this.WallTexNameCntr = this.WallFolderGUI.add(this.guiData.wd.Material, 'TexName', this.TexNames).listen();
+    //console.log(this.selectedWall);
+
+    //console.log(this.guiData.wd.Material);
+    this.WallTexNameCntr = this.WallFolderGUI.add(this.guiData.wd.Material, 'TexName', this.TexNames).listen();    
     this.WallTexNameCntr.onFinishChange(selObjTextureChanged);
+
+    //console.log("updateWallTexGUI finish");
 };
 
 GameModeProject.prototype.updateStripTexGUI = function () {

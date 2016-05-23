@@ -17,7 +17,7 @@ var Scale = function () {
 };
 
 var Material = function () {
-    this.TexName = '';
+    this.TexName = "";
     this.RepeatX = 1;
     this.RepeatY = 1;
     this.Color = "#ffffff";
