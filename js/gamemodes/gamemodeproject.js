@@ -4,7 +4,7 @@ function GameModeProject(name) {
     this.scene = new THREE.Scene();
     this.projClearColor = new THREE.Color(0xdddddd);
     this.visitClearColor = new THREE.Color(0x00ff00);
-    
+
     this.cameraType = 1;
 
     if (this.cameraType === 1) {
@@ -28,15 +28,15 @@ function GameModeProject(name) {
     this.gridSizeX = this.stageSizeX * this.gridStep;
     this.gridSizeY = this.stageSizeY * this.gridStep;
     this.halfGridStep = this.gridStep * 0.5;
-    
-    this.Files = ['','rbn','rbn_0','rbn_1','rbn_2','sprite','sprite0','sprite1','t1'];
+
+    this.Files = ['', 'rbn', 'rbn_0', 'rbn_1', 'rbn_2', 'sprite', 'sprite0', 'sprite1', 't1'];
     this.TexNames = this.Files.slice();
     this.StripTexNames = [""];
-            
-    this.guiData = new PGUIData(this);    
+
+    this.guiData = new PGUIData(this);
     this.selTexData = null; //new SelTexData();    
     this.selTex = null;
-    
+
     this.guiSelTexFolder = null;
     this.guiSelTexParamsFolder = null;
     this.guiSelTexOrienCntr = null;
@@ -51,8 +51,8 @@ function GameModeProject(name) {
     this.createFloor();
     this.createAxis();
     this.createGrid();
-    this.createPlayerPos(new THREE.Vector2(0,0), 0, 2);
-    
+    this.createPlayerPos(new THREE.Vector2(0, 0), 0, 2);
+
     this.walls = [];
     this.selectedWall = null;
     this.highlightWall = null;
@@ -73,7 +73,7 @@ function GameModeProject(name) {
     this.yrat = Math.PI * 0.25;
     this.zrat = Math.PI * 0.25;
     this.updateCamera();
-    
+
     this.raycaster = new THREE.Raycaster();
     this.setSelected(null);
 
@@ -133,7 +133,7 @@ dat.GUI.prototype.removeFolder = function (name) {
     this.onResize();
 };
 
-GameModeProject.prototype.keyDown = function (event) {       
+GameModeProject.prototype.keyDown = function (event) {
     switch (event.keyCode) {
 
         case 82:
@@ -145,7 +145,7 @@ GameModeProject.prototype.keyDown = function (event) {
 
         case 81: //q
             break;
-            
+
         case 71: //g
             break;
 
@@ -239,17 +239,17 @@ GameModeProject.prototype.keyUp = function (event) {
 
 };
 
-GameModeProject.prototype.addNewTexture = function(){
+GameModeProject.prototype.addNewTexture = function () {
     var newTexName = prompt("New texture name", "MyTex");
     if (newTexName !== null) {
-        if( this.TexNames.indexOf(newTexName) !== -1 ){
+        if (this.TexNames.indexOf(newTexName) !== -1) {
             alert("Texture " + newTexName + " already exist. Type unique texture name.");
             return;
         }
         this.createMyStripTexture(newTexName);
     }
 };
-    
+
 GameModeProject.prototype.onWindowResize = function () {
     if (this.cameraType === 1) {
         this.camera.left = window.innerWidth / -2;
@@ -296,7 +296,7 @@ GameModeProject.prototype.mouseDown = function (event) {
                 if (pressedKeys[82])
                     this.rotateObject = true;
             }
-        }else{
+        } else {
             this.setHighlighted(null);
         }
     }
@@ -308,8 +308,8 @@ GameModeProject.prototype.mouseUp = function (event) {
     this.scaleY = false;
 };
 
-GameModeProject.prototype.mouseMove = function (event) {    
-    if (this.draggedWall) {        
+GameModeProject.prototype.mouseMove = function (event) {
+    if (this.draggedWall) {
         this.raycaster.setFromCamera(mouse, this.camera);
         var intersects = this.raycaster.intersectObject(this.draggedFloor);
         if (intersects.length > 0) {
@@ -379,19 +379,19 @@ GameModeProject.prototype.render = function (renderer) {
     }
 
     // camera moved
-    var cm = pressedKeys[81] || pressedKeys[69] || 
+    var cm = pressedKeys[81] || pressedKeys[69] ||
             this.moveLeft || this.moveRight || this.moveUp || this.moveDown;
-  
-    if(cm) this.updateCamera();
-  
+
+    if (cm) this.updateCamera();
+
     renderer.render(this.scene, this.camera);
 };
 
-GameModeProject.prototype.setProjClearColor = function(val){
+GameModeProject.prototype.setProjClearColor = function (val) {
     this.projClearColor = new THREE.Color(val);
     renderer.setClearColor(this.projClearColor);
 }
-GameModeProject.prototype.setVisitClearColor = function(val){
+GameModeProject.prototype.setVisitClearColor = function (val) {
     this.visitClearColor = new THREE.Color(val);
     //this.renderer.setClearColor(this.projClearColor);
 }
@@ -402,7 +402,7 @@ GameModeProject.prototype.updateCamera = function () {
     this.camera.position.z = Math.cos(this.zrat) * this.cameraRestrict.z;
     this.camera.lookAt(this.scene.position);
 }
-        
+
 GameModeProject.prototype.getFirstUnderMouse = function () {
     this.raycaster.setFromCamera(mouse, this.camera);
     var intersects = this.raycaster.intersectObjects(this.walls);
@@ -451,12 +451,12 @@ GameModeProject.prototype.setSelected = function (cube) {
         this.udpateGUIPos(this.selectedWall);
         this.updateGUIRotation(this.selectedWall);
         this.updateGUIScale(this.selectedWall);
-        this.updateGUIMaterial(this.selectedWall);        
+        this.updateGUIMaterial(this.selectedWall);
     } else {
         this.udpateGUIPos(null);
         this.updateGUIRotation(null);
         this.updateGUIScale(null);
-        this.updateGUIMaterial(null);        
+        this.updateGUIMaterial(null);
     }
 };
 
@@ -486,8 +486,8 @@ GameModeProject.prototype.prepareTextures = function () {
     this.StripTexNames = [""];
     for (var i = 0; i < this.Files.length; ++i) {
         if (this.Files[i]) {
-            var _tex = new MyTexGfx(this.Files[i]);            
-            this.textures[ this.Files[i] ] = _tex;
+            var _tex = new MyTexGfx(this.Files[i]);
+            this.textures[this.Files[i]] = _tex;
         }
     }
 };
@@ -495,48 +495,48 @@ GameModeProject.prototype.prepareTextures = function () {
 GameModeProject.prototype.createMyStripTexture = function (newTexName) {
     var mtsp = new MyTexStripParams();
     mtsp.numOfStrips = 5;
-    this.createMyStripTexture2(newTexName,mtsp);
+    this.createMyStripTexture2(newTexName, mtsp);
 };
 
 GameModeProject.prototype.createMyStripTexture2 = function (newTexName, params) {
-    var _newTex = new MyTexStrip(newTexName,params);
+    var _newTex = new MyTexStrip(newTexName, params);
     this.textures[_newTex._name] = _newTex;
     this.TexNames.push(_newTex._name);
     this.StripTexNames.push(_newTex._name);
-    
+
     this.guiData.StripTexName = _newTex._name;
 
     this.updateWallTexGUI();
     this.updateStripTexGUI();
-    this.selStripTextureChanged(_newTex._name);  
+    this.selStripTextureChanged(_newTex._name);
 };
 
 GameModeProject.prototype.createDraggedFloor = function () {
     var draggedFloorGeometry = new THREE.BoxGeometry(this.gridStep * this.stageSizeX * 4, 10, this.gridStep * this.stageSizeY * 4);
-    var draggedFloorMaterial = new THREE.MeshBasicMaterial({color: 0x888888});
+    var draggedFloorMaterial = new THREE.MeshBasicMaterial({ color: 0x888888 });
     this.draggedFloor = new THREE.Mesh(draggedFloorGeometry, draggedFloorMaterial);
     this.draggedFloor.position.set(0, 0 - 5 - 0.5, 0);
-    this.scene.add(this.draggedFloor);    
+    this.scene.add(this.draggedFloor);
 };
 
 GameModeProject.prototype.createFloor = function () {
-    var floorGeometry = new THREE.PlaneGeometry(this.gridStep * this.stageSizeX * 2, this.gridStep * this.stageSizeY * 2, 1,1)
+    var floorGeometry = new THREE.PlaneGeometry(this.gridStep * this.stageSizeX * 2, this.gridStep * this.stageSizeY * 2, 1, 1)
 
-    var floorMaterial = new THREE.MeshBasicMaterial({color: 0xbbbbbb});
+    var floorMaterial = new THREE.MeshBasicMaterial({ color: 0xbbbbbb });
     this.floor = new THREE.Mesh(floorGeometry, floorMaterial);
     this.floor._addMyParams();
-    
+
     this.floor.position.set(0, 0, 0);
     var newRot = this.floor.rotation;
     var rad = THREE.Math.degToRad(-90);
     newRot.x = rad;
     this.floor.rotation = newRot;
-    this.scene.add(this.floor);    
+    this.scene.add(this.floor);
 }
 
 GameModeProject.prototype.createAxis = function () {
     var draggedIndicatorGeometry = new THREE.PlaneGeometry(this.gridStep, this.gridStep);
-    var draggedIndicatorMaterial = new THREE.MeshBasicMaterial({color: 0xff0000});
+    var draggedIndicatorMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000 });
     draggedIndicatorMaterial.transparent = true;
     draggedIndicatorMaterial.opacity = 0.5;
     this.draggedIndicator = new THREE.Mesh(draggedIndicatorGeometry, draggedIndicatorMaterial);
@@ -549,7 +549,7 @@ GameModeProject.prototype.createAxis = function () {
     this.scene.add(this.draggedIndicator);
 
     var draggedAxisXGeometry = new THREE.PlaneGeometry(this.gridStep * 2, this.gridStep / 3);
-    var draggedAxisXMaterial = new THREE.MeshBasicMaterial({color: 0xff0000});
+    var draggedAxisXMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000 });
     draggedAxisXMaterial.transparent = false;
     this.draggedAxisX = new THREE.Mesh(draggedAxisXGeometry, draggedAxisXMaterial);
     this.draggedAxisX.position.set(this.gridStep, 0.1, 0);
@@ -557,18 +557,18 @@ GameModeProject.prototype.createAxis = function () {
     this.draggedIndicator.add(this.draggedAxisX);
 
     var draggedAxisYGeometry = new THREE.PlaneGeometry(this.gridStep / 3, this.gridStep * 2);
-    var draggedAxisYMaterial = new THREE.MeshBasicMaterial({color: 0x00ff00});
+    var draggedAxisYMaterial = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
     draggedAxisYMaterial.transparent = false;
     this.draggedAxisY = new THREE.Mesh(draggedAxisYGeometry, draggedAxisYMaterial);
     this.draggedAxisY.position.set(0, -this.gridStep, 1.0);
     this.draggedAxisY.visible = false;
     this.draggedIndicator.add(this.draggedAxisY);
 };
-    
+
 GameModeProject.prototype.createGrid = function () {
     var ggoffset = 0.5;
     var gridGeometry = this.createGridGeometry();
-    var gridMaterial = new THREE.LineBasicMaterial({color: 0x000000, opacity: 1.0});
+    var gridMaterial = new THREE.LineBasicMaterial({ color: 0x000000, opacity: 1.0 });
     this.gridLine = new THREE.LineSegments(gridGeometry, gridMaterial);
     this.scene.add(this.gridLine);
 };
@@ -586,76 +586,76 @@ GameModeProject.prototype.createGridGeometry = function () {
     }
     return gridGeometry;
 };
-    
-GameModeProject.prototype.createPlayerPos = function (pos,rot,height) {
-    var geometry = new THREE.BoxGeometry(this.gridStep*0.5, this.gridStep, this.gridStep*0.5);
-    var material = new THREE.MeshBasicMaterial({color: 0xff0000, map: null});
+
+GameModeProject.prototype.createPlayerPos = function (pos, rot, height) {
+    var geometry = new THREE.BoxGeometry(this.gridStep * 0.5, this.gridStep, this.gridStep * 0.5);
+    var material = new THREE.MeshBasicMaterial({ color: 0xff0000, map: null });
     this.playerPos = new THREE.Mesh(geometry, material);
     this.playerPos.position.x = pos.x;
     this.playerPos.position.z = pos.y;
-    
-    
+
+
     this.playerPos.scale.y = height;
-    this.playerPos.position.y = this.gridStep*height / 2 - 0; 
-    
+    this.playerPos.position.y = this.gridStep * height / 2 - 0;
+
     this.playerPos.rotation.y = rot;
-    this.scene.add(this.playerPos); 
-    
-    var geometry2 = new THREE.BoxGeometry(this.gridStep*0.25, this.gridStep*0.5, this.gridStep*0.5);
-    var material2 = new THREE.MeshBasicMaterial({color: 0x00ff00, map: null});
+    this.scene.add(this.playerPos);
+
+    var geometry2 = new THREE.BoxGeometry(this.gridStep * 0.25, this.gridStep * 0.5, this.gridStep * 0.5);
+    var material2 = new THREE.MeshBasicMaterial({ color: 0x00ff00, map: null });
     this.playerPos2 = new THREE.Mesh(geometry2, material2);
-    this.playerPos2.position.y = ( (this.gridStep*height / 2) - this.halfGridStep ) / height;
-    this.playerPos2.position.z = -(this.gridStep*0.5 / 2) + (this.gridStep*0.25 / 2); 
-    this.playerPos2.scale.y = 1/height;
-    
-    this.playerPos.add(this.playerPos2); 
+    this.playerPos2.position.y = ((this.gridStep * height / 2) - this.halfGridStep) / height;
+    this.playerPos2.position.z = -(this.gridStep * 0.5 / 2) + (this.gridStep * 0.25 / 2);
+    this.playerPos2.scale.y = 1 / height;
+
+    this.playerPos.add(this.playerPos2);
 };
 
-GameModeProject.prototype.updatePlayerHeight = function(newHeight){
+GameModeProject.prototype.updatePlayerHeight = function (newHeight) {
     this.playerPos.scale.y = newHeight;
-    this.playerPos.position.y = this.gridStep*newHeight / 2 - 0; 
-    this.playerPos2.position.y = ( (this.gridStep*newHeight / 2) - this.halfGridStep ) / newHeight;
-    this.playerPos2.scale.y = 1/newHeight;
+    this.playerPos.position.y = this.gridStep * newHeight / 2 - 0;
+    this.playerPos2.position.y = ((this.gridStep * newHeight / 2) - this.halfGridStep) / newHeight;
+    this.playerPos2.scale.y = 1 / newHeight;
 };
 
-GameModeProject.prototype.updatePlayer = function(playerData){
+GameModeProject.prototype.updatePlayer = function (playerData) {
     this.playerPos.position.x = playerData.PosX;
     this.playerPos.position.z = playerData.PosZ;
     this.playerPos.rotation.y = playerData.Rot;
     this.updatePlayerHeight(playerData.Height);
-    
+
     this.guiData.pd.PosX = playerData.PosX / this.gridStep;
     this.guiData.pd.PosZ = playerData.PosZ / this.gridStep;
     this.guiData.pd.Rot = THREE.Math.radToDeg(playerData.Rot);
     this.guiData.pd.Height = playerData.Height;
 };
 
-GameModeProject.prototype.updateFloor = function(floorData){
+GameModeProject.prototype.updateFloor = function (floorData) {
     //console.log(floorData);
-    
+
     floorColorChanged(floorData.Color);
     floorTextureChanged(floorData.File);
     floorTexRepeatXChanged(floorData.RepeatX);
     floorTexRepeatYChanged(floorData.RepeatY);
-    
+
     this.guiData.fm.Color = floorData.Color;
     this.guiData.fm.File = floorData.File;
     this.guiData.fm.RepeatX = floorData.RepeatX;
     this.guiData.fm.RepeatY = floorData.RepeatY;
 };
- 
-GameModeProject.prototype.updateStage = function(stageData){
-    this.updateStageSize(stageData.SizeX,stageData.SizeY);
+
+GameModeProject.prototype.updateStage = function (stageData) {
+    this.updateStageSize(stageData.SizeX, stageData.SizeY);
     this.setProjClearColor(stageData.ProjBackColor);
     this.setVisitClearColor(stageData.VisitBackColor);
-    
+
     this.guiData.sd.SizeX = stageData.SizeX;
     this.guiData.sd.SizeY = stageData.SizeY;
     this.guiData.sd.ProjBackColor = stageData.ProjBackColor;
     this.guiData.sd.VisitBackColor = stageData.VisitBackColor;
 };
 
-GameModeProject.prototype.updateStageSizeX = function(newSizeX){
+GameModeProject.prototype.updateStageSizeX = function (newSizeX) {
     this.updateStageSize(newSizeX, this.stageSizeY);
 }
 
@@ -663,27 +663,27 @@ GameModeProject.prototype.updateStageSizeY = function (newSizeY) {
     this.updateStageSize(this.stageSizeX, newSizeY);
 }
 
-GameModeProject.prototype.updateStageSize = function(newSizeX,newSizeY){    
+GameModeProject.prototype.updateStageSize = function (newSizeX, newSizeY) {
     this.stageSizeX = newSizeX;
     this.stageSizeY = newSizeY;
     this.gridSizeX = this.stageSizeX * this.gridStep;
     this.gridSizeY = this.stageSizeY * this.gridStep;
     this.halfGridStep = this.gridStep * 0.5;
-    
+
     //draggedFloor
     var draggedFloorGeometry = new THREE.BoxGeometry(this.gridStep * this.stageSizeX * 4, 10, this.gridStep * this.stageSizeY * 4);
     this.draggedFloor.geometry = draggedFloorGeometry;
-    
+
     //floor
-    var floorGeometry = new THREE.PlaneGeometry(this.gridStep * this.stageSizeX * 2, this.gridStep * this.stageSizeY * 2, 1,1);
+    var floorGeometry = new THREE.PlaneGeometry(this.gridStep * this.stageSizeX * 2, this.gridStep * this.stageSizeY * 2, 1, 1);
     this.floor.geometry = floorGeometry;
-    this.floor._setMyUV(this.floor._myUVX,this.floor._myUVY);
-     
+    this.floor._setMyUV(this.floor._myUVX, this.floor._myUVY);
+
     //grid
     var ggoffset = 0.5;
     var gridGeometry = this.createGridGeometry();
     this.gridLine.geometry = gridGeometry;
-    
+
     this.cntrPlayerPosX.min(-this.stageSizeX);
     this.cntrPlayerPosX.max(this.stageSizeX);
     this.cntrPlayerPosZ.min(-this.stageSizeY);
@@ -697,12 +697,12 @@ GameModeProject.prototype.updateStageSize = function(newSizeX,newSizeY){
 
 GameModeProject.prototype.createWall = function (nwd/*NewWallData*/) {
     var geometry = new THREE.BoxGeometry(this.gridStep, this.gridStep, this.gridStep);
-    
+
     var material = null;
-    
-    material = new THREE.MeshBasicMaterial({color: nwd.Material.Color, map: null});
+
+    material = new THREE.MeshBasicMaterial({ color: nwd.Material.Color, map: null });
     material.transparent = true;
-    
+
     //console.log(geometry.faceVertexUvs);
     //console.log(geometry.faceVertexUvs[0][0][0])//.set(0, 0);
 
@@ -711,9 +711,9 @@ GameModeProject.prototype.createWall = function (nwd/*NewWallData*/) {
     //console.log(geometry.faceVertexUvs[0][4][2]);
 
     var tc = 0.9;
-    geometry.faceVertexUvs[0][4][0].set(tc,tc);
-    geometry.faceVertexUvs[0][4][1].set(tc,tc);
-    geometry.faceVertexUvs[0][4][2].set(tc,tc);
+    geometry.faceVertexUvs[0][4][0].set(tc, tc);
+    geometry.faceVertexUvs[0][4][1].set(tc, tc);
+    geometry.faceVertexUvs[0][4][2].set(tc, tc);
     geometry.faceVertexUvs[0][5][0].set(tc, tc);
     geometry.faceVertexUvs[0][5][1].set(tc, tc);
     geometry.faceVertexUvs[0][5][2].set(tc, tc);
@@ -723,20 +723,20 @@ GameModeProject.prototype.createWall = function (nwd/*NewWallData*/) {
     //geometry.faceVertexUvs[0][5][2].set(0.0, 1);
 
     var newWall = new THREE.Mesh(geometry, material);
-    newWall._addMyParams();    
+    newWall._addMyParams();
     newWall._setMyTex(this.textures[nwd.Material.TexName])
-    newWall._setMyUV(nwd.Material.RepeatX,nwd.Material.RepeatY);
-    
+    newWall._setMyUV(nwd.Material.RepeatX, nwd.Material.RepeatY);
+
     newWall.position.set(nwd.Pos.X, nwd.Pos.Y, nwd.Pos.Z);
-    
+
     var _rot = newWall.rotation;
     _rot.x = 0.0;
     _rot.y = nwd.Rot;
     _rot.z = 0.0;
     newWall.rotation = _rot;
-    
+
     newWall.scale.set(nwd.Scale.X, nwd.Scale.Y, nwd.Scale.Z);
-    
+
     this.scene.add(newWall);
     this.walls.push(newWall);
     return newWall;
@@ -744,45 +744,45 @@ GameModeProject.prototype.createWall = function (nwd/*NewWallData*/) {
 
 GameModeProject.prototype.createWallData = function (wall) {
     var wallData = new WallData();
-    
+
     var _pos = wall.position;
     wallData.Pos.X = _pos.x;
     wallData.Pos.Y = _pos.y;
     wallData.Pos.Z = _pos.z;
-    
+
     var _rot = wall.rotation;
     wallData.Rot = _rot.y;
-    
+
     var _scl = wall.scale;
-    wallData.Scale.X = _scl.x;    
+    wallData.Scale.X = _scl.x;
     wallData.Scale.Y = _scl.y;
     wallData.Scale.Z = _scl.z;
-    
+
     var _mat = wall.material;
     wallData.Material.Color = "#" + _mat.color.getHexString();
 
-    if( wall._myTex ){
+    if (wall._myTex) {
         wallData.Material.TexName = wall._myTex._name;
     }
-    
+
     wallData.Material.RepeatX = wall._myUVX;
-    wallData.Material.RepeatY = wall._myUVY; 
-        
+    wallData.Material.RepeatY = wall._myUVY;
+
     return wallData;
 };
-   
-GameModeProject.prototype.createPlayerData = function(){
+
+GameModeProject.prototype.createPlayerData = function () {
     var playerData = new PlayerData();
-    
+
     playerData.PosX = this.playerPos.position.x;
     playerData.PosZ = this.playerPos.position.z;
     playerData.Rot = this.playerPos.rotation.y;
     playerData.Height = this.guiData.pd.Height;
-    
+
     return playerData;
 };
-   
-GameModeProject.prototype.addWall = function () {    
+
+GameModeProject.prototype.addWall = function () {
     var newWallData = new WallData();
 
     newWallData.Pos.Y = newWallData.Scale.Y * this.gridStep * 0.5;
@@ -790,86 +790,86 @@ GameModeProject.prototype.addWall = function () {
     var newWall = this.createWall(newWallData);
     this.setHighlighted(newWall);
     this.setSelected(newWall);
-    
+
     return newWall;
 };
 
 GameModeProject.prototype.removeSelectedWall = function () {
-    if(!this.selectedWall) {
+    if (!this.selectedWall) {
         alert("Select wall to remove");
         return;
     }
     var wallToRemove = this.selectedWall;
     var removedIndex = this.walls.indexOf(wallToRemove);
-    this.walls.splice(removedIndex,1);        
+    this.walls.splice(removedIndex, 1);
 
-    this.scene.remove(wallToRemove);  
-    
-    this.setSelected(null);  
+    this.scene.remove(wallToRemove);
+
+    this.setSelected(null);
     this.setHighlighted(null);
-};    
+};
 
 GameModeProject.prototype.duplicateSelectedWall = function () {
-    if(!this.selectedWall) {
+    if (!this.selectedWall) {
         alert("Select wall to duplicate");
         return;
     }
-    
+
     var newWallData = this.createWallData(this.selectedWall);
-    
+
     newWallData.Pos.X = 0;
     newWallData.Pos.Z = 0;
-    
-    this.setSelected(null);  
+
+    this.setSelected(null);
     this.setHighlighted(null);
-    
+
     var newWall = this.createWall(newWallData);
-    
+
     this.setHighlighted(newWall);
-    this.setSelected(newWall); 
+    this.setSelected(newWall);
 };
 
-var SaveData = function(){
+var SaveData = function () {
     this.StageData = new StageData(gameModeProject);
     this.TexturesDatas = [];
-    this.WallDatas = [];    
+    this.WallDatas = [];
     this.PlayerData = new PlayerData();
     this.FloorData = gameModeProject.guiData.fm;
 };
 
-GameModeProject.prototype.saveFile = function(){
+GameModeProject.prototype.saveFile = function () {
     var fileName = prompt("File name", "scene");
     if (fileName !== null) {
 
         //var output = gameModeProject.scene.toJSON();
         var saveData = new SaveData();
-        
-         for( var i = 0 ; i < this.walls.length ; ++i ){
+
+        for (var i = 0 ; i < this.walls.length ; ++i) {
             //var output = this.createWallData(this.selectedWall); //this.guiData.fm;// "{asdf}";
             var wallData = this.createWallData(this.walls[i]);
             saveData.WallDatas.push(wallData);
         }
-        
-//        //console.log(this.textures.length);
-//        for( var i = 0 ; i < this.textures.length ; ++i ){
-//            //console.log(this.textures[i]);
-//            if( this.textures[i]._type === 2 ){
-//                //console.log(this.textures[i].getSelTexData());
-//                saveData.TexuresDatas.push(this.textures[i].getSelTexData());
-//            }
-//        }
-        
+
+        //        //console.log(this.textures.length);
+        //        for( var i = 0 ; i < this.textures.length ; ++i ){
+        //            //console.log(this.textures[i]);
+        //            if( this.textures[i]._type === 2 ){
+        //                //console.log(this.textures[i].getSelTexData());
+        //                saveData.TexuresDatas.push(this.textures[i].getSelTexData());
+        //            }
+        //        }
+
         for (var key in this.textures) {
             //console.log(this.textures[key]);
-            if(this.textures[key]) {
+            if (this.textures[key]) {
                 if (this.textures[key]._type === 2) {
                     saveData.TexturesDatas.push(this.textures[key].getSelTexData());
                 }
             }
         }
-        
+
         saveData.PlayerData = this.createPlayerData();
-        
+
         try {
             saveData = JSON.stringify(saveData, null, '\t');
             saveData = saveData.replace(/[\n\t]+([\d\.e\-\[\]]+)/g, '$1');
@@ -878,76 +878,76 @@ GameModeProject.prototype.saveFile = function(){
 
             saveData = JSON.stringify(saveData);
         }
-        
+
         saveString(saveData, fileName + '.game5scene');
-        
+
         //console.log(saveData);        
         //var loadData = jQuery.parseJSON(saveData);
         //this.load(loadData);
     }
 };
 
-GameModeProject.prototype.loadFile = function(file){
-    
+GameModeProject.prototype.loadFile = function (file) {
+
     var filename = file.name;
     //var extension = filename.split('.').pop().toLowerCase();
 
     var reader = new FileReader();
-//    reader.addEventListener('progress', function (event) {
-//        var size = '(' + Math.floor(event.total / 1000).format() + ' KB)';
-//        var progress = Math.floor((event.loaded / event.total) * 100) + '%';
-//        console.log('Loading', filename, size, progress);
-//    });
-    
+    //    reader.addEventListener('progress', function (event) {
+    //        var size = '(' + Math.floor(event.total / 1000).format() + ' KB)';
+    //        var progress = Math.floor((event.loaded / event.total) * 100) + '%';
+    //        console.log('Loading', filename, size, progress);
+    //    });
+
     reader.addEventListener('load', function (event) {
         var contents = event.target.result;
-        
+
         //var saveData = new SaveData();
         //console.log(contents);
-        
+
         var loadData = jQuery.parseJSON(contents);
         gameModeProject.load(loadData);
-    });    
-    
-    reader.readAsText( file );
+    });
+
+    reader.readAsText(file);
 };
 
-GameModeProject.prototype.load = function(loadData){    
+GameModeProject.prototype.load = function (loadData) {
     //console.log("load");
-    
+
     this.setSelected(null);
     this.setHighlighted(null);
-    
+
     this.prepareTextures();
-    for( var i = 0 ; i < loadData.TexturesDatas.length ; ++i ){
+    for (var i = 0 ; i < loadData.TexturesDatas.length ; ++i) {
         var td = loadData.TexturesDatas[i];
-//        var SelTexData = function () {
-//            this.Name = "";
-//            this.NumOfStrips = 2;
-//            this.Colors = ["#000000", "#ffffff"];
-//            this.Vertical = false;
-//        };
+        //        var SelTexData = function () {
+        //            this.Name = "";
+        //            this.NumOfStrips = 2;
+        //            this.Colors = ["#000000", "#ffffff"];
+        //            this.Vertical = false;
+        //        };
         var mtsp = new MyTexStripParams();
         mtsp.numOfStrips = td.NumOfStrips;
         mtsp.colors = td.Colors;
         mtsp.orientation = td.Vertical ? MTSOrientation.VERTICAL : MTSOrientation.HORIZONTAL;
-        gameModeProject.createMyStripTexture2( td.Name, mtsp );
+        gameModeProject.createMyStripTexture2(td.Name, mtsp);
     }
     //console.log(this.textures);
-    
-    for( var i = 0 ; i < this.walls.length ; ++i ){
+
+    for (var i = 0 ; i < this.walls.length ; ++i) {
         this.scene.remove(this.walls[i]);
     }
     this.walls = [];
-    
+
     gameModeProject.updateStage(loadData.StageData);
-        
-    for( var i = 0 ; i < loadData.WallDatas.length ; ++i ){
-        gameModeProject.createWall( loadData.WallDatas[i] );
+
+    for (var i = 0 ; i < loadData.WallDatas.length ; ++i) {
+        gameModeProject.createWall(loadData.WallDatas[i]);
     }
-        
-    gameModeProject.updatePlayer(loadData.PlayerData);        
+
+    gameModeProject.updatePlayer(loadData.PlayerData);
     //console.log(loadData.FloorData);
-    gameModeProject.updateFloor(loadData.FloorData);    
+    gameModeProject.updateFloor(loadData.FloorData);
 };
 
