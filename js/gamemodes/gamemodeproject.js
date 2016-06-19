@@ -75,7 +75,14 @@ function GameModeProject(name) {
     this.updateCamera();
     
     this.raycaster = new THREE.Raycaster();
-    this.setSelected(null);    
+    this.setSelected(null);
+
+    //var newWallData = new WallData();
+    //newWallData.Pos.X = 50;
+    //newWallData.Material.TexName = this.TexNames[8];
+    //var newWall = this.createWall(newWallData);
+    //this.setHighlighted(newWall);
+    //this.setSelected(newWall);
 }
 
 GameModeProject.prototype = Object.create(GameMode.prototype);
@@ -690,11 +697,31 @@ GameModeProject.prototype.updateStageSize = function(newSizeX,newSizeY){
 
 GameModeProject.prototype.createWall = function (nwd/*NewWallData*/) {
     var geometry = new THREE.BoxGeometry(this.gridStep, this.gridStep, this.gridStep);
+    
     var material = null;
     
     material = new THREE.MeshBasicMaterial({color: nwd.Material.Color, map: null});
     material.transparent = true;
     
+    //console.log(geometry.faceVertexUvs);
+    //console.log(geometry.faceVertexUvs[0][0][0])//.set(0, 0);
+
+    //console.log(geometry.faceVertexUvs[0][4][0]);
+    //console.log(geometry.faceVertexUvs[0][4][1]);
+    //console.log(geometry.faceVertexUvs[0][4][2]);
+
+    var tc = 0.9;
+    geometry.faceVertexUvs[0][4][0].set(tc,tc);
+    geometry.faceVertexUvs[0][4][1].set(tc,tc);
+    geometry.faceVertexUvs[0][4][2].set(tc,tc);
+    geometry.faceVertexUvs[0][5][0].set(tc, tc);
+    geometry.faceVertexUvs[0][5][1].set(tc, tc);
+    geometry.faceVertexUvs[0][5][2].set(tc, tc);
+
+    //geometry.faceVertexUvs[0][5][0].set(0.0, 1);
+    //geometry.faceVertexUvs[0][5][1].set(0.0, 1);
+    //geometry.faceVertexUvs[0][5][2].set(0.0, 1);
+
     var newWall = new THREE.Mesh(geometry, material);
     newWall._addMyParams();    
     newWall._setMyTex(this.textures[nwd.Material.TexName])
