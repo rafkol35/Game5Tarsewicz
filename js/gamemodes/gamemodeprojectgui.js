@@ -328,11 +328,6 @@ var playerHeightChanged = function (val) {
 
 var stageSizeChanged = function (val) {
     gameModeProject.updateStageSize(val);
-
-    //var newRot = gameModeProject.playerPos.rotation;
-    //var rad = THREE.Math.degToRad(val);
-    //newRot.y = rad;
-    //gameModeProject.playerPos.rotation = newRot;    
 };
 
 var stageProjColorChanged = function (val) {
