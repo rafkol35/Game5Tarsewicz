@@ -283,8 +283,6 @@ GameModeProject.prototype.mouseDown = function (event) {
         var intersects = this.raycaster.intersectObject(this.draggedFloor);
         if (intersects.length > 0) {
             var newPos = intersects[0].point.clone();//.sub(this.draggedWallOffset.clone());
-            //newPos.x = Math.min(Math.max(-this.gridSizeX, newPos.x), this.gridSizeX);
-            //newPos.z = Math.min(Math.max(-this.gridSizeY, newPos.z), this.gridSizeY);
             if (newPos.x < -this.gridSizeX || newPos.x > this.gridSizeX) return;
             if (newPos.z < -this.gridSizeY || newPos.z > this.gridSizeY) return;
 
@@ -381,8 +379,17 @@ GameModeProject.prototype.mouseMove = function (event) {
                 }
             } else {
                 var newPos = intersects[0].point.clone().sub(this.draggedWallOffset.clone());
-                newPos.x = Math.min(Math.max(-this.gridSizeX, newPos.x), this.gridSizeX);
-                newPos.z = Math.min(Math.max(-this.gridSizeY, newPos.z), this.gridSizeY);
+                newPos.x = Math.min(Math.max(-this.gridSizeX+1, newPos.x), this.gridSizeX-1);
+                newPos.z = Math.min(Math.max(-this.gridSizeY+1, newPos.z), this.gridSizeY-1);
+
+                if (this.snapToGrid) {
+                    var nwGpX = Math.floor(newPos.x / this.gridStep);
+                    var nwGpZ = Math.floor(newPos.z / this.gridStep);
+                    newPos.x = nwGpX * this.gridStep + this.halfGridStep;
+                    newPos.z = nwGpZ * this.gridStep + this.halfGridStep;
+                }
+                this.draggedWall.position.set(newPos.x, this.draggedWall.position.y, newPos.z);
+
                 this.draggedWall.position.set(newPos.x, this.draggedWall.position.y, newPos.z);
                 this.draggedIndicator.position.x = this.draggedWall.position.x;
                 this.draggedIndicator.position.z = this.draggedWall.position.z;
