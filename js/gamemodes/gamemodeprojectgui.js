@@ -622,3 +622,106 @@ GameModeProject.prototype.updateGUISelTexColors = function(){
 GameModeProject.prototype.createGUITex = function (){
 
 };
+
+GameModeProject.prototype.udpateGUIPos = function (cube) {
+    if (cube !== null) {
+        this.guiData.wd.Pos.X = cube.position.x / this.gridStep;
+        this.guiData.wd.Pos.Y = cube.position.y / this.gridStep;
+        this.guiData.wd.Pos.Z = cube.position.z / this.gridStep;
+    } else {
+        this.guiData.wd.Pos.X = "Nan";
+        this.guiData.wd.Pos.Y = "Nan";
+        this.guiData.wd.Pos.Z = "Nan";
+    }
+};
+
+GameModeProject.prototype.updateGUIRotation = function (cube) {
+    if (cube !== null) {
+        var sor = cube.rotation;
+        this.guiData.wd.Rot.X = THREE.Math.radToDeg(sor.x);
+        this.guiData.wd.Rot.Y = THREE.Math.radToDeg(sor.y);
+        this.guiData.wd.Rot.Z = THREE.Math.radToDeg(sor.z);
+    } else {
+        this.guiData.wd.Rot.X = "Nan";
+        this.guiData.wd.Rot.Y = "Nan";
+        this.guiData.wd.Rot.Z = "Nan";
+    }
+};
+
+GameModeProject.prototype.updateGUIScale = function (cube) {
+    if (cube !== null) {
+        this.guiData.wd.Scale.X = cube.scale.x;
+        this.guiData.wd.Scale.Y = cube.scale.y;
+        this.guiData.wd.Scale.Z = cube.scale.z;
+    } else {
+        this.guiData.wd.Scale.X = "Nan";
+        this.guiData.wd.Scale.Y = "Nan";
+        this.guiData.wd.Scale.Z = "Nan";
+    }
+};
+
+GameModeProject.prototype.updateGUIMaterial = function (cube) {
+    if (cube !== null) {
+        this.guiData.wd.Material.Color = "#" + this.selectedWall.material.color.getHexString();
+        var curMap = this.selectedWall.material.map;
+        if (curMap !== null) {
+            this.guiData.wd.Material.TexName = cube._myTex._name;
+            this.selTexChanged(this.selectedWall._myTex._name);
+        } else {
+            this.guiData.wd.Material.TexName = "";
+            this.selTexChanged(null);
+        }
+        this.guiData.wd.Material.RepeatX = cube._myUVX;
+        this.guiData.wd.Material.RepeatY = cube._myUVY;        
+    } else {
+        this.guiData.wd.Material.Color = "#000000";            
+        this.guiData.wd.Material.TexName = "";
+        this.guiData.wd.Material.RepeatX = 1;
+        this.guiData.wd.Material.RepeatY = 1;
+        
+        this.selTexChanged(null);
+    }    
+};
+
+GameModeProject.prototype.updateWallTexGUI = function () {
+    if (this.WallTexNameCntr) {
+        this.WallTexNameCntr.remove();
+        this.WallTexNameCntr = null;
+    }
+
+    if (this.selectedWall) {
+        if (this.selectedWall._myTex)
+            this.guiData.wd.Material.TexName = this.selectedWall._myTex._name;
+        else
+            this.guiData.wd.Material.TexName = "";
+    }
+    else
+        this.guiData.wd.Material.TexName = "";
+    this.WallTexNameCntr = this.WallFolderGUI.add(this.guiData.wd.Material, 'TexName', this.TexNames).listen();    
+    this.WallTexNameCntr.onFinishChange(selObjTextureChanged);
+};
+
+GameModeProject.prototype.updateStripTexGUI = function () {
+    if (this.StripTexNameCntr) {
+        this.StripTexNameCntr.remove();
+        this.StripTexNameCntr = null;
+    }
+    this.StripTexNameCntr = this.guiSelTexFolder.add(this.guiData, 'StripTexName', this.StripTexNames).listen();
+    this.StripTexNameCntr.onFinishChange(selStripTextureChanged);
+};
+
+GameModeProject.prototype.selStripTextureChanged = function (texName) {
+    if (!texName) {
+        this.hideGUISelTex();
+        return;
+    }
+
+    if (this.textures[texName]._type === 2) {
+        this.guiData.StripTexName = texName;
+        this.hideGUISelTex();
+        this.showGUISelTex(this.textures[texName]);
+    } else {
+        this.guiData.StripTexName = "";
+        this.hideGUISelTex();
+    }
+};
