@@ -95,6 +95,8 @@ var PGUIData = function (game) {
     };
 
     this.StripTexName = "";
+
+    this.SnapToGrid = game.snapToGrid;
 };
 
 var SelTexData = function () {
@@ -127,6 +129,12 @@ function save(blob, filename) {
 function saveString(text, filename) {
     save(new Blob([text], { type: 'text/plain' }), filename);
 }
+///////////////////////////////////////////
+
+function snapToGridChanged(val) {
+    gameModeProject.snapToGrid = val;
+}
+
 ////////////////////////////// SelTex ////////////////////////////////////////////////////////////////////////////////////////
 
 function selTexColorChanged(val) {
@@ -520,9 +528,17 @@ GameModeProject.prototype.createGUI = function () {
     }
 
     {
-        cntr = this.gui.add(this.guiData, "GoToVisit");
+        var cntr = this.gui.add(this.guiData, "GoToVisit");
         cntr = this.gui.add(this.guiData, "Save");
         cntr = this.gui.add(this.guiData, "Load");
+    }
+
+    {
+        //this.guiSelTexOrienCntr = this.guiSelTexFolder.add(this.selTexData, 'Vertical').listen();
+        //this.guiSelTexOrienCntr.onChange(selTexOrientationChanged);
+
+        var cntr = this.gui.add(this.guiData, "SnapToGrid");
+        cntr.onChange(snapToGridChanged);
     }
 };
 
