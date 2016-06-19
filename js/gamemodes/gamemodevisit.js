@@ -126,7 +126,7 @@ GameModeVisit.prototype.createFloor = function(projFloor){
     var gmp = gameModeProject;
     
     var floorGeometry = new THREE.PlaneGeometry(
-            gmp.stageSize * 2, gmp.stageSize * 2,
+            gmp.stageSizeX * 2, gmp.stageSizeY * 2,
             1, 1);
 
     //var floorMaterial = new THREE.MeshBasicMaterial({color: 0xbbbbbb});    
@@ -161,6 +161,14 @@ GameModeVisit.prototype.createWall = function(projWall){
 //        material.map = _tex;
 //        material.needsUpdate = true;
 //    }
+
+    var tc = 0.9;
+    geometry.faceVertexUvs[0][4][0].set(tc, tc);
+    geometry.faceVertexUvs[0][4][1].set(tc, tc);
+    geometry.faceVertexUvs[0][4][2].set(tc, tc);
+    geometry.faceVertexUvs[0][5][0].set(tc, tc);
+    geometry.faceVertexUvs[0][5][1].set(tc, tc);
+    geometry.faceVertexUvs[0][5][2].set(tc, tc);
 
     var newWall = new THREE.Mesh(geometry, material);
     newWall._addMyParams();
