@@ -135,7 +135,7 @@ GameModeVisit.prototype.createFloor = function(projFloor){
     this.floor._addMyParams();
     this.floor._setMyUV(projFloor._myUVX,projFloor._myUVY);
     
-    this.floor.position.set(0, -gmp.halfGridStep / gmp.gridStep, 0);
+    this.floor.position.set(0, 0, 0);
     //this.floor.position.set(0, -1, 0);
     var newRot = this.floor.rotation;
     var rad = THREE.Math.degToRad(-90);

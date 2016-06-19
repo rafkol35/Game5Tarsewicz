@@ -515,7 +515,7 @@ GameModeProject.prototype.createDraggedFloor = function () {
     var draggedFloorGeometry = new THREE.BoxGeometry(this.gridStep * this.stageSizeX * 4, 10, this.gridStep * this.stageSizeY * 4);
     var draggedFloorMaterial = new THREE.MeshBasicMaterial({color: 0x888888});
     this.draggedFloor = new THREE.Mesh(draggedFloorGeometry, draggedFloorMaterial);
-    this.draggedFloor.position.set(0, -this.halfGridStep - 5 - 0.5, 0);
+    this.draggedFloor.position.set(0, 0 - 5 - 0.5, 0);
     this.scene.add(this.draggedFloor);    
 };
 
@@ -526,7 +526,7 @@ GameModeProject.prototype.createFloor = function () {
     this.floor = new THREE.Mesh(floorGeometry, floorMaterial);
     this.floor._addMyParams();
     
-    this.floor.position.set(0, -this.halfGridStep, 0);
+    this.floor.position.set(0, 0, 0);
     var newRot = this.floor.rotation;
     var rad = THREE.Math.degToRad(-90);
     newRot.x = rad;
@@ -540,7 +540,7 @@ GameModeProject.prototype.createAxis = function () {
     draggedIndicatorMaterial.transparent = true;
     draggedIndicatorMaterial.opacity = 0.5;
     this.draggedIndicator = new THREE.Mesh(draggedIndicatorGeometry, draggedIndicatorMaterial);
-    this.draggedIndicator.position.set(100, -this.halfGridStep + 0.1, 100);
+    this.draggedIndicator.position.set(100, 0 + 0.1, 100);
     var newRot = this.draggedIndicator.rotation;
     var rad = THREE.Math.degToRad(-90);
     newRot.x = rad;
@@ -578,10 +578,10 @@ GameModeProject.prototype.createGridGeometry = function () {
     var gridGeometry = new THREE.Geometry();
     for (var z = -this.gridSizeY; z <= this.gridSizeY; z += this.gridStep) {
         for (var x = -this.gridSizeX; x <= this.gridSizeX; x += this.gridStep) {
-            gridGeometry.vertices.push(new THREE.Vector3(-this.gridSizeX, -this.halfGridStep + ggoffset, z));
-            gridGeometry.vertices.push(new THREE.Vector3(this.gridSizeX, -this.halfGridStep + ggoffset, z));
-            gridGeometry.vertices.push(new THREE.Vector3(x, -this.halfGridStep + ggoffset, -this.gridSizeY));
-            gridGeometry.vertices.push(new THREE.Vector3(x, -this.halfGridStep + ggoffset, this.gridSizeY));
+            gridGeometry.vertices.push(new THREE.Vector3(-this.gridSizeX, 0 + ggoffset, z));
+            gridGeometry.vertices.push(new THREE.Vector3(this.gridSizeX, 0 + ggoffset, z));
+            gridGeometry.vertices.push(new THREE.Vector3(x, 0 + ggoffset, -this.gridSizeY));
+            gridGeometry.vertices.push(new THREE.Vector3(x, 0 + ggoffset, this.gridSizeY));
         }
     }
     return gridGeometry;
@@ -596,7 +596,7 @@ GameModeProject.prototype.createPlayerPos = function (pos,rot,height) {
     
     
     this.playerPos.scale.y = height;
-    this.playerPos.position.y = this.gridStep*height / 2 - this.halfGridStep; 
+    this.playerPos.position.y = this.gridStep*height / 2 - 0; 
     
     this.playerPos.rotation.y = rot;
     this.scene.add(this.playerPos); 
@@ -613,7 +613,7 @@ GameModeProject.prototype.createPlayerPos = function (pos,rot,height) {
 
 GameModeProject.prototype.updatePlayerHeight = function(newHeight){
     this.playerPos.scale.y = newHeight;
-    this.playerPos.position.y = this.gridStep*newHeight / 2 - this.halfGridStep; 
+    this.playerPos.position.y = this.gridStep*newHeight / 2 - 0; 
     this.playerPos2.position.y = ( (this.gridStep*newHeight / 2) - this.halfGridStep ) / newHeight;
     this.playerPos2.scale.y = 1/newHeight;
 };
