@@ -221,15 +221,21 @@ var selObjRotChanged = function (val) {
 var selObjScaleChanged = function (val) {
     if (gameModeProject.selectedWall === null)
         return;
+
+    var gmp = gameModeProject;
+
     switch (this.property) {
         case "X":
-            gameModeProject.selectedWall.scale.x = val;
+            gmp.selectedWall.scale.x = val;
             break;
         case "Y":
-            gameModeProject.selectedWall.scale.y = val;
+            var anchorY = gmp.selectedWall.position.y - gmp.selectedWall.scale.y * gmp.gridStep * 0.5;
+            gmp.selectedWall.scale.y = val;
+            //gmp.selectedWall.position.y = (val + gmp.selectedWall.scale.y * 0.5) * gmp.gridStep;
+            gmp.selectedWall.position.y = anchorY + (val * gmp.gridStep * 0.5);
             break;
         case "Z":
-            gameModeProject.selectedWall.scale.z = val;
+            gmp.selectedWall.scale.z = val;
             break;
     }
 };

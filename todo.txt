@@ -1,5 +1,3 @@
-
-) usunac "lustrzane odbicie"
 ) jeszcze to wstawianie mysza nowych scian by sie przydalo...
 
 1) on/off full screen : view-source:https://stemkoski.github.io/Three.js/GUI.html
