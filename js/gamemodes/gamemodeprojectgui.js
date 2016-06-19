@@ -39,7 +39,8 @@ var PlayerData = function () {
 };
 
 var StageData = function (game) {
-    this.Size = game.stageSize;
+    this.SizeX = game.stageSizeX;
+    this.SizeY = game.stageSizeY;
     this.ProjBackColor = "#" + game.projClearColor.getHexString();
     this.VisitBackColor = "#" + game.visitClearColor.getHexString();
 };
@@ -158,13 +159,23 @@ var selObjPosChanged = function (val) {
         return;
     var gmp = gameModeProject;
 
-    if (this.property === "X" || this.property === "Z") {
-        if (val > gmp.stageSize) {
-            val = gmp.stageSize;
-            this.setValue(gmp.stageSize);
-        } else if (val < -gmp.stageSize) {
-            val = -gmp.stageSize;
-            this.setValue(-gmp.stageSize);
+    if (this.property === "X") {
+        if (val > gmp.stageSizeX) {
+            val = gmp.stageSizeX;
+            this.setValue(gmp.stageSizeX);
+        } else if (val < -gmp.stageSizeX) {
+            val = -gmp.stageSizeX;
+            this.setValue(-gmp.stageSizeX);
+        }
+    }
+
+    if (this.property === "Z") {
+        if (val > gmp.stageSizeY) {
+            val = gmp.stageSizeY;
+            this.setValue(gmp.stageSizeY);
+        } else if (val < -gmp.stageSizeY) {
+            val = -gmp.stageSizeY;
+            this.setValue(-gmp.stageSizeY);
         }
     }
 
@@ -309,8 +320,11 @@ var playerHeightChanged = function (val) {
 
 ////////////////////////////// stage ////////////////////////////////////////////////////////////////////////////////////////
 
-var stageSizeChanged = function (val) {
-    gameModeProject.updateStageSize(val);
+var stageSizeChangedX = function (val) {
+    gameModeProject.updateStageSizeX(val);
+};
+var stageSizeChangedY = function (val) {
+    gameModeProject.updateStageSizeY(val);
 };
 
 var stageProjColorChanged = function (val) {
@@ -337,10 +351,15 @@ GameModeProject.prototype.createGUI = function () {
     var stageFolder = this.gui.addFolder('Stage');
     
     {
-        var cntr = stageFolder.add(this.guiData.sd,'Size',8,15).listen();
+        var cntr = stageFolder.add(this.guiData.sd,'SizeX',8,15).listen();
         cntr.step(1);
-        cntr.onChange(stageSizeChanged);
-        cntr.onFinishChange(stageSizeChanged);
+        cntr.onChange(stageSizeChangedX);
+        cntr.onFinishChange(stageSizeChangedX);
+        
+        var cntr = stageFolder.add(this.guiData.sd,'SizeY',8,15).listen();
+        cntr.step(1);
+        cntr.onChange(stageSizeChangedY);
+        cntr.onFinishChange(stageSizeChangedY);
         
         cntr = stageFolder.addColor(this.guiData.sd, 'ProjBackColor').listen();
         cntr.onChange(stageProjColorChanged);
@@ -355,28 +374,22 @@ GameModeProject.prototype.createGUI = function () {
     
     {
         var folderPosition = wallFolder.addFolder('Position');
-        //var _t = this.stageSize;
-        //var cntr = folderPosition.add(this.guiData.wd.Pos, 'X', -this.stageSize, this.stageSize).listen();
-        var cntr = folderPosition.add(this.guiData.wd.Pos, 'X').listen();
-        cntr.step(0.05);
-        //cntr.min(-this.stageSize);
-        //cntr.max(this.stageSize);
-        //cntr.min(-this.stageSize/2);
-        //cntr.max(this.stageSize/2);
-        cntr.onChange(selObjPosChanged);
-        cntr.onFinishChange(selObjPosChanged);
 
-        cntr = folderPosition.add(this.guiData.wd.Pos, 'Y').listen();
+        this.wallCntrX = folderPosition.add(this.guiData.wd.Pos, 'X').listen();
+        this.wallCntrX.step(0.05);
+        this.wallCntrX.onChange(selObjPosChanged);
+        this.wallCntrX.onFinishChange(selObjPosChanged);
+
+        var cntr = folderPosition.add(this.guiData.wd.Pos, 'Y').listen();
         cntr.step(0.05);
         cntr.min(0);//.max(30);
         cntr.onChange(selObjPosChanged);
         cntr.onFinishChange(selObjPosChanged);
 
-        cntr = folderPosition.add(this.guiData.wd.Pos, 'Z').listen();
-        cntr.step(0.05);
-        //cntr.step(0.1).min(-this.stageSize).max(this.stageSize);
-        cntr.onChange(selObjPosChanged);
-        cntr.onFinishChange(selObjPosChanged);
+        this.wallCntrZ = folderPosition.add(this.guiData.wd.Pos, 'Z').listen();
+        this.wallCntrZ.step(0.05);
+        this.wallCntrZ.onChange(selObjPosChanged);
+        this.wallCntrZ.onFinishChange(selObjPosChanged);
     }
 
     {
@@ -475,30 +488,29 @@ GameModeProject.prototype.createGUI = function () {
         var folder = this.gui.addFolder('Player');
         var cntr = null;
         
-        this.cntrPlayerPosX = folder.add(this.guiData.pd, 'PosX', -this.stageSize, this.stageSize).listen();
+        this.cntrPlayerPosX = folder.add(this.guiData.pd, 'PosX', -this.stageSizeX, this.stageSizeX).listen();
         this.cntrPlayerPosX.step(0.1);
         this.cntrPlayerPosX.onChange(playerPosChanged);
         this.cntrPlayerPosX.onFinishChange(playerPosChanged);
 
-        this.cntrPlayerPosZ = folder.add(this.guiData.pd, 'PosZ', -this.stageSize, this.stageSize).listen();
-        this.cntrPlayerPosZ.step(0.1); //.min(-this.stageSize).max(this.stageSize);
+        this.cntrPlayerPosZ = folder.add(this.guiData.pd, 'PosZ', -this.stageSizeY, this.stageSizeY).listen();
+        this.cntrPlayerPosZ.step(0.1);
         this.cntrPlayerPosZ.onChange(playerPosChanged);
         this.cntrPlayerPosZ.onFinishChange(playerPosChanged);
         
         cntr = folder.add(this.guiData.pd, 'Rot').listen();
-        cntr.step(1); //.min(-this.stageSize).max(this.stageSize);
+        cntr.step(1);
         cntr.onChange(playerRotChanged);
         cntr.onFinishChange(playerRotChanged);
         
         cntr = folder.add(this.guiData.pd, 'Height', 1, 5).listen();
-        cntr.step(0.1); //.min(-this.stageSize).max(this.stageSize);
+        cntr.step(0.1);
         cntr.onChange(playerHeightChanged);
         cntr.onFinishChange(playerHeightChanged);
     }
     
     {
         cntr = this.gui.add(this.guiData, "GoToVisit");
-        
         cntr = this.gui.add(this.guiData, "Save");
         cntr = this.gui.add(this.guiData, "Load");
     }

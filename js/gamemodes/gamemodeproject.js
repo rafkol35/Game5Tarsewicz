@@ -23,10 +23,12 @@ function GameModeProject(name) {
     this.camera.lookAt(new THREE.Vector3(0, 0, 0));
 
     this.gridStep = 50.0;
-    this.stageSize = 10.0;
-    this.gridSize = this.stageSize * this.gridStep;
+    this.stageSizeX = 9.0;
+    this.stageSizeY = 11.0;
+    this.gridSizeX = this.stageSizeX * this.gridStep;
+    this.gridSizeY = this.stageSizeY * this.gridStep;
     this.halfGridStep = this.gridStep * 0.5;
-
+    
     this.Files = ['','rbn','rbn_0','rbn_1','rbn_2','sprite','sprite0','sprite1','t1'];
     this.TexNames = this.Files.slice();
     this.StripTexNames = [""];
@@ -331,8 +333,8 @@ GameModeProject.prototype.mouseMove = function (event) {
                 }
             } else {
                 var newPos = intersects[0].point.clone().sub(this.draggedWallOffset.clone());
-                newPos.x = Math.min(Math.max(-this.gridSize, newPos.x), this.gridSize);
-                newPos.z = Math.min(Math.max(-this.gridSize, newPos.z), this.gridSize);
+                newPos.x = Math.min(Math.max(-this.gridSizeX, newPos.x), this.gridSizeX);
+                newPos.z = Math.min(Math.max(-this.gridSizeY, newPos.z), this.gridSizeY);
                 this.draggedWall.position.set(newPos.x, this.draggedWall.position.y, newPos.z);
                 this.draggedIndicator.position.x = this.draggedWall.position.x;
                 this.draggedIndicator.position.z = this.draggedWall.position.z;
@@ -503,7 +505,7 @@ GameModeProject.prototype.createMyStripTexture2 = function (newTexName, params) 
 };
 
 GameModeProject.prototype.createDraggedFloor = function () {
-    var draggedFloorGeometry = new THREE.BoxGeometry(this.gridStep * this.stageSize * 4, 10, this.gridStep * this.stageSize * 4);
+    var draggedFloorGeometry = new THREE.BoxGeometry(this.gridStep * this.stageSizeX * 4, 10, this.gridStep * this.stageSizeY * 4);
     var draggedFloorMaterial = new THREE.MeshBasicMaterial({color: 0x888888});
     this.draggedFloor = new THREE.Mesh(draggedFloorGeometry, draggedFloorMaterial);
     this.draggedFloor.position.set(0, -this.halfGridStep - 5 - 0.5, 0);
@@ -511,11 +513,7 @@ GameModeProject.prototype.createDraggedFloor = function () {
 };
 
 GameModeProject.prototype.createFloor = function () {
-    var floorGeometry = new THREE.PlaneGeometry(
-            this.gridStep * this.stageSize * 2,
-            this.gridStep * this.stageSize * 2,
-            //this.stageSize, this.stageSize);
-            1,1)
+    var floorGeometry = new THREE.PlaneGeometry(this.gridStep * this.stageSizeX * 2, this.gridStep * this.stageSizeY * 2, 1,1)
 
     var floorMaterial = new THREE.MeshBasicMaterial({color: 0xbbbbbb});
     this.floor = new THREE.Mesh(floorGeometry, floorMaterial);
@@ -562,24 +560,29 @@ GameModeProject.prototype.createAxis = function () {
     
 GameModeProject.prototype.createGrid = function () {
     var ggoffset = 0.5;
-    var gridGeometry = new THREE.Geometry();
-    for (var i = -this.gridSize; i <= this.gridSize; i += this.gridStep) {
-        gridGeometry.vertices.push(new THREE.Vector3(-this.gridSize, -this.halfGridStep + ggoffset, i));
-        gridGeometry.vertices.push(new THREE.Vector3(this.gridSize, -this.halfGridStep + ggoffset, i));
-        gridGeometry.vertices.push(new THREE.Vector3(i, -this.halfGridStep + ggoffset, -this.gridSize));
-        gridGeometry.vertices.push(new THREE.Vector3(i, -this.halfGridStep + ggoffset, this.gridSize));
-    }
+    var gridGeometry = this.createGridGeometry();
     var gridMaterial = new THREE.LineBasicMaterial({color: 0x000000, opacity: 1.0});
     this.gridLine = new THREE.LineSegments(gridGeometry, gridMaterial);
     this.scene.add(this.gridLine);
 };
+
+GameModeProject.prototype.createGridGeometry = function () {
+    var ggoffset = 0.5;
+    var gridGeometry = new THREE.Geometry();
+    for (var z = -this.gridSizeY; z <= this.gridSizeY; z += this.gridStep) {
+        for (var x = -this.gridSizeX; x <= this.gridSizeX; x += this.gridStep) {
+            gridGeometry.vertices.push(new THREE.Vector3(-this.gridSizeX, -this.halfGridStep + ggoffset, z));
+            gridGeometry.vertices.push(new THREE.Vector3(this.gridSizeX, -this.halfGridStep + ggoffset, z));
+            gridGeometry.vertices.push(new THREE.Vector3(x, -this.halfGridStep + ggoffset, -this.gridSizeY));
+            gridGeometry.vertices.push(new THREE.Vector3(x, -this.halfGridStep + ggoffset, this.gridSizeY));
+        }
+    }
+    return gridGeometry;
+};
     
 GameModeProject.prototype.createPlayerPos = function (pos,rot,height) {
-    //console.log(pos);
     var geometry = new THREE.BoxGeometry(this.gridStep*0.5, this.gridStep, this.gridStep*0.5);
     var material = new THREE.MeshBasicMaterial({color: 0xff0000, map: null});
-    //material.transparent = true;
-    //material.opacity = 0.5;
     this.playerPos = new THREE.Mesh(geometry, material);
     this.playerPos.position.x = pos.x;
     this.playerPos.position.z = pos.y;
@@ -593,8 +596,6 @@ GameModeProject.prototype.createPlayerPos = function (pos,rot,height) {
     
     var geometry2 = new THREE.BoxGeometry(this.gridStep*0.25, this.gridStep*0.5, this.gridStep*0.5);
     var material2 = new THREE.MeshBasicMaterial({color: 0x00ff00, map: null});
-    //material.transparent = true;
-    //material.opacity = 0.5;
     this.playerPos2 = new THREE.Mesh(geometry2, material2);
     this.playerPos2.position.y = ( (this.gridStep*height / 2) - this.halfGridStep ) / height;
     this.playerPos2.position.z = -(this.gridStep*0.5 / 2) + (this.gridStep*0.25 / 2); 
@@ -637,47 +638,54 @@ GameModeProject.prototype.updateFloor = function(floorData){
 };
  
 GameModeProject.prototype.updateStage = function(stageData){
-    this.updateStageSize(stageData.Size);
+    this.updateStageSize(stageData.SizeX,stageData.SizeY);
     this.setProjClearColor(stageData.ProjBackColor);
     this.setVisitClearColor(stageData.VisitBackColor);
     
-    this.guiData.sd.Size = stageData.Size;
+    this.guiData.sd.SizeX = stageData.SizeX;
+    this.guiData.sd.SizeY = stageData.SizeY;
     this.guiData.sd.ProjBackColor = stageData.ProjBackColor;
     this.guiData.sd.VisitBackColor = stageData.VisitBackColor;
 };
 
-GameModeProject.prototype.updateStageSize = function(newSize){
-    this.stageSize = newSize;
-    this.gridSize = this.stageSize * this.gridStep;
+GameModeProject.prototype.updateStageSizeX = function(newSizeX){
+    this.updateStageSize(newSizeX, this.stageSizeY);
+}
+
+GameModeProject.prototype.updateStageSizeY = function (newSizeY) {
+    this.updateStageSize(this.stageSizeX, newSizeY);
+}
+
+GameModeProject.prototype.updateStageSize = function(newSizeX,newSizeY){    
+    this.stageSizeX = newSizeX;
+    this.stageSizeY = newSizeY;
+    this.gridSizeX = this.stageSizeX * this.gridStep;
+    this.gridSizeY = this.stageSizeY * this.gridStep;
     this.halfGridStep = this.gridStep * 0.5;
     
     //draggedFloor
-    var draggedFloorGeometry = new THREE.BoxGeometry(this.gridStep * this.stageSize * 4, 10, this.gridStep * this.stageSize * 4);
+    var draggedFloorGeometry = new THREE.BoxGeometry(this.gridStep * this.stageSizeX * 4, 10, this.gridStep * this.stageSizeY * 4);
     this.draggedFloor.geometry = draggedFloorGeometry;
     
     //floor
-    var floorGeometry = new THREE.PlaneGeometry(
-            this.gridStep * this.stageSize * 2,
-            this.gridStep * this.stageSize * 2,
-            1,1);
+    var floorGeometry = new THREE.PlaneGeometry(this.gridStep * this.stageSizeX * 2, this.gridStep * this.stageSizeY * 2, 1,1);
     this.floor.geometry = floorGeometry;
     this.floor._setMyUV(this.floor._myUVX,this.floor._myUVY);
      
     //grid
     var ggoffset = 0.5;
-    var gridGeometry = new THREE.Geometry();
-    for (var i = -this.gridSize; i <= this.gridSize; i += this.gridStep) {
-        gridGeometry.vertices.push(new THREE.Vector3(-this.gridSize, -this.halfGridStep + ggoffset, i));
-        gridGeometry.vertices.push(new THREE.Vector3(this.gridSize, -this.halfGridStep + ggoffset, i));
-        gridGeometry.vertices.push(new THREE.Vector3(i, -this.halfGridStep + ggoffset, -this.gridSize));
-        gridGeometry.vertices.push(new THREE.Vector3(i, -this.halfGridStep + ggoffset, this.gridSize));
-    }
+    var gridGeometry = this.createGridGeometry();
     this.gridLine.geometry = gridGeometry;
     
-    this.cntrPlayerPosX.min(-this.stageSize);
-    this.cntrPlayerPosX.max(this.stageSize);
-    this.cntrPlayerPosZ.min(-this.stageSize);
-    this.cntrPlayerPosZ.max(this.stageSize);
+    this.cntrPlayerPosX.min(-this.stageSizeX);
+    this.cntrPlayerPosX.max(this.stageSizeX);
+    this.cntrPlayerPosZ.min(-this.stageSizeY);
+    this.cntrPlayerPosZ.max(this.stageSizeY);
+
+    //this.wallCntrX.min(-this.stageSizeX);
+    //this.wallCntrX.max(this.stageSizeX);
+    //this.wallCntrZ.min(-this.stageSizeY);
+    //this.wallCntrZ.max(this.stageSizeY);
 };
 
 GameModeProject.prototype.createWall = function (nwd/*NewWallData*/) {
