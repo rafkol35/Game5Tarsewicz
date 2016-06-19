@@ -784,7 +784,9 @@ GameModeProject.prototype.createPlayerData = function(){
    
 GameModeProject.prototype.addWall = function () {    
     var newWallData = new WallData();
-    
+
+    newWallData.Pos.Y = newWallData.Scale.Y * this.gridStep * 0.5;
+
     var newWall = this.createWall(newWallData);
     this.setHighlighted(newWall);
     this.setSelected(newWall);

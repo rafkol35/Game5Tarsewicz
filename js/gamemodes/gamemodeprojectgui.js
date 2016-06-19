@@ -88,7 +88,7 @@ var PGUIData = function (game) {
         fileInput.addEventListener('change', function (event) {
             //console.log(fileInput.files);
             //console.log(fileInput);
-            gameModeProject.loadFile(fileInput.files[ 0 ]);
+            gameModeProject.loadFile(fileInput.files[0]);
         });
 
         fileInput.click();
@@ -97,11 +97,11 @@ var PGUIData = function (game) {
     this.StripTexName = "";
 };
 
-var SelTexData = function(){
+var SelTexData = function () {
     this.Name = "";
     this.NumOfStrips = 2;
-    this.Colors = ["#000000","#ffffff"];    
-    this.Vertical = false;    
+    this.Colors = ["#000000", "#ffffff"];
+    this.Vertical = false;
 };
 
 var link = document.createElement('a');
@@ -125,30 +125,30 @@ function save(blob, filename) {
 }
 
 function saveString(text, filename) {
-    save(new Blob([text], {type: 'text/plain'}), filename);
+    save(new Blob([text], { type: 'text/plain' }), filename);
 }
 ////////////////////////////// SelTex ////////////////////////////////////////////////////////////////////////////////////////
 
-function selTexColorChanged(val){
+function selTexColorChanged(val) {
     if (!gameModeProject.selTex) return;
-    
+
     //console.log(this.property + " " + val);
-    gameModeProject.selTex.setStripColor(this.property,val);
-    
+    gameModeProject.selTex.setStripColor(this.property, val);
+
     gameModeProject.selTexChanged2();
 }
 
-function selTexNumOfStripsChanged(val){    
+function selTexNumOfStripsChanged(val) {
     gameModeProject.selTexChanged3(val);
 }
 
-function selTexOrientationChanged(val){
+function selTexOrientationChanged(val) {
     if (!gameModeProject.selTex) return;
-    
+
     //console.log(val);
     var newOrientation = val === true ? MTSOrientation.VERTICAL : MTSOrientation.HORIZONTAL;
     gameModeProject.selTex.setOrientation(newOrientation);
-    
+
     gameModeProject.selTexChanged2();
 };
 
@@ -179,12 +179,16 @@ var selObjPosChanged = function (val) {
         }
     }
 
+    if (this.property === "Y") {
+        //gmp.selectedWall.scale.y * 0.5
+    }
+
     switch (this.property) {
         case "X":
             gmp.selectedWall.position.x = val * gmp.gridStep;
             break;
         case "Y":
-            gmp.selectedWall.position.y = val * gmp.gridStep;
+            gmp.selectedWall.position.y = (val + gmp.selectedWall.scale.y * 0.5) * gmp.gridStep;
             break;
         case "Z":
             gmp.selectedWall.position.z = val * gmp.gridStep;
@@ -202,7 +206,7 @@ var selObjRotChanged = function (val) {
     var rad = THREE.Math.degToRad(val);
 
     newRot.y = rad;
-    
+
     gameModeProject.selectedWall.rotation = newRot;
 
     var axesRot = gameModeProject.draggedIndicator.rotation;
@@ -239,7 +243,7 @@ var selObjColorChanged = function (val) {
 var selObjTextureChanged = function (val) {
     gameModeProject.selTexChanged(val);
     if (gameModeProject.selectedWall === null) return;
-    gameModeProject.selectedWall._setMyTex(gameModeProject.textures[val]);    
+    gameModeProject.selectedWall._setMyTex(gameModeProject.textures[val]);
 };
 
 var selObjTexRepeatXChanged = function (val) {
@@ -248,12 +252,12 @@ var selObjTexRepeatXChanged = function (val) {
 };
 
 var selObjTexRepeatYChanged = function (val) {
-    if (gameModeProject.selectedWall === null) return;  
+    if (gameModeProject.selectedWall === null) return;
     gameModeProject.selectedWall._setMyUVY(val);
 };
 
 var selStripTextureChanged = function (val) {
-    gameModeProject.selStripTextureChanged(val);    
+    gameModeProject.selStripTextureChanged(val);
 }
 ////////////////////////////// floor ////////////////////////////////////////////////////////////////////////////////////////
 
@@ -265,9 +269,9 @@ var floorColorChanged = function (val) {
 var floorTextureChanged = function (val) {
     if (gameModeProject.floor === null) return;
     var currentMaterial = gameModeProject.floor.material;
-    if(val){
+    if (val) {
         currentMaterial.map = gameModeProject.textures[val].getTHREETexture();
-    }else{
+    } else {
         currentMaterial.map = null;
     }
     currentMaterial.needsUpdate = true;
@@ -337,11 +341,11 @@ var stageVisitColorChanged = function (val) {
 
 GameModeProject.prototype.createGUI = function () {
     this.gui = new dat.GUI({
-//        height: 5 * 32 - 1
-//        autoPlace: false
+        //        height: 5 * 32 - 1
+        //        autoPlace: false
     });
     //this.gui.domElement.id = 'guiProject';
-    
+
     this.guiTex = new dat.GUI({
         //height: 5 * 32 - 1,
         //autoPlace: false
@@ -349,29 +353,29 @@ GameModeProject.prototype.createGUI = function () {
     //this.guiTex.domElement.id = 'guiTex';
 
     var stageFolder = this.gui.addFolder('Stage');
-    
+
     {
-        var cntr = stageFolder.add(this.guiData.sd,'SizeX',8,15).listen();
+        var cntr = stageFolder.add(this.guiData.sd, 'SizeX', 8, 15).listen();
         cntr.step(1);
         cntr.onChange(stageSizeChangedX);
         cntr.onFinishChange(stageSizeChangedX);
-        
-        var cntr = stageFolder.add(this.guiData.sd,'SizeY',8,15).listen();
+
+        var cntr = stageFolder.add(this.guiData.sd, 'SizeY', 8, 15).listen();
         cntr.step(1);
         cntr.onChange(stageSizeChangedY);
         cntr.onFinishChange(stageSizeChangedY);
-        
+
         cntr = stageFolder.addColor(this.guiData.sd, 'ProjBackColor').listen();
         cntr.onChange(stageProjColorChanged);
         cntr.onFinishChange(stageProjColorChanged);
-        
+
         cntr = stageFolder.addColor(this.guiData.sd, 'VisitBackColor').listen();
         cntr.onChange(stageVisitColorChanged);
         cntr.onFinishChange(stageVisitColorChanged);
     }
-    
+
     var wallFolder = this.gui.addFolder('Wall');
-    
+
     {
         var folderPosition = wallFolder.addFolder('Position');
 
@@ -418,76 +422,76 @@ GameModeProject.prototype.createGUI = function () {
         cntr.onFinishChange(selObjScaleChanged);
     }
 
-    {        
+    {
         var folder = wallFolder.addFolder('Material');
         this.WallFolderGUI = folder;
-        
+
         var cntr = null;
         cntr = folder.addColor(this.guiData.wd.Material, 'Color').listen();
         cntr.onChange(selObjColorChanged);
         cntr.onFinishChange(selObjColorChanged);
-        
-        cntr = folder.add(this.guiData.wd.Material, 'RepeatX',1,20).listen();
+
+        cntr = folder.add(this.guiData.wd.Material, 'RepeatX', 1, 20).listen();
         cntr.step(1);//.min(0.1);
         cntr.onChange(selObjTexRepeatXChanged);
         cntr.onFinishChange(selObjTexRepeatXChanged);
-        
-        cntr = folder.add(this.guiData.wd.Material, 'RepeatY',1,20).listen();
+
+        cntr = folder.add(this.guiData.wd.Material, 'RepeatY', 1, 20).listen();
         cntr.step(1);//.min(0.1);
         cntr.onChange(selObjTexRepeatYChanged);
         cntr.onFinishChange(selObjTexRepeatYChanged);
-        
+
         this.updateWallTexGUI();
     }
-    
+
     {
         this.guiSelTexFolder = this.guiTex.addFolder('StripTextures');
-        
+
         var cntr = null;
-        
+
         this.guiData.AddNew = function () {
             gameModeProject.addNewTexture();
         };
-                
+
         cntr = this.guiSelTexFolder.add(this.guiData, "AddNew");
-        
+
         this.updateStripTexGUI();
     }
-    
+
     {
         var cntr = null;
         cntr = wallFolder.add(this.guiData, "AddWall");
         cntr = wallFolder.add(this.guiData, "RemoveSelectedWall");
         cntr = wallFolder.add(this.guiData, "DuplicateSelectedWall");
     }
-    
+
     {
         this.guiFolder = this.gui.addFolder('Floor');
-        
+
         var cntr = null;
-        
+
         cntr = this.guiFolder.addColor(this.guiData.fm, 'Color').listen();
         cntr.onChange(floorColorChanged);
         cntr.onFinishChange(floorColorChanged);
-        
-        cntr = this.guiFolder.add(this.guiData.fm, 'RepeatX',1,20).listen();
+
+        cntr = this.guiFolder.add(this.guiData.fm, 'RepeatX', 1, 20).listen();
         cntr.step(1);//.min(0.1);
         cntr.onChange(floorTexRepeatXChanged);
         cntr.onFinishChange(floorTexRepeatXChanged);
-        
-        cntr = this.guiFolder.add(this.guiData.fm, 'RepeatY',1,20).listen();
+
+        cntr = this.guiFolder.add(this.guiData.fm, 'RepeatY', 1, 20).listen();
         cntr.step(1);//.min(0.1);
         cntr.onChange(floorTexRepeatYChanged);
         cntr.onFinishChange(floorTexRepeatYChanged);
-        
+
         this.floorFileCntr = this.guiFolder.add(this.guiData.fm, 'TexName', this.Files).listen();
-        this.floorFileCntr.onFinishChange(floorTextureChanged);        
+        this.floorFileCntr.onFinishChange(floorTextureChanged);
     }
-    
+
     {
         var folder = this.gui.addFolder('Player');
         var cntr = null;
-        
+
         this.cntrPlayerPosX = folder.add(this.guiData.pd, 'PosX', -this.stageSizeX, this.stageSizeX).listen();
         this.cntrPlayerPosX.step(0.1);
         this.cntrPlayerPosX.onChange(playerPosChanged);
@@ -497,18 +501,18 @@ GameModeProject.prototype.createGUI = function () {
         this.cntrPlayerPosZ.step(0.1);
         this.cntrPlayerPosZ.onChange(playerPosChanged);
         this.cntrPlayerPosZ.onFinishChange(playerPosChanged);
-        
+
         cntr = folder.add(this.guiData.pd, 'Rot').listen();
         cntr.step(1);
         cntr.onChange(playerRotChanged);
         cntr.onFinishChange(playerRotChanged);
-        
+
         cntr = folder.add(this.guiData.pd, 'Height', 1, 5).listen();
         cntr.step(0.1);
         cntr.onChange(playerHeightChanged);
         cntr.onFinishChange(playerHeightChanged);
     }
-    
+
     {
         cntr = this.gui.add(this.guiData, "GoToVisit");
         cntr = this.gui.add(this.guiData, "Save");
@@ -516,7 +520,7 @@ GameModeProject.prototype.createGUI = function () {
     }
 };
 
-GameModeProject.prototype.createSelTexControls = function(){
+GameModeProject.prototype.createSelTexControls = function () {
     //if(!this.selTex) return;
     //var selTexName = this.selTex._name;
     //for(var i = 0 ; i < this.walls.length ; ++i){
@@ -524,24 +528,24 @@ GameModeProject.prototype.createSelTexControls = function(){
     //}
 };
 
-GameModeProject.prototype.selTexChanged2 = function(){
-    if(!this.selTex) return;
+GameModeProject.prototype.selTexChanged2 = function () {
+    if (!this.selTex) return;
     var selTexName = this.selTex._name;
-    for(var i = 0 ; i < this.walls.length ; ++i){
+    for (var i = 0 ; i < this.walls.length ; ++i) {
         this.walls[i]._updateTex2(selTexName);
     }
 };
 
-GameModeProject.prototype.selTexChanged3 = function(newNumOfStrips){
+GameModeProject.prototype.selTexChanged3 = function (newNumOfStrips) {
     if (!this.selTex) return;
     this.selTex.setNumOfStrips(newNumOfStrips);
     this.selTexData.NumOfStrips = this.selTex.numOfStrips;
     this.updateGUISelTexColors();
-    this.selTexChanged2();    
+    this.selTexChanged2();
 };
 
 GameModeProject.prototype.selTexChanged = function (texName) {
-    if(!texName) {
+    if (!texName) {
         this.hideGUISelTex();
         return;
     }
@@ -557,9 +561,9 @@ GameModeProject.prototype.selTexChanged = function (texName) {
     }
 };
 
-GameModeProject.prototype.showGUISelTex = function(selTex){
+GameModeProject.prototype.showGUISelTex = function (selTex) {
     //console.log(selTex);
-    if(selTex._type !== 2) {
+    if (selTex._type !== 2) {
         //this.updateGUISelTex(this.textures[texName]);
         console.log('createGUISelTex => selTex._type !== 2');
         return;
@@ -567,14 +571,14 @@ GameModeProject.prototype.showGUISelTex = function(selTex){
 
     this.selTex = selTex;
     this.selTexData = selTex.getSelTexData();
-    
+
     this.guiSelTexOrienCntr = this.guiSelTexFolder.add(this.selTexData, 'Vertical').listen();
     this.guiSelTexOrienCntr.onChange(selTexOrientationChanged);
 
     this.guiSelTexNumOfColorsCntr = this.guiSelTexFolder.add(this.selTexData, 'NumOfStrips', 2, _maxNumStrips).listen();
     this.guiSelTexNumOfColorsCntr.step(1);
     this.guiSelTexNumOfColorsCntr.onChange(selTexNumOfStripsChanged);
-    
+
     var curFolder = null;
     for (var i = 0; i < this.selTexData.NumOfStrips; i++) {
         if (i % 10 === 0) {
@@ -589,29 +593,29 @@ GameModeProject.prototype.showGUISelTex = function(selTex){
 };
 
 GameModeProject.prototype.hideGUISelTex = function () {
-    if(!this.selTex) return;
-    
+    if (!this.selTex) return;
+
     this.selTex = null;
     this.setTexData = null;
-    
+
     this.guiSelTexNumOfColorsCntr.remove();
     this.guiSelTexNumOfColorsCntr = null;
-    
+
     this.guiSelTexOrienCntr.remove();
     this.guiSelTexOrienCntr = null;
-    
-    for(var i = 0 ; i < this.guiSelTexColorsCntrs.length ; ++i){
+
+    for (var i = 0 ; i < this.guiSelTexColorsCntrs.length ; ++i) {
         this.guiSelTexColorsCntrs[i].remove();
     }
     this.guiSelTexColorsCntrs = [];
-    
+
     for (var i = 0 ; i < this.guiSelTexColorsFolders.length ; ++i) {
         this.guiSelTexFolder.removeFolder(this.guiSelTexColorsFolders[i].name);
     }
     this.guiSelTexColorsFolders = [];
 };
 
-GameModeProject.prototype.updateGUISelTexColors = function(){    
+GameModeProject.prototype.updateGUISelTexColors = function () {
     for (var i = 0 ; i < this.guiSelTexColorsFolders.length ; ++i) {
         //console.log('this.guiTex.removeFolder('+this.guiSelTexColorsFolders[i].name+');');
         this.guiSelTexFolder.removeFolder(this.guiSelTexColorsFolders[i].name);
@@ -621,7 +625,7 @@ GameModeProject.prototype.updateGUISelTexColors = function(){
     var curFolder = null;
     for (var i = 0; i < this.selTexData.NumOfStrips; i++) {
         if (i % 10 === 0) {
-            curFolder = this.guiSelTexFolder.addFolder("Colors " + i + " : " + (i + 9) );
+            curFolder = this.guiSelTexFolder.addFolder("Colors " + i + " : " + (i + 9));
             this.guiSelTexColorsFolders.push(curFolder);
         }
         var cntr = curFolder.addColor(this.selTexData.Colors, i, this.selTexData.Colors[i]);
@@ -631,14 +635,14 @@ GameModeProject.prototype.updateGUISelTexColors = function(){
     }
 };
 
-GameModeProject.prototype.createGUITex = function (){
+GameModeProject.prototype.createGUITex = function () {
 
 };
 
 GameModeProject.prototype.udpateGUIPos = function (cube) {
     if (cube !== null) {
         this.guiData.wd.Pos.X = cube.position.x / this.gridStep;
-        this.guiData.wd.Pos.Y = cube.position.y / this.gridStep;
+        this.guiData.wd.Pos.Y = (cube.position.y / this.gridStep) - cube.scale.y * 0.5;
         this.guiData.wd.Pos.Z = cube.position.z / this.gridStep;
     } else {
         this.guiData.wd.Pos.X = "Nan";
@@ -684,15 +688,15 @@ GameModeProject.prototype.updateGUIMaterial = function (cube) {
             this.selTexChanged(null);
         }
         this.guiData.wd.Material.RepeatX = cube._myUVX;
-        this.guiData.wd.Material.RepeatY = cube._myUVY;        
+        this.guiData.wd.Material.RepeatY = cube._myUVY;
     } else {
-        this.guiData.wd.Material.Color = "#000000";            
+        this.guiData.wd.Material.Color = "#000000";
         this.guiData.wd.Material.TexName = "";
         this.guiData.wd.Material.RepeatX = 1;
         this.guiData.wd.Material.RepeatY = 1;
-        
+
         this.selTexChanged(null);
-    }    
+    }
 };
 
 GameModeProject.prototype.updateWallTexGUI = function () {
@@ -709,7 +713,7 @@ GameModeProject.prototype.updateWallTexGUI = function () {
     }
     else
         this.guiData.wd.Material.TexName = "";
-    this.WallTexNameCntr = this.WallFolderGUI.add(this.guiData.wd.Material, 'TexName', this.TexNames).listen();    
+    this.WallTexNameCntr = this.WallFolderGUI.add(this.guiData.wd.Material, 'TexName', this.TexNames).listen();
     this.WallTexNameCntr.onFinishChange(selObjTextureChanged);
 };
 
