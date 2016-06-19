@@ -768,19 +768,24 @@ GameModeProject.prototype.createGUI = function () {
     }
 
     {
-        var folder = wallFolder.addFolder('Rotation');
+//        var folder = wallFolder.addFolder('Rotation');
+//
+//        var cntr = folder.add(this.guiData.wd.Rot, 'X').listen();
+//        //cntr.step(0.1);
+//        cntr.onChange(selObjRotChanged);
+//        cntr.onFinishChange(selObjRotChanged);
+//
+//        cntr = folder.add(this.guiData.wd.Rot, 'Y').listen();
+//        //cntr.step(0.1);
+//        cntr.onChange(selObjRotChanged);
+//        cntr.onFinishChange(selObjRotChanged);
+//
+//        cntr = folder.add(this.guiData.wd.Rot, 'Z').listen();
+//        //cntr.step(0.1);
+//        cntr.onChange(selObjRotChanged);
+//        cntr.onFinishChange(selObjRotChanged);
 
-        var cntr = folder.add(this.guiData.wd.Rot, 'X').listen();
-        //cntr.step(0.1);
-        cntr.onChange(selObjRotChanged);
-        cntr.onFinishChange(selObjRotChanged);
-
-        cntr = folder.add(this.guiData.wd.Rot, 'Y').listen();
-        //cntr.step(0.1);
-        cntr.onChange(selObjRotChanged);
-        cntr.onFinishChange(selObjRotChanged);
-
-        cntr = folder.add(this.guiData.wd.Rot, 'Z').listen();
+        var cntr = wallFolder.add(this.guiData.wd, 'Rot').listen();
         //cntr.step(0.1);
         cntr.onChange(selObjRotChanged);
         cntr.onFinishChange(selObjRotChanged);

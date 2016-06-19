@@ -1,9 +1,14 @@
+
+) dwa wymiary sceny
+) usunac "lustrzane odbicie"
+) na gorze scian kolor ostatniej lini z tekstury
+) jeszcze to wstawianie mysza nowych scian by sie przydalo...
+
 1) on/off full screen : view-source:https://stemkoski.github.io/Three.js/GUI.html
 2) tam (w 1) tez jest scrol i orbitcontrol
 3) rozwiac jakos to ze w edgu nie pokazuja sie kontrolki jak sie je wylaczy na starcie... moze update spozniony o klatke pomoze
 
  ) przerzucic edycji tekstur paskowych do drugiego menu z osobna lista rozwijalna gdzie beda tylko teksury paskowe
- ) jeszcze to wstawianie mysza nowych scian by sie przydalo...
 
  ) usprawnic chodzenie po visit aby tylko rzucal reje w kierunku chodzenia i faktycznie wtedy kiedy idzie i aby nie dalo sie wlazic w cos nizszego niz kamera
  ) obracanie sceny mysza

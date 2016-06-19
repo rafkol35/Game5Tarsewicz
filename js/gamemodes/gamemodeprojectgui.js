@@ -25,7 +25,8 @@ var Material = function () {
 
 var WallData = function () {
     this.Pos = new Pos();
-    this.Rot = new Rot();
+    //this.Rot = new Rot();
+    this.Rot = 0;
     this.Scale = new Scale();
     this.Material = new Material();
 };
@@ -190,17 +191,19 @@ var selObjRotChanged = function (val) {
     //console.log(newRot);
     var rad = THREE.Math.degToRad(val);
 
-    switch (this.property) {
-        case "X":
-            newRot.x = rad;
-            break;
-        case "Y":
-            newRot.y = rad;
-            break;
-        case "Z":
-            newRot.z = rad;
-            break;
-    }
+//    switch (this.property) {
+//        case "X":
+//            newRot.x = rad;
+//            break;
+//        case "Y":
+//            newRot.y = rad;
+//            break;
+//        case "Z":
+//            newRot.z = rad;
+//            break;
+//    }
+    newRot.y = rad;
+    
     gameModeProject.selectedWall.rotation = newRot;
 
     var axesRot = gameModeProject.draggedIndicator.rotation;
