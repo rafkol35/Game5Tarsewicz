@@ -703,17 +703,19 @@ GameModeProject.prototype.createWall = function (nwd/*NewWallData*/) {
     material = new THREE.MeshBasicMaterial({ color: nwd.Material.Color, map: null });
     material.transparent = true;
 
-    //console.log(geometry.faceVertexUvs);
+    //console.log(geometry);
     //console.log(geometry.faceVertexUvs[0][0][0])//.set(0, 0);
 
     //console.log(geometry.faceVertexUvs[0][4][0]);
     //console.log(geometry.faceVertexUvs[0][4][1]);
     //console.log(geometry.faceVertexUvs[0][4][2]);
 
-    var tc = 0.9;
-    geometry.faceVertexUvs[0][4][0].set(tc, tc);
-    geometry.faceVertexUvs[0][4][1].set(tc, tc);
-    geometry.faceVertexUvs[0][4][2].set(tc, tc);
+    var tc = 0.0;
+    var tcmin = 0;
+    var tcmax = 0;
+    geometry.faceVertexUvs[0][4][0].set(tcmin, tcmax);
+    geometry.faceVertexUvs[0][4][1].set(tcmin, tcmin);
+    geometry.faceVertexUvs[0][4][2].set(tcmax, tcmax);
     geometry.faceVertexUvs[0][5][0].set(tc, tc);
     geometry.faceVertexUvs[0][5][1].set(tc, tc);
     geometry.faceVertexUvs[0][5][2].set(tc, tc);
@@ -721,6 +723,7 @@ GameModeProject.prototype.createWall = function (nwd/*NewWallData*/) {
     //geometry.faceVertexUvs[0][5][0].set(0.0, 1);
     //geometry.faceVertexUvs[0][5][1].set(0.0, 1);
     //geometry.faceVertexUvs[0][5][2].set(0.0, 1);
+    geometry.uvsNeedUpdate = true;
 
     var newWall = new THREE.Mesh(geometry, material);
     newWall._addMyParams();
