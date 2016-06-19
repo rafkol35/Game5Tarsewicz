@@ -262,12 +262,12 @@ var selObjTextureChanged = function (val) {
 
 var selObjTexRepeatXChanged = function (val) {
     if (gameModeProject.selectedWall === null) return;
-    gameModeProject.selectedWall._setMyUVX(val);
+    gameModeProject.selectedWall._setMyUVX(val, false);
 };
 
 var selObjTexRepeatYChanged = function (val) {
     if (gameModeProject.selectedWall === null) return;
-    gameModeProject.selectedWall._setMyUVY(val);
+    gameModeProject.selectedWall._setMyUVY(val, false);
 };
 
 var selStripTextureChanged = function (val) {
@@ -293,12 +293,12 @@ var floorTextureChanged = function (val) {
 
 var floorTexRepeatXChanged = function (val) {
     if (gameModeProject.floor === null) return;
-    gameModeProject.floor._setMyUVX(val);
+    gameModeProject.floor._setMyUVX(val, true);
 };
 
 var floorTexRepeatYChanged = function (val) {
     if (gameModeProject.floor === null) return;
-    gameModeProject.floor._setMyUVY(val);
+    gameModeProject.floor._setMyUVY(val, true);
 };
 
 ////////////////////////////// player ////////////////////////////////////////////////////////////////////////////////////////

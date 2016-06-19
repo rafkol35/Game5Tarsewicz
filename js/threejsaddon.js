@@ -33,12 +33,12 @@ THREE.Mesh.prototype._printMyParams = function(){
     console.log("THREE.Mesh : " + this._myUVX + " " + this._myUVY + " " + this._myTex);
 };
 
-THREE.Mesh.prototype._setMyUV = function(uvx,uvy){
+THREE.Mesh.prototype._setMyUV = function(uvx,uvy,touchTop){
     this._myUVX = uvx;
     this._myUVY = uvy;
     for (var i = 0; i < this.geometry.faceVertexUvs[0].length; ++i) {
+        if (!touchTop && (i === 4 || i === 5)) continue;
         var _faceVertUV = this.geometry.faceVertexUvs[0][i];
-
         for (var j = 0; j < _faceVertUV.length; ++j) {
             var _vertUV = _faceVertUV[j];
             if (_vertUV.x !== 0) _vertUV.x = this._myUVX;
@@ -48,11 +48,11 @@ THREE.Mesh.prototype._setMyUV = function(uvx,uvy){
     this.geometry.uvsNeedUpdate = true;
 };
 
-THREE.Mesh.prototype._setMyUVX = function(val){
+THREE.Mesh.prototype._setMyUVX = function(val,touchTop){
     this._myUVX = val;
     for (var i = 0; i < this.geometry.faceVertexUvs[0].length; ++i) {
+        if (!touchTop && (i === 4 || i === 5)) continue;
         var _faceVertUV = this.geometry.faceVertexUvs[0][i];
-
         for (var j = 0; j < _faceVertUV.length; ++j) {
             var _vertUV = _faceVertUV[j];
             if (_vertUV.x !== 0) _vertUV.x = this._myUVX;
@@ -61,11 +61,11 @@ THREE.Mesh.prototype._setMyUVX = function(val){
     this.geometry.uvsNeedUpdate = true;
 };
 
-THREE.Mesh.prototype._setMyUVY = function(val){
+THREE.Mesh.prototype._setMyUVY = function(val,touchTop){
     this._myUVY = val;
     for (var i = 0; i < this.geometry.faceVertexUvs[0].length; ++i) {
+        if (!touchTop && (i === 4 || i === 5)) continue;
         var _faceVertUV = this.geometry.faceVertexUvs[0][i];
-
         for (var j = 0; j < _faceVertUV.length; ++j) {
             var _vertUV = _faceVertUV[j];
             if (_vertUV.y !== 0) _vertUV.y = this._myUVY;

@@ -133,7 +133,7 @@ GameModeVisit.prototype.createFloor = function (projFloor) {
     this.floor = new THREE.Mesh(floorGeometry, gmp.floor.material);
 
     this.floor._addMyParams();
-    this.floor._setMyUV(projFloor._myUVX, projFloor._myUVY);
+    this.floor._setMyUV(projFloor._myUVX, projFloor._myUVY, true);
 
     this.floor.position.set(0, 0, 0);
     //this.floor.position.set(0, -1, 0);
@@ -162,17 +162,20 @@ GameModeVisit.prototype.createWall = function (projWall) {
     //        material.needsUpdate = true;
     //    }
 
-    var tc = 0.9;
-    geometry.faceVertexUvs[0][4][0].set(tc, tc);
-    geometry.faceVertexUvs[0][4][1].set(tc, tc);
-    geometry.faceVertexUvs[0][4][2].set(tc, tc);
-    geometry.faceVertexUvs[0][5][0].set(tc, tc);
-    geometry.faceVertexUvs[0][5][1].set(tc, tc);
-    geometry.faceVertexUvs[0][5][2].set(tc, tc);
+    var tc = 0.0;
+    var tcmin = 0.99;
+    var tcmax = 1;
+    geometry.faceVertexUvs[0][4][0].set(tcmin, tcmax);
+    geometry.faceVertexUvs[0][4][1].set(tcmin, tcmin);
+    geometry.faceVertexUvs[0][4][2].set(tcmax, tcmax);
+    geometry.faceVertexUvs[0][5][0].set(tcmin, tcmax);
+    geometry.faceVertexUvs[0][5][1].set(tcmin, tcmin);
+    geometry.faceVertexUvs[0][5][2].set(tcmax, tcmax);
+    geometry.uvsNeedUpdate = true;
 
     var newWall = new THREE.Mesh(geometry, material);
     newWall._addMyParams();
-    newWall._setMyUV(projWall._myUVX, projWall._myUVY);
+    newWall._setMyUV(projWall._myUVX, projWall._myUVY, false);
 
     //newWall.position.set(nwd.Pos.X * this.gridStep, nwd.Pos.Y * this.gridStep, nwd.Pos.Z * this.gridStep);
     newWall.position.set(projWall.position.x / gmp.gridStep, projWall.position.y / gmp.gridStep, projWall.position.z / gmp.gridStep);
